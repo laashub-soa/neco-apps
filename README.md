@@ -36,38 +36,86 @@ The following describes an example of time line based development flow with the 
 3. `neco-ops`: Download and load virtual machine snapshots from Google Cloud Storage.
 4. `neco-ops`: Ready as Kubernetes cluster.
 5. `Developer`: Write some code and push commits.
-6. `CircleCI`: Deploy commits to `neco-ops` cluster for testing.
-7. `CircleCI`: Deploy commits to `neco-ops` cluster for testing.
-8. `neco-ops`: Delete an instance at night.
-9. `CircleCI`: CI does not work because no `neco-ops` cluster in this time.
-10. Go back to 1. tomorrow.
+6. `CircleCI`: Deploy commits to `neco-ops` cluster for testing through `Argo CD`.
+7. `neco-ops`: Delete an instance at night.
+8. `CircleCI`: CI does not work because no `neco-ops` cluster in this time.
+9. Go back to 1. tomorrow.
 
 Directory tree
 --------------
 
 ```console
 .
-├── README.md
-├── appname
+├── argocd_config # Argo CD CRD based app configurations
 │   ├── base
-│   │   ├── deployment.yaml        # Manifest files of each K8s object name
-│   │   ├── kustomization.yaml     # Kustomize file
-│   │   └── service.yaml
-│   ├── overlays                   # Each K8s cluster
-│   │   ├── bk
-│   │   ├── prod
-│   │   └── stage
-│   │       ├── cpu_count.yaml     # Some tuning
-│   |       ├── proxy.yaml         # NO_PROXY, HTTP_PROXY, HTTPS_PROXY environment variables
-│   │       └── kustomization.yaml
-│   └── test
-│       └── suite_test.go          # Ginkgo based deployment test
-├── prometheus
+│   │   └── monitoring.yaml # CRD yaml for app "monitoring" configuration includes repository URL and path.
+│   └── overlays
+│       ├── bk
+│       ├── prod
+│       └── stage
+│           ├── kustumization.yaml # Argo CD CRD deployment for stage.
+│           └── monitoring.yaml    # overlays for base/monitoring.yaml.
+└── monitoring # App "monitoring" deployment manifests.
+    ├── base
+    │   ├── deployment.yaml    # Plain manifest files of each K8s object name
+    │   ├── kustomization.yaml
+    │   └── service.yaml
+    ├── overlays
+    │   ├── dev
+    │   ├── prod
+    │   └── stage
+    │       ├── cpu_count.yaml     # Some tuning
+    │       ├── kustomization.yaml
+    │       └── proxy.yaml         # NO_PROXY, HTTP_PROXY, HTTPS_PROXY environment variables
+    └── test
+        └── suite_test.go          # Gingko based deployment test
 ...
 ```
 
-Test
-----
+`argocd_config/overlays/stage/kustomization.yaml`
+```yaml
+bases: # It includes all applications for stage.
+- ../../base
+...
+
+patches:
+- monitoring.yaml # Argo CD CRD of app "monitoring" for stage.
+```
+
+`argocd_config/overlays/stage/monitoring.yaml`
+```yaml
+# Custom Resource Definition for Argo CD app "monitoring"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/cybozu-go/neco-ops.git
+    targetRevision: release         # branch name
+    path: monitoring/overlays/stage # Path to Kustomize based app path
+    kustomize:
+      namePrefix: stage-
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+```
+
+`monitoring/overlays/stage/kustomization.yaml`
+```yaml
+bases:   # It includes all K8s objects for monitoring.
+- ../../base
+patches: # Patches for stage
+- cpu_count.yaml
+- proxy.yaml
+```
+
+`monitoring/base/kustomization.yaml`
+```yaml
+resources:   # It includes all K8s objects for monitoring.
+- deployment.yaml
+- service.yaml
+```
+
+Planned Test Flow
+-----------------
 
 CI in this repository runs deployment test using `neco-ops` instance. Test resources are in `test/` directory of each `appname`.
 Typical test step is:
@@ -75,10 +123,14 @@ Typical test step is:
 - Run [Ginkgo][] based deployment test.
     1. Login to `neco-opts` instance.
     2. Deploy Argo CD by `kubectl`.
-    3. Initialize Argo CD client with `argocd login`.
-    4. `argocd app create` with topic branch.
-    5. Deploy particular apps through Argo CD by `argocd app sync`.
+    3. Initialize Argo CD client with `argocd login SERVER --name admin --password xxxxx`.
+    4. Deploy particular Apps by:
+        ```console
+        argocd app create ${CIRCLE_BUILD_NUM} -f https://github.com/cybozu-go/neco-ops --path monitoring/overlays/stage --dest-namespace=${CIRCLE_BUILD_NUM} ...
+        ````
+    5. Deploy all apps through Argo CD by `argocd app sync ${CIRCLE_BUILD_NUM}`.
     6. Check some status.
+    7. Remove `argocd app delete ${CIRCLE_BUILD_NUM}`
 
 License
 -------
