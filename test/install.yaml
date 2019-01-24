@@ -1,4 +1,3 @@
-# This is an auto-generated file. DO NOT EDIT
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -38,11 +37,6 @@ kind: ServiceAccount
 metadata:
   name: argocd-server
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: dex-server
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -116,21 +110,6 @@ rules:
   verbs:
   - create
   - list
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: dex-server
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  - configmaps
-  verbs:
-  - get
-  - list
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -197,18 +176,6 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argocd-server
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: dex-server
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: dex-server
-subjects:
-- kind: ServiceAccount
-  name: dex-server
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -309,23 +276,6 @@ spec:
     app: argocd-server
   type: NodePort
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: dex-server
-spec:
-  ports:
-  - name: http
-    port: 5556
-    protocol: TCP
-    targetPort: 5556
-  - name: grpc
-    port: 5557
-    protocol: TCP
-    targetPort: 5557
-  selector:
-    app: dex-server
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -346,7 +296,7 @@ spec:
         - "20"
         - --operation-processors
         - "10"
-        image: argoproj/argocd:v0.11.0
+        image: quay.io/cybozu/argocd:0.11
         imagePullPolicy: Always
         name: argocd-application-controller
         ports:
@@ -382,7 +332,7 @@ spec:
       containers:
       - command:
         - argocd-repo-server
-        image: argoproj/argocd:v0.11.0
+        image: quay.io/cybozu/argocd:0.11
         imagePullPolicy: Always
         name: argocd-repo-server
         ports:
@@ -416,9 +366,7 @@ spec:
       containers:
       - command:
         - argocd-server
-        - --staticassets
-        - /shared/app
-        image: argoproj/argocd:v0.11.0
+        image: quay.io/cybozu/argocd:0.11
         imagePullPolicy: Always
         name: argocd-server
         ports:
@@ -430,8 +378,6 @@ spec:
           initialDelaySeconds: 3
           periodSeconds: 30
         volumeMounts:
-        - mountPath: /shared
-          name: static-files
         env:
         - name: NO_PROXY
           value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server
@@ -439,61 +385,4 @@ spec:
           value: http://squid.internet-egress.svc.cluster.local:3128
         - name: HTTPS_PROXY
           value: http://squid.internet-egress.svc.cluster.local:3128
-      initContainers:
-      - command:
-        - cp
-        - -r
-        - /app
-        - /shared
-        image: argoproj/argocd-ui:v0.11.0
-        imagePullPolicy: Always
-        name: ui
-        volumeMounts:
-        - mountPath: /shared
-          name: static-files
       serviceAccountName: argocd-server
-      volumes:
-      - emptyDir: {}
-        name: static-files
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: dex-server
-spec:
-  selector:
-    matchLabels:
-      app: dex-server
-  template:
-    metadata:
-      labels:
-        app: dex-server
-    spec:
-      containers:
-      - command:
-        - /shared/argocd-util
-        - rundex
-        image: quay.io/dexidp/dex:v2.12.0
-        imagePullPolicy: Always
-        name: dex
-        ports:
-        - containerPort: 5556
-        - containerPort: 5557
-        volumeMounts:
-        - mountPath: /shared
-          name: static-files
-      initContainers:
-      - command:
-        - cp
-        - /usr/local/bin/argocd-util
-        - /shared
-        image: argoproj/argocd:v0.11.0
-        imagePullPolicy: Always
-        name: copyutil
-        volumeMounts:
-        - mountPath: /shared
-          name: static-files
-      serviceAccountName: dex-server
-      volumes:
-      - emptyDir: {}
-        name: static-files
