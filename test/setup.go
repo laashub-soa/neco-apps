@@ -26,8 +26,8 @@ func testSetup() {
 		execSafeAt(boot0, "sudo", "rkt", "run",
 			"--volume", "host,kind=host,source=/opt/bin",
 			"--mount", "volume=host,target=/host",
-			"--exec", "install-tools",
-			"quay.io/cybozu/argocd:1.2.3")
+			"quay.io/cybozu/argocd:0.11",
+			"--exec", "install-tools")
 	})
 
 	It("should login to Argo CD", func() {
