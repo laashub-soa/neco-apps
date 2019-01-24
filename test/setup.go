@@ -23,11 +23,13 @@ func testSetup() {
 	})
 
 	It("should install argocd CLI", func() {
-		execSafeAt(boot0, "sudo", "rkt", "run",
-			"--volume", "host,kind=host,source=/opt/bin",
+		execSafeAt(boot0, "sudo", "env", "HTTPS_PROXY=http://10.0.49.3:3128",
+			"rkt", "run",
+			"--volume", "host,kind=host,source=/usr/local/bin",
 			"--mount", "volume=host,target=/host",
 			"quay.io/cybozu/argocd:0.11",
-			"--exec", "install-tools")
+			"--user=0", "--group=0",
+			"--exec", "/usr/local/argocd/install-tools")
 	})
 
 	It("should login to Argo CD", func() {
