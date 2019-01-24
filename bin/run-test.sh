@@ -23,6 +23,6 @@ $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="mkdir -p /
 $GCLOUD compute scp --zone=${ZONE} run.sh cybozu@${INSTANCE_NAME}:${TEST_DIR}
 $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="/home/cybozu/${TEST_DIR}/run.sh"
 RET=$?
-$GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="rm -rf /home/cybozu/${TEST_DIR}"
+$GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="sudo rm -rf /home/cybozu/${TEST_DIR}"
 
 exit $RET
