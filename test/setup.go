@@ -18,7 +18,7 @@ func testSetup() {
 
 		data, err := ioutil.ReadFile("install.yaml")
 		Expect(err).ShouldNot(HaveOccurred())
-		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "create", "-n", testID, "-f", "-")
+		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "apply", "-n", testID, "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	})
 
