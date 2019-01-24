@@ -266,12 +266,10 @@ spec:
     port: 80
     protocol: TCP
     targetPort: 8080
-    nodePort: 30080
   - name: https
     port: 443
     protocol: TCP
     targetPort: 8080
-    nodePort: 30443
   selector:
     app: argocd-server
   type: NodePort
