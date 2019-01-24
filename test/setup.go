@@ -23,7 +23,8 @@ func testSetup() {
 	})
 
 	It("should install argocd CLI", func() {
-		execSafeAt(boot0, "sudo", "env", "HTTPS_PROXY=http://10.0.49.3:3128",
+		execSafeAt(boot0, "sudo",
+			"env", "HTTP_PROXY=http://10.0.49.3:3128", "HTTPS_PROXY=http://10.0.49.3:3128",
 			"rkt", "run",
 			"--volume", "host,kind=host,source=/usr/local/bin",
 			"--mount", "volume=host,target=/host",
@@ -35,13 +36,14 @@ func testSetup() {
 	It("should login to Argo CD", func() {
 		By("getting password")
 		// admin password is same as pod name
-		var pod corev1.Pod
+		var podList corev1.PodList
 		Eventually(func() error {
 			data := execSafeAt(boot0, "kubectl", "get", "pods", "-n", testID,
 				"-l", "app=argocd-server", "-o", "json")
-			return json.Unmarshal(data, &pod)
+			return json.Unmarshal(data, &podList)
 		}).Should(Succeed())
-		password := pod.Name
+		Expect(podList.Items).ShouldNot(BeEmpty())
+		password := podList.Items[0].Name
 
 		By("getting node address")
 		var nodeList corev1.NodeList
@@ -67,7 +69,7 @@ func testSetup() {
 	It("should setup application", func() {
 		By("creating guestbook")
 		execSafeAt(boot0, "argocd", "app", "create", "guestbook",
-			"--repo", "https://github.com/YujiEda/argocd-example-apps.git",
+			"--repo", "https://github.com/argoproj/argocd-example-apps",
 			"--path", "kustomize-guestbook", "--dest-server", "https://kubernetes.default.svc",
 			"--dest-namespace", testID)
 		execSafeAt(boot0, "argocd", "app", "sync", "guestbook")
