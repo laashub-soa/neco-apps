@@ -8,3 +8,4 @@ test:
 
 setup:
 	GO111MODULE=off go get github.com/onsi/ginkgo/ginkgo
+	go get -t ./...
