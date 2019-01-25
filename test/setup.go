@@ -144,7 +144,7 @@ func testSetup() {
 
 	It("should setup application", func() {
 		By("creating guestbook")
-		execSafeAt(boot0, "kubectl", "apply", "-f", "../argocd/app-create-bookinfo.yml")
+		execSafeAt(boot0, "kubectl", "apply", "-f", "./argocd/app-create-bookinfo.yml")
 
 		By("checking guestbook status")
 		Eventually(func() error {
