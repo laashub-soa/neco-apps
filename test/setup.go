@@ -144,14 +144,14 @@ func testSetup() {
 
 	It("should setup Argo CD application as Argo CD app", func() {
 		By("creating argocd app")
-		execSafeAt(boot0, "argocd", "app", "create", "argocd_config",
+		execSafeAt(boot0, "argocd", "app", "create", "argocd-config",
 			"--repo", "https://github.com/cybozu-go/neco-ops.git",
-			"--path", "argocd_config/overlays/stage",
+			"--path", "argocd-config/overlays/stage",
 			"--dest-namespace", argoCDNamespace,
 			"--dest-server", "https://kubernetes.default.svc",
 			"--sync-policy", "automated",
 			"--revision", branch)
-		execSafeAt(boot0, "argocd", "app", "sync", "argocd_config")
+		execSafeAt(boot0, "argocd", "app", "sync", "argocd-config")
 
 		By("checking guestbook sample app status")
 		Eventually(func() error {

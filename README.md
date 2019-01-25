@@ -45,7 +45,7 @@ Directory tree
 
 ```console
 .
-├── argocd_config # Argo CD CRD based app configurations
+├── argocd-config # Argo CD CRD based app configurations
 │   ├── base
 │   │   └── monitoring.yml # CRD yml for app "monitoring" configuration includes repository URL and path.
 │   └── overlays
@@ -71,7 +71,7 @@ Directory tree
 ...
 ```
 
-`argocd_config/overlays/stage/kustomization.yml`
+`argocd-config/overlays/stage/kustomization.yml`
 ```yml
 bases: # It includes all applications for stage.
 - ../../base
@@ -81,7 +81,7 @@ patches:
 - monitoring.yml # Argo CD CRD of app "monitoring" for stage.
 ```
 
-`argocd_config/overlays/stage/monitoring.yml`
+`argocd-config/overlays/stage/monitoring.yml`
 ```yml
 # Custom Resource Definition for Argo CD app "monitoring"
 spec:
