@@ -145,7 +145,7 @@ func testSetup() {
 	It("should setup Argo CD application as Argo CD app", func() {
 		By("creating Argo CD app")
 		Eventually(func() error {
-			stdout, stderr, err := exexAt(boot0, "argocd", "app", "create", "argocd-config",
+			stdout, stderr, err := execAt(boot0, "argocd", "app", "create", "argocd-config",
 				"--repo", "https://github.com/cybozu-go/neco-ops.git",
 				"--path", "argocd-config/overlays/stage",
 				"--dest-namespace", argoCDNamespace,
