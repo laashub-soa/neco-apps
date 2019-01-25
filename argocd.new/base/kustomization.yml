@@ -1,0 +1,6 @@
+configMapGenerator:
+  - files:
+    - entrypoint.sh
+    name: argocd-app-create
+resources:
+  - app-create-job.yml

@@ -1,0 +1,11 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: app-create
+spec:
+  template:
+    spec:
+      volumes:
+        - name: env-volume
+          configMap:
+            name: app-guestbook
