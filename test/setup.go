@@ -14,8 +14,45 @@ import (
 
 // testSetup tests setup of Argo CD
 func testSetup() {
-	It("should install Argo CD", func() {
+	It("should be ready K8s cluster", func() {
 		execSafeAt(boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
+
+		By("waiting nodes")
+		Eventually(func() error {
+			stdout, _, err := execAt(boot0, "kubectl", "get", "nodes", "-o", "json")
+			if err != nil {
+				return err
+			}
+
+			var nl corev1.NodeList
+			err = json.Unmarshal(stdout, &nl)
+			if err != nil {
+				return err
+			}
+
+			if len(nl.Items) != 5 {
+				return fmt.Errorf("too few nodes: %d", len(nl.Items))
+			}
+
+		OUTER:
+			for _, n := range nl.Items {
+				for _, cond := range n.Status.Conditions {
+					if cond.Type != corev1.NodeReady {
+						continue
+					}
+					if cond.Status != corev1.ConditionTrue {
+						return fmt.Errorf("node %s is not ready", n.Name)
+					}
+					continue OUTER
+				}
+
+				return fmt.Errorf("node %s has no readiness status", n.Name)
+			}
+
+			return nil
+		}).Should(Succeed())
+
+	It("should install Argo CD", func() {
 		execSafeAt(boot0, "kubectl", "create", "namespace", argoCDNamespace)
 
 		data, err := ioutil.ReadFile("install.yaml")
