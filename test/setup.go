@@ -144,7 +144,10 @@ func testSetup() {
 
 	It("should setup application", func() {
 		By("creating guestbook")
-		execSafeAt(boot0, "kubectl", "apply", "-f", "./argocd/app-create-bookinfo.yml")
+		data, err := ioutil.ReadFile("../argocd/app-create-bookinfo.yml")
+		Expect(err).ShouldNot(HaveOccurred())
+		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "apply", "-n", argoCDNamespace, "-f", "-")
+		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 
 		By("checking guestbook status")
 		Eventually(func() error {
