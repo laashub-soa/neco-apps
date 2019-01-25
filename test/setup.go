@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
+	argoappv1 "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
