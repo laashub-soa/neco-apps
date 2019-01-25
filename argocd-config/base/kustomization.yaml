@@ -1,0 +1,4 @@
+resources:
+- guestbook.yaml
+apiVersion: v1beta1
+kind: Kustomization

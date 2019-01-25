@@ -126,7 +126,7 @@ func testSetup() {
 		}
 		Expect(nodePort).ShouldNot(BeNil())
 
-		By("logging to Argo CD")
+		By("logging in to Argo CD")
 		Eventually(func() error {
 			stdout, stderr, err := execAt(boot0, "argocd", "login", nodeAddress+":"+nodePort,
 				"--insecure", "--username", "admin", "--password", password)
@@ -142,16 +142,34 @@ func testSetup() {
 		}).Should(Succeed())
 	})
 
-	It("should setup application", func() {
-		By("creating guestbook")
-		data, err := ioutil.ReadFile("../argocd/app-create-guestbook.yml")
-		Expect(err).ShouldNot(HaveOccurred())
-		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "apply", "-n", argoCDNamespace, "-f", "-")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-
-		By("checking guestbook status")
+	It("should setup Argo CD application as Argo CD app", func() {
+		By("creating Argo CD app")
 		Eventually(func() error {
-			stdout, stderr, err := execAt(boot0, "argocd", "app", "get", "guestbook", "-o", "json")
+			stdout, stderr, err := execAt(boot0, "argocd", "app", "create", "argocd-config",
+				"--repo", "https://github.com/cybozu-go/neco-ops.git",
+				"--path", "argocd-config/overlays/stage",
+				"--dest-namespace", argoCDNamespace,
+				"--dest-server", "https://kubernetes.default.svc",
+				"--sync-policy", "automated",
+				"--revision", commitID)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("synchronizing Argo CD app")
+		Eventually(func() error {
+			stdout, stderr, err := execAt(boot0, "argocd", "app", "sync", "argocd-config")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("checking argocd-config app status")
+		Eventually(func() error {
+			stdout, stderr, err := execAt(boot0, "kubectl", "get", "app", "argocd-config", "-n", argoCDNamespace, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
