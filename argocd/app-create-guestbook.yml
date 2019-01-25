@@ -12,6 +12,7 @@ data:
     --dest-namespace ${NAMESPACE} \
     --dest-server https://kubernetes.default.svc \
     --sync-policy automated
+    argocd app sync ${APPNAME}
 ---
 apiVersion: v1
 kind: ConfigMap
