@@ -126,7 +126,7 @@ func testSetup() {
 		}
 		Expect(nodePort).ShouldNot(BeNil())
 
-		By("logging to Argo CD")
+		By("logging in to Argo CD")
 		Eventually(func() error {
 			stdout, stderr, err := execAt(boot0, "argocd", "login", nodeAddress+":"+nodePort,
 				"--insecure", "--username", "admin", "--password", password)
@@ -170,45 +170,6 @@ func testSetup() {
 		By("checking argocd-config app status")
 		Eventually(func() error {
 			stdout, stderr, err := execAt(boot0, "kubectl", "get", "app", "argocd-config", "-n", argoCDNamespace, "-o", "json")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			var app argoappv1.Application
-			err = json.Unmarshal(stdout, &app)
-			if err != nil {
-				return err
-			}
-
-			for _, r := range app.Status.Resources {
-				if r.Status != argoappv1.SyncStatusCodeSynced {
-					return fmt.Errorf("app is not yet Synced: %s", r.Status)
-				}
-				if r.Health.Status != argoappv1.HealthStatusHealthy {
-					return fmt.Errorf("app is not yet Healthy: %s", r.Health.Status)
-				}
-			}
-			return nil
-		}).Should(Succeed())
-
-		By("synchronizing guestbook sample app")
-		Eventually(func() error {
-			// To apply target commitID for auto-sync enabled app, use kubectl patch allows change targetRevision.
-			stdout, stderr, err := execAt(boot0, "kubectl", "patch",
-				"-n", argoCDNamespace, "app", "guestbook", "--type='merge'",
-				"-p", `{"spec": {"source": { "targetRevision":"`+commitID+`" } } }`)
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			stdout, stderr, err = execAt(boot0, "argocd", "app", "sync", "guestbook", "--timeout", "20")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-
-		By("checking guestbook sample app status")
-		Eventually(func() error {
-			stdout, stderr, err := execAt(boot0, "kubectl", "get", "app", "guestbook", "-n", argoCDNamespace, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
