@@ -168,6 +168,10 @@ func testSetup() {
 		}).Should(Succeed())
 
 		By("synchronizing guestbook sample app")
+		// To apply target commitID for auto-sync enabled app, use kubectl patch allows change targetRevision.
+		execSafeAt(boot0, "kubectl", "patch", "-n", argoCDNamespace, "app", "guestbook",
+			"--type='merge'", "-p", `{"spec": {"source": { "targetRevision":"`+commitID+`" } } }`)
+
 		Eventually(func() error {
 			stdout, stderr, err := execAt(boot0, "argocd", "app", "sync", "guestbook")
 			if err != nil {

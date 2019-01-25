@@ -120,16 +120,16 @@ CI in this repository runs deployment test using `neco-ops` instance. Test resou
 Typical test step is:
 
 - Run [Ginkgo][] based deployment test.
+    0. Load initialized state of the placemat snapshot by `pmctl snapshot load`.
     1. Login to `neco-opts` instance.
     2. Deploy Argo CD by `kubectl`.
     3. Initialize Argo CD client with `argocd login SERVER --name admin --password xxxxx`.
-    4. Deploy particular Apps by:
+    4. Deploy Argo CD configuration `argocd-config` by:
         ```console
-        argocd app create ${CIRCLE_BUILD_NUM} -f https://github.com/cybozu-go/neco-ops --path monitoring/overlays/stage --dest-namespace=${CIRCLE_BUILD_NUM} ...
+        argocd app create argocd-config -f https://github.com/cybozu-go/neco-ops --path argocd-config/overlays/stage --dest-namespace=argocd ...
         ````
-    5. Deploy all apps through Argo CD by `argocd app sync ${CIRCLE_BUILD_NUM}`.
+    5. Deploy `argocd-config` and other apps through Argo CD by `argocd app sync APPNAME`.
     6. Check some status.
-    7. Remove `argocd app delete ${CIRCLE_BUILD_NUM}`
 
 License
 -------
