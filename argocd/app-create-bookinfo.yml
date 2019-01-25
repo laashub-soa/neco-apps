@@ -36,7 +36,7 @@ spec:
         - name: main
           image: quay.io/cybozu/argocd:0.11
           command: ["/bin/sh", "-c"]
-          args: ["/env/env.sh && /entrypoint/entrypoint.sh"]
+          args: [". /env/env.sh && /entrypoint/entrypoint.sh"]
           volumeMounts:
             - name: entrypoint-volume
               mountPath: /entrypoint
