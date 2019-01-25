@@ -14,8 +14,15 @@ import (
 
 // testSetup tests setup of Argo CD
 func testSetup() {
-	It("should be ready K8s cluster", func() {
-		execSafeAt(boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
+	It("should be ready K8s cluster after loading snapshot", func() {
+		By("re-issuing kubeconfig")
+		Eventually(func() error {
+			_, _, err := execAt(boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
+			if err != nil {
+				return err
+			}
+			return nil
+		}).Should(Succeed())
 
 		By("waiting nodes")
 		Eventually(func() error {
