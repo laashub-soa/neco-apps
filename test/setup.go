@@ -156,7 +156,7 @@ func testSetup() {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			var app argoappv1.Application
-			err = json.Unmarshal(data, &app)
+			err = json.Unmarshal(stdout, &app)
 			if err != nil {
 				return err
 			}
