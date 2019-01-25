@@ -144,16 +144,19 @@ func testSetup() {
 
 	It("should setup application", func() {
 		By("creating guestbook")
-		data, err := ioutil.ReadFile("../argocd/app-create-bookinfo.yml")
+		data, err := ioutil.ReadFile("../argocd/app-create-guestbook.yml")
 		Expect(err).ShouldNot(HaveOccurred())
 		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "apply", "-n", argoCDNamespace, "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 
 		By("checking guestbook status")
 		Eventually(func() error {
-			data := execSafeAt(boot0, "argocd", "app", "get", "guestbook", "-o", "json")
+			stdout, stderr, err := execAt(boot0, "argocd", "app", "get", "guestbook", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
 			var app argoappv1.Application
-			err := json.Unmarshal(data, &app)
+			err = json.Unmarshal(data, &app)
 			if err != nil {
 				return err
 			}

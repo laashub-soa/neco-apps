@@ -16,19 +16,19 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-bookinfo
+  name: app-guestbook
 data:
   env.sh: |-
     #!/bin/bash
     export NAMESPACE=default
-    export APPNAME=bookinfo
+    export APPNAME=guestbook
     export REPO=https://github.com/argoproj/argocd-example-apps
     export APP_PATH=kustomize-guestbook
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: argocd-app-create-bookinfo
+  name: argocd-app-create-guestbook
 spec:
   template:
     spec:
@@ -55,7 +55,7 @@ spec:
         - name: env-volume
           configMap:
             defaultMode: 0755
-            name: app-bookinfo
+            name: app-guestbook
             items:
               - key: env.sh
                 path: env.sh
