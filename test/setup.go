@@ -139,6 +139,7 @@ func testSetup() {
 
 	It("should setup application", func() {
 		By("creating guestbook")
+		execSafeAt(boot0, "kubectl", "create", "namespace", testID)
 		execSafeAt(boot0, "argocd", "app", "create", "guestbook",
 			"--repo", "https://github.com/argoproj/argocd-example-apps",
 			"--path", "kustomize-guestbook", "--dest-server", "https://kubernetes.default.svc",
