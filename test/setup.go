@@ -142,16 +142,20 @@ func testSetup() {
 		}).Should(Succeed())
 	})
 
-	It("should setup application", func() {
-		By("creating guestbook")
-		data, err := ioutil.ReadFile("../argocd/app-create-guestbook.yml")
-		Expect(err).ShouldNot(HaveOccurred())
-		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "apply", "-n", argoCDNamespace, "-f", "-")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+	It("should setup Argo CD application as Argo CD app", func() {
+		By("creating argocd app")
+		execSafeAt(boot0, "argocd", "app", "create", "argocd_config",
+			"--repo", "https://github.com/cybozu-go/neco-ops.git",
+			"--path", "argocd_config/overlays/stage",
+			"--dest-namespace", argoCDNamespace,
+			"--dest-server", "https://kubernetes.default.svc",
+			"--sync-policy", "automated",
+			"--revision", branch)
+		execSafeAt(boot0, "argocd", "app", "sync", "argocd_config")
 
-		By("checking guestbook status")
+		By("checking guestbook sample app status")
 		Eventually(func() error {
-			stdout, stderr, err := execAt(boot0, "argocd", "app", "get", "guestbook", "-o", "json")
+			stdout, stderr, err := execAt(boot0, "kubectl", "get", "app", "guestbook", "-n", argoCDNamespace, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

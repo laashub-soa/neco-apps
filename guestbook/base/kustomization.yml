@@ -1,0 +1,5 @@
+resources:
+- deployment.yml
+- service.yml
+apiVersion: v1beta1
+kind: Kustomization

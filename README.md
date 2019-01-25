@@ -47,42 +47,42 @@ Directory tree
 .
 ├── argocd_config # Argo CD CRD based app configurations
 │   ├── base
-│   │   └── monitoring.yaml # CRD yaml for app "monitoring" configuration includes repository URL and path.
+│   │   └── monitoring.yml # CRD yml for app "monitoring" configuration includes repository URL and path.
 │   └── overlays
 │       ├── bk
 │       ├── prod
 │       └── stage
-│           ├── kustumization.yaml # Argo CD CRD deployment for stage.
-│           └── monitoring.yaml    # overlays for base/monitoring.yaml.
+│           ├── kustumization.yml # Argo CD CRD deployment for stage.
+│           └── monitoring.yml    # overlays for base/monitoring.yml.
 └── monitoring # App "monitoring" deployment manifests.
     ├── base
-    │   ├── deployment.yaml    # Plain manifest files of each K8s object name
-    │   ├── kustomization.yaml
-    │   └── service.yaml
+    │   ├── deployment.yml    # Plain manifest files of each K8s object name
+    │   ├── kustomization.yml
+    │   └── service.yml
     ├── overlays
     │   ├── dev
     │   ├── prod
     │   └── stage
-    │       ├── cpu_count.yaml     # Some tuning
-    │       ├── kustomization.yaml
-    │       └── proxy.yaml         # NO_PROXY, HTTP_PROXY, HTTPS_PROXY environment variables
+    │       ├── cpu_count.yml     # Some tuning
+    │       ├── kustomization.yml
+    │       └── proxy.yml         # NO_PROXY, HTTP_PROXY, HTTPS_PROXY environment variables
     └── test
         └── suite_test.go          # Gingko based deployment test
 ...
 ```
 
-`argocd_config/overlays/stage/kustomization.yaml`
-```yaml
+`argocd_config/overlays/stage/kustomization.yml`
+```yml
 bases: # It includes all applications for stage.
 - ../../base
 ...
 
 patches:
-- monitoring.yaml # Argo CD CRD of app "monitoring" for stage.
+- monitoring.yml # Argo CD CRD of app "monitoring" for stage.
 ```
 
-`argocd_config/overlays/stage/monitoring.yaml`
-```yaml
+`argocd_config/overlays/stage/monitoring.yml`
+```yml
 # Custom Resource Definition for Argo CD app "monitoring"
 spec:
   project: default
@@ -97,20 +97,20 @@ spec:
     namespace: default
 ```
 
-`monitoring/overlays/stage/kustomization.yaml`
-```yaml
+`monitoring/overlays/stage/kustomization.yml`
+```yml
 bases:   # It includes all K8s objects for monitoring.
 - ../../base
 patches: # Patches for stage
-- cpu_count.yaml
-- proxy.yaml
+- cpu_count.yml
+- proxy.yml
 ```
 
-`monitoring/base/kustomization.yaml`
-```yaml
+`monitoring/base/kustomization.yml`
+```yml
 resources:   # It includes all K8s objects for monitoring.
-- deployment.yaml
-- service.yaml
+- deployment.yml
+- service.yml
 ```
 
 Planned Test Flow
