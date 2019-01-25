@@ -12,5 +12,5 @@ var (
 	boot0      = os.Getenv("BOOT0")
 	sshKeyFile = os.Getenv("SSH_PRIVKEY")
 	testID     = os.Getenv("TEST_ID")
-	branch     = os.Getenv("BRANCH")
+	commitID   = os.Getenv("COMMIT_ID")
 )

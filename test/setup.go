@@ -150,7 +150,7 @@ func testSetup() {
 			"--dest-namespace", argoCDNamespace,
 			"--dest-server", "https://kubernetes.default.svc",
 			"--sync-policy", "automated",
-			"--revision", branch)
+			"--revision", commitID)
 		execSafeAt(boot0, "argocd", "app", "sync", "argocd-config")
 
 		By("checking guestbook sample app status")
