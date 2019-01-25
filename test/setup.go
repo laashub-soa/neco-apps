@@ -133,18 +133,18 @@ func testSetup() {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
+			stdout, stderr, err = execAt(boot0, "argocd", "account", "update-password",
+				"--current-password", password, "--new-password", "password")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
 			return nil
 		}).Should(Succeed())
 	})
 
 	It("should setup application", func() {
 		By("creating guestbook")
-		execSafeAt(boot0, "kubectl", "create", "namespace", testID)
-		execSafeAt(boot0, "argocd", "app", "create", "guestbook",
-			"--repo", "https://github.com/argoproj/argocd-example-apps",
-			"--path", "kustomize-guestbook", "--dest-server", "https://kubernetes.default.svc",
-			"--dest-namespace", testID)
-		execSafeAt(boot0, "argocd", "app", "sync", "guestbook")
+		execSafeAt(boot0, "kubectl", "apply", "-f", "../argocd/app-create-bookinfo.yml")
 
 		By("checking guestbook status")
 		Eventually(func() error {

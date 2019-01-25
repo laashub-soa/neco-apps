@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-app-create
+data:
+  entrypoint.sh: |-
+    #!/bin/bash
+    argocd login argocd-server --insecure --username admin --password password
+    argocd app create ${APPNAME} \
+	--repo ${REPO} \
+	--path ${APP_PATH} \
+	--dest-namespace ${NAMESPACE} \
+    --dest-server https://kubernetes.default.svc \
+    --sync-policy automated
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-bookinfo
+data:
+  env.sh: |-
+    #!/bin/bash
+    export NAMESPACE=default
+    export APPNAME=bookinfo
+    export REPO=https://github.com/argoproj/argocd-example-apps
+    export APP_PATH=kustomize-guestbook
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: argocd-app-create-bookinfo
+spec:
+  template:
+    spec:
+      containers:
+        - name: pi
+          image: quay.io/cybozu/argocd:0.11
+          command:
+            - ["source", "/env/env.sh", "&&", "/entrypoint/entrypoint.sh"]
+          volumeMounts:
+            - name: entrypoint-volume
+              mountPath: /entrypoint
+              readOnly: true
+            - name: env-volume
+              mountPath: /env
+              readOnly: true
+      volumes:
+        - name: entrypoint-volume
+          configMap:
+            defaultMode: 0700
+            name: argocd-app-create
+            items:
+              - key: entrypoint.sh
+                path: entrypoint.sh
+        - name: env-volume
+          configMap:
+            defaultMode: 0700
+            name: app-bookinfo
+            items:
+              - key: env.sh
+                path: env.sh
+      restartPolicy: Never
+  backoffLimit: 4
