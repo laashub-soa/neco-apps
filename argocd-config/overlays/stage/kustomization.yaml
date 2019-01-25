@@ -3,4 +3,4 @@ bases:
 apiVersion: v1beta1
 kind: Kustomization
 patchesStrategicMerge:
-- guestbook.yml
+- guestbook.yaml

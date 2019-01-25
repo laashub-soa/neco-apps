@@ -1,4 +1,4 @@
 bases:
 - ../../base
-apiVersion: v1beta1
 kind: Kustomization
+apiVersion: v1beta1

@@ -1,5 +1,5 @@
 resources:
-- deployment.yml
-- service.yml
+- deployment.yaml
+- service.yaml
 apiVersion: v1beta1
 kind: Kustomization
