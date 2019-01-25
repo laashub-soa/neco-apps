@@ -26,8 +26,7 @@ CI/CD
 
 ### `neco-ops` instance
 
-`neco-ops` is a Google Compute Engine instance for GitOps testing of this repository. It is automatically startup and shutdown by schedule.
-Scheduled provisioning is managed by [neco-gcp][].
+`neco-ops` is a Google Compute Engine instance for GitOps testing of this repository. It is automatically created and deleted by [CircleCI scheduled workflow](https://circleci.com/docs/2.0/workflows).
 
 The following describes an example of time line based development flow with the Kubernetes cluster in `neco-ops` instance.
 
@@ -141,5 +140,4 @@ MIT
 [Kustomize]: https://github.com/kubernetes-sigs/kustomize
 [Argo CD]: https://github.com/argoproj/argo-cd
 [Alertmanager]: https://prometheus.io/docs/alerting/alertmanager/
-[neco-gcp]: https://github.com/cybozu/neco-gcp
 [Ginkgo]: https://github.com/onsi/ginkgo

@@ -18,8 +18,93 @@ jobs:
           command: |
             gcloud --quiet --project neco-test compute project-info remove-metadata --keys=ssh-keys
 
+  start-neco-ops:
+    docker:
+      - image: google/cloud-sdk
+    environment:
+      PROJECT: neco-test
+      ZONE: asia-northeast1-c
+      MACHINE_TYPE: n1-highmem-8
+      IMAGE: debian-9-stretch-v20180911-vmx-enabled
+      DISK_SIZE: 20GB
+    steps:
+      - checkout
+      - run:
+          name: Store Service Account
+          command: |
+            echo $GCLOUD_SERVICE_ACCOUNT > account.json
+            gcloud auth activate-service-account --key-file=account.json
+      - run:
+          name: Create instance
+          command: |
+            apt-get update
+            apt-get install -y --no-install-recommends jq
+            gcloud compute instances create neco-ops \
+                --project ${PROJECT} \
+                --zone ${ZONE} \
+                --machine-type ${MACHINE_TYPE} \
+                --image ${IMAGE} \
+                --boot-disk-type pd-ssd \
+                --boot-disk-size ${DISK_SIZE} \
+                --local-ssd interface=scsi \
+                --scopes https://www.googleapis.com/auth/devstorage.read_write
+      - run:
+          name: Launch placemat
+          no_output_timeout: 30m
+          command: |
+            apt-get update
+            apt-get install -y --no-install-recommends jq
+            gcloud compute scp ./bin/run.sh cybozu@neco-ops: --quiet --project ${PROJECT} --zone ${ZONE}
+            gcloud compute ssh cybozu@neco-ops --quiet --project ${PROJECT} --zone ${ZONE} \
+                --command="sudo /home/cybozu/run.sh"
+      - run:
+          name: Delete instance
+          command: |
+            apt-get update
+            apt-get install -y --no-install-recommends jq
+            gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE}
+          when: on_fail
+
+  stop-neco-ops:
+    docker:
+      - image: google/cloud-sdk
+    environment:
+      PROJECT: neco-test
+      ZONE: asia-northeast1-c
+    steps:
+      - checkout
+      - run:
+          name: Store Service Account
+          command: |
+            echo $GCLOUD_SERVICE_ACCOUNT > account.json
+            gcloud auth activate-service-account --key-file=account.json
+      - run:
+          name: Delete instance
+          command: |
+            apt-get update
+            apt-get install -y --no-install-recommends jq
+            gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE}
+
 workflows:
   version: 2
   main:
     jobs:
       - test
+  auto-start:
+    triggers:
+      - schedule:
+          cron: "30 21 * * 0-4"
+          filters:
+            branches:
+              only: master
+    jobs:
+      - start-neco-ops
+  auto-shutdown:
+    triggers:
+      - schedule:
+          cron: "0 12 * * 1-5"
+          filters:
+            branches:
+              only: master
+    jobs:
+      - stop-neco-ops

@@ -15,11 +15,11 @@ import (
 func testSetup() {
 	It("should install Argo CD", func() {
 		execSafeAt(boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
-		execSafeAt(boot0, "kubectl", "create", "namespace", testID)
+		execSafeAt(boot0, "kubectl", "create", "namespace", argoCDNamespace)
 
 		data, err := ioutil.ReadFile("install.yaml")
 		Expect(err).ShouldNot(HaveOccurred())
-		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "apply", "-n", testID, "-f", "-")
+		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "apply", "-n", argoCDNamespace, "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	})
 
@@ -40,7 +40,7 @@ func testSetup() {
 		// admin password is same as pod name
 		var podList corev1.PodList
 		Eventually(func() error {
-			data := execSafeAt(boot0, "kubectl", "get", "pods", "-n", testID,
+			data := execSafeAt(boot0, "kubectl", "get", "pods", "-n", argoCDNamespace,
 				"-l", "app=argocd-server", "-o", "json")
 			return json.Unmarshal(data, &podList)
 		}).Should(Succeed())
@@ -66,7 +66,7 @@ func testSetup() {
 
 		By("getting node port")
 		var svc corev1.Service
-		data = execSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", testID, "-o", "json")
+		data = execSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", argoCDNamespace, "-o", "json")
 		err = json.Unmarshal(data, &svc)
 		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 		Expect(svc.Spec.Ports).ShouldNot(BeEmpty())
@@ -91,23 +91,23 @@ func testSetup() {
 		}).Should(Succeed())
 	})
 
-	//	It("should setup application", func() {
-	//		By("creating guestbook")
-	//		execSafeAt(boot0, "argocd", "app", "create", "guestbook",
-	//			"--repo", "https://github.com/argoproj/argocd-example-apps",
-	//			"--path", "kustomize-guestbook", "--dest-server", "https://kubernetes.default.svc",
-	//			"--dest-namespace", testID)
-	//		execSafeAt(boot0, "argocd", "app", "sync", "guestbook")
-	//
-	//		By("checking guestbook status")
-	//		data := execSafeAt(boot0, "argocd", "app", "get", "guestbook", "-o", "json")
-	//		var app argoappv1.Application
-	//		err := json.Unmarshal(data, &app)
-	//		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
-	//
-	//		for _, r := range app.Status.Resources {
-	//			Expect(r.Status).Should(Equal(argoappv1.SyncStatusCodeSynced))
-	//			Expect(r.Health.Status).Should(Equal(argoappv1.HealthStatusHealthy))
-	//		}
-	//	})
+	It("should setup application", func() {
+		By("creating guestbook")
+		execSafeAt(boot0, "argocd", "app", "create", "guestbook",
+			"--repo", "https://github.com/argoproj/argocd-example-apps",
+			"--path", "kustomize-guestbook", "--dest-server", "https://kubernetes.default.svc",
+			"--dest-namespace", testID)
+		execSafeAt(boot0, "argocd", "app", "sync", "guestbook")
+
+		By("checking guestbook status")
+		data := execSafeAt(boot0, "argocd", "app", "get", "guestbook", "-o", "json")
+		var app argoappv1.Application
+		err := json.Unmarshal(data, &app)
+		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
+
+		for _, r := range app.Status.Resources {
+			Expect(r.Status).Should(Equal(argoappv1.SyncStatusCodeSynced))
+			Expect(r.Health.Status).Should(Equal(argoappv1.HealthStatusHealthy))
+		}
+	})
 }
