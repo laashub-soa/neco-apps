@@ -51,6 +51,7 @@ func testSetup() {
 
 			return nil
 		}).Should(Succeed())
+	})
 
 	It("should install Argo CD", func() {
 		execSafeAt(boot0, "kubectl", "create", "namespace", argoCDNamespace)
