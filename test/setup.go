@@ -147,14 +147,23 @@ func testSetup() {
 		execSafeAt(boot0, "argocd", "app", "sync", "guestbook")
 
 		By("checking guestbook status")
-		data := execSafeAt(boot0, "argocd", "app", "get", "guestbook", "-o", "json")
-		var app argoappv1.Application
-		err := json.Unmarshal(data, &app)
-		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
+		Eventually(func() error {
+			data := execSafeAt(boot0, "argocd", "app", "get", "guestbook", "-o", "json")
+			var app argoappv1.Application
+			err := json.Unmarshal(data, &app)
+			if err != nil {
+				return err
+			}
 
-		for _, r := range app.Status.Resources {
-			Expect(r.Status).Should(Equal(argoappv1.SyncStatusCodeSynced))
-			Expect(r.Health.Status).Should(Equal(argoappv1.HealthStatusHealthy))
-		}
+			for _, r := range app.Status.Resources {
+				if r.Status != argoappv1.SyncStatusCodeSynced {
+					return fmt.Errorf("app is not yet Synced: %s", r.Status)
+				}
+				if r.Health.Status != argoappv1.HealthStatusHealthy {
+					return fmt.Errorf("app is not yet Healthy: %s", r.Health.Status)
+				}
+			}
+			return nil
+		}).Should(Succeed())
 	})
 }
