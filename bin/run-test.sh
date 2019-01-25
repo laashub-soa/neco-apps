@@ -15,7 +15,7 @@ git checkout -qf ${CIRCLE_SHA1}
 cd test
 export GO111MODULE=on
 make setup
-exec make test
+exec make BRANCH=${CIRCLE_BRANCH} test
 EOF
 chmod +x run.sh
 
