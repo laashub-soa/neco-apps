@@ -143,15 +143,38 @@ func testSetup() {
 	})
 
 	It("should setup Argo CD application as Argo CD app", func() {
-		By("creating argocd app")
-		execSafeAt(boot0, "argocd", "app", "create", "argocd-config",
-			"--repo", "https://github.com/cybozu-go/neco-ops.git",
-			"--path", "argocd-config/overlays/stage",
-			"--dest-namespace", argoCDNamespace,
-			"--dest-server", "https://kubernetes.default.svc",
-			"--sync-policy", "automated",
-			"--revision", commitID)
-		execSafeAt(boot0, "argocd", "app", "sync", "argocd-config")
+		By("creating Argo CD app")
+		Eventually(func() error {
+			stdout, stderr, err := exexAt(boot0, "argocd", "app", "create", "argocd-config",
+				"--repo", "https://github.com/cybozu-go/neco-ops.git",
+				"--path", "argocd-config/overlays/stage",
+				"--dest-namespace", argoCDNamespace,
+				"--dest-server", "https://kubernetes.default.svc",
+				"--sync-policy", "automated",
+				"--revision", commitID)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("synchronizing Argo CD app")
+		Eventually(func() error {
+			stdout, stderr, err := execAt(boot0, "argocd", "app", "sync", "argocd-config")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("synchronizing guestbook sample app")
+		Eventually(func() error {
+			stdout, stderr, err := execAt(boot0, "argocd", "app", "sync", "guestbook")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 
 		By("checking guestbook sample app status")
 		Eventually(func() error {
