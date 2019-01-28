@@ -6,7 +6,7 @@ COMMIT_ID=
 export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID
 
 test:
-	./test.sh
+	./test.sh .
 
 setup:
 	GO111MODULE=off go get github.com/onsi/ginkgo/ginkgo
