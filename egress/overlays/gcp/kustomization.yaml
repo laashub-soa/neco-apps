@@ -1,7 +1,6 @@
 bases:
 - ../../base
-apiVersion: v1beta1
 kind: Kustomization
+apiVersion: v1beta1
 patchesStrategicMerge:
-- guestbook.yaml
-- egress.yaml
+- squid-configmap.yaml
