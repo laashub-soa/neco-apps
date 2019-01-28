@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guestbook
+  name: egress
   namespace: argocd
 spec:
   source:
-    path: guestbook/overlays/stage
+    path: egress/base
   syncPolicy:
     automated: {}

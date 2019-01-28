@@ -1,33 +1,34 @@
-package test
+package egress
 
 import (
 	"encoding/json"
 	"fmt"
 
 	argoappv1 "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
+	"github.com/cybozu-go/neco-ops/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-// testSampleApp tests sample app deployment by Argo CD
-func testSampleApp() {
-	It("should deploy guestbook sample app by Argo CD", func() {
-		By("synchronizing guestbook sample app")
+func testEgress() {
+	It("should deploy egress by Argo CD", func() {
+		By("synchronizing egress")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "set", "guestbook", "--revision", CommitID)
+			stdout, stderr, err := test.ExecAt(test.Boot0, "argocd", "app", "set", "egress", "--revision", test.CommitID)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			stdout, stderr, err = ExecAt(Boot0, "argocd", "app", "sync", "guestbook", "--timeout", "20")
+			stdout, stderr, err = test.ExecAt(test.Boot0, "argocd", "app", "sync", "egress", "--timeout", "20")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			return nil
 		}).Should(Succeed())
 
-		By("checking guestbook sample app status")
+		By("checking egress status")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "app", "guestbook", "-n", ArgoCDNamespace, "-o", "json")
+			stdout, stderr, err := test.ExecAt(test.Boot0,
+				"kubectl", "get", "app", "egress", "-n", test.ArgoCDNamespace, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

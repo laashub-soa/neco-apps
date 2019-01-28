@@ -67,7 +67,7 @@ Directory tree
     │       ├── kustomization.yaml
     │       └── proxy.yaml         # NO_PROXY, HTTP_PROXY, HTTPS_PROXY environment variables
     └── test
-        └── suite_test.go          # Gingko based deployment test
+        └── suite_test.go          # Ginkgo based deployment test
 ...
 ```
 

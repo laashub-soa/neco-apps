@@ -17,7 +17,7 @@ func testSetup() {
 	It("should be ready K8s cluster after loading snapshot", func() {
 		By("re-issuing kubeconfig")
 		Eventually(func() error {
-			_, _, err := execAt(boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
+			_, _, err := ExecAt(Boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
 			if err != nil {
 				return err
 			}
@@ -26,7 +26,7 @@ func testSetup() {
 
 		By("waiting nodes")
 		Eventually(func() error {
-			stdout, _, err := execAt(boot0, "kubectl", "get", "nodes", "-o", "json")
+			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "nodes", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -61,16 +61,16 @@ func testSetup() {
 	})
 
 	It("should install Argo CD", func() {
-		execSafeAt(boot0, "kubectl", "create", "namespace", argoCDNamespace)
+		ExecSafeAt(Boot0, "kubectl", "create", "namespace", ArgoCDNamespace)
 
 		data, err := ioutil.ReadFile("install.yaml")
 		Expect(err).ShouldNot(HaveOccurred())
-		stdout, stderr, err := execAtWithInput(boot0, data, "kubectl", "apply", "-n", argoCDNamespace, "-f", "-")
+		stdout, stderr, err := execAtWithInput(Boot0, data, "kubectl", "apply", "-n", ArgoCDNamespace, "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	})
 
 	It("should install argocd CLI", func() {
-		execSafeAt(boot0, "sudo",
+		ExecSafeAt(Boot0, "sudo",
 			"env", "HTTP_PROXY=http://10.0.49.3:3128", "HTTPS_PROXY=http://10.0.49.3:3128",
 			"rkt", "run",
 			"--insecure-options=image",
@@ -86,7 +86,7 @@ func testSetup() {
 		// admin password is same as pod name
 		var podList corev1.PodList
 		Eventually(func() error {
-			data := execSafeAt(boot0, "kubectl", "get", "pods", "-n", argoCDNamespace,
+			data := ExecSafeAt(Boot0, "kubectl", "get", "pods", "-n", ArgoCDNamespace,
 				"-l", "app=argocd-server", "-o", "json")
 			return json.Unmarshal(data, &podList)
 		}).Should(Succeed())
@@ -95,7 +95,7 @@ func testSetup() {
 
 		By("getting node address")
 		var nodeList corev1.NodeList
-		data := execSafeAt(boot0, "kubectl", "get", "nodes", "-o", "json")
+		data := ExecSafeAt(Boot0, "kubectl", "get", "nodes", "-o", "json")
 		err := json.Unmarshal(data, &nodeList)
 		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 		Expect(nodeList.Items).ShouldNot(BeEmpty())
@@ -112,7 +112,7 @@ func testSetup() {
 
 		By("getting node port")
 		var svc corev1.Service
-		data = execSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", argoCDNamespace, "-o", "json")
+		data = ExecSafeAt(Boot0, "kubectl", "get", "svc/argocd-server", "-n", ArgoCDNamespace, "-o", "json")
 		err = json.Unmarshal(data, &svc)
 		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 		Expect(svc.Spec.Ports).ShouldNot(BeEmpty())
@@ -128,13 +128,8 @@ func testSetup() {
 
 		By("logging in to Argo CD")
 		Eventually(func() error {
-			stdout, stderr, err := execAt(boot0, "argocd", "login", nodeAddress+":"+nodePort,
+			stdout, stderr, err := ExecAt(Boot0, "argocd", "login", nodeAddress+":"+nodePort,
 				"--insecure", "--username", "admin", "--password", password)
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			stdout, stderr, err = execAt(boot0, "argocd", "account", "update-password",
-				"--current-password", password, "--new-password", "password")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -145,13 +140,12 @@ func testSetup() {
 	It("should setup Argo CD application as Argo CD app", func() {
 		By("creating Argo CD app")
 		Eventually(func() error {
-			stdout, stderr, err := execAt(boot0, "argocd", "app", "create", "argocd-config",
+			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "create", "argocd-config",
 				"--repo", "https://github.com/cybozu-go/neco-ops.git",
-				"--path", "argocd-config/overlays/stage",
-				"--dest-namespace", argoCDNamespace,
+				"--path", "argocd-config/overlays/gcp",
+				"--dest-namespace", ArgoCDNamespace,
 				"--dest-server", "https://kubernetes.default.svc",
-				"--sync-policy", "automated",
-				"--revision", commitID)
+				"--revision", CommitID)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -160,7 +154,7 @@ func testSetup() {
 
 		By("synchronizing Argo CD app")
 		Eventually(func() error {
-			stdout, stderr, err := execAt(boot0, "argocd", "app", "sync", "argocd-config")
+			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "sync", "argocd-config", "--timeout", "20")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -169,7 +163,7 @@ func testSetup() {
 
 		By("checking argocd-config app status")
 		Eventually(func() error {
-			stdout, stderr, err := execAt(boot0, "kubectl", "get", "app", "argocd-config", "-n", argoCDNamespace, "-o", "json")
+			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "app", "argocd-config", "-n", ArgoCDNamespace, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

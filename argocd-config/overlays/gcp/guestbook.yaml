@@ -5,6 +5,4 @@ metadata:
   namespace: argocd
 spec:
   source:
-    path: guestbook/overlays/stage
-  syncPolicy:
-    automated: {}
+    path: guestbook/base

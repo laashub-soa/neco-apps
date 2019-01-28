@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guestbook
+  name: coil
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/cybozu-go/neco-ops.git
     targetRevision: HEAD
-    path: guestbook/base
+    path: coil/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: kube-system

@@ -5,12 +5,12 @@ import (
 )
 
 const (
-	argoCDNamespace = "argocd"
+	ArgoCDNamespace = "argocd"
 )
 
 var (
-	boot0      = os.Getenv("BOOT0")
-	sshKeyFile = os.Getenv("SSH_PRIVKEY")
-	testID     = os.Getenv("TEST_ID")
-	commitID   = os.Getenv("COMMIT_ID")
+	Boot0      = os.Getenv("BOOT0")
+	SSHKeyFile = os.Getenv("SSH_PRIVKEY")
+	TestID     = os.Getenv("TEST_ID")
+	CommitID   = os.Getenv("COMMIT_ID")
 )
