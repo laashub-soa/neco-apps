@@ -13,7 +13,7 @@ import (
 func testSquid() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := execAt(boot0, "kubectl", "--namespace=internet-egress",
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=internet-egress",
 				"get", "deployments/squid", "-o=json")
 			if err != nil {
 				return err
@@ -34,10 +34,10 @@ func testSquid() {
 
 	It("should serve for docker daemon", func() {
 		By("running nginx pods")
-		test.ExecSafeAt(boot0, "kubectl", "run", "nginx", "--image=nginx", "--replicas=2")
+		test.ExecSafeAt(test.Boot0, "kubectl", "run", "nginx", "--image=nginx", "--replicas=2")
 
 		Eventually(func() error {
-			stdout, _, err := execAt(boot0, "kubectl", "get", "deployments/nginx", "-o=json")
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "deployments/nginx", "-o=json")
 			if err != nil {
 				return err
 			}
@@ -55,6 +55,6 @@ func testSquid() {
 		}).Should(Succeed())
 
 		By("removing nginx pods")
-		test.ExecSafeAt(boot0, "kubectl", "delete", "deployments/nginx")
+		test.ExecSafeAt(test.Boot0, "kubectl", "delete", "deployments/nginx")
 	})
 }
