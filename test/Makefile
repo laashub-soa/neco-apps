@@ -20,3 +20,6 @@ setup:
 # this target expects to be executed after `test` target
 test-coil:
 	./test.sh ../coil/test
+
+test-egress:
+	./test.sh ../egress/test
