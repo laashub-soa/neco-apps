@@ -3,7 +3,7 @@
 . $(dirname $0)/env
 
 cat >run.sh <<EOF
-#!/bin/sh -e -x
+#!/bin/sh -ex
 # Run test
 GOPATH=\$HOME/${TEST_DIR}/go
 export GOPATH
