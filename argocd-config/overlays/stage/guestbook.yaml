@@ -6,3 +6,5 @@ metadata:
 spec:
   source:
     path: guestbook/overlays/stage
+  syncPolicy:
+    automated: {}

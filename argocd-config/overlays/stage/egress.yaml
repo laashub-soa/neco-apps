@@ -6,3 +6,5 @@ metadata:
 spec:
   source:
     path: egress/overlays/stage
+  syncPolicy:
+    automated: {}

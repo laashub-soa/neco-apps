@@ -15,6 +15,7 @@ git checkout -qf ${CIRCLE_SHA1}
 cd test
 export GO111MODULE=on
 make setup
+make kustomize-check
 make COMMIT_ID=${CIRCLE_SHA1} test
 
 targets="$(git diff origin/master ${CIRCLE_SHA1} --name-only | cut -d '/' -f 1 | uniq)"
