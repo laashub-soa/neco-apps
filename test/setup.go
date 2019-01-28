@@ -160,7 +160,7 @@ func testSetup() {
 
 		By("synchronizing Argo CD app")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "sync", "argocd-config")
+			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "sync", "argocd-config", "--timeout", "20")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

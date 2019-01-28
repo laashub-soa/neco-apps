@@ -3,7 +3,7 @@
 . $(dirname $0)/env
 
 cat >run.sh <<EOF
-#!/bin/sh -e
+#!/bin/sh -e -x
 # Run test
 GOPATH=\$HOME/${TEST_DIR}/go
 export GOPATH
@@ -20,6 +20,7 @@ make COMMIT_ID=${CIRCLE_SHA1} test
 targets="$(git diff origin/master ${CIRCLE_SHA1} --name-only | cut -d '/' -f 1 | uniq)"
 for target in ${targets}; do
     if test -f ../${target}/test/suite_test.go; then
+        echo "Run test-${target}"
         make COMMIT_ID=${CIRCLE_SHA1} test-${target}
     fi
 done
@@ -30,6 +31,6 @@ $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="mkdir -p /
 $GCLOUD compute scp --zone=${ZONE} run.sh cybozu@${INSTANCE_NAME}:${TEST_DIR}
 $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="/home/cybozu/${TEST_DIR}/run.sh"
 RET=$?
-$GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="sudo rm -rf /home/cybozu/${TEST_DIR}"
+#$GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="sudo rm -rf /home/cybozu/${TEST_DIR}"
 
 exit $RET
