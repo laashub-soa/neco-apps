@@ -3,15 +3,14 @@ GINKGO = env GO111MODULE=off $(GOPATH)/bin/ginkgo --failFast -v
 SSH_PRIVKEY = $(realpath ./dctest_key)
 TEST_ID = $(shell basename $(dir $(GOPATH)))
 COMMIT_ID=
-export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID
-
 KUSTOMIZATION_YAMLS = $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
+export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_YAMLS
 
 test:
 	./test.sh
 
 kustomize-check:
-	for yaml in $(KUSTOMIZATION_YAMLS); do echo $$yaml; kustomize build $$yaml >/dev/null; done
+	./kustomize-check.sh
 
 setup:
 	GO111MODULE=off go get github.com/onsi/ginkgo/ginkgo sigs.k8s.io/kustomize
