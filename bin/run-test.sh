@@ -17,9 +17,10 @@ export GO111MODULE=on
 make setup
 make COMMIT_ID=${CIRCLE_SHA1} test
 
-for target in $(git diff origin/master ${CIRCLE_SHA1} --name-only | cut -d '/' -f 1 | uniq); do
+targets="$(git diff origin/master ${CIRCLE_SHA1} --name-only | cut -d '/' -f 1 | uniq)"
+for target in ${targets}; do
     if test -f ../${target}/test/suite_test.go; then
-        echo "make COMMIT_ID=${CIRCLE_SHA1} test-${target}"
+        make COMMIT_ID=${CIRCLE_SHA1} test-${target}
     fi
 done
 EOF
