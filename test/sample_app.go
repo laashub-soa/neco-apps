@@ -14,10 +14,7 @@ func testSampleApp() {
 	It("should deploy guestbook sample app by Argo CD", func() {
 		By("synchronizing guestbook sample app")
 		Eventually(func() error {
-			// To apply target commitID for auto-sync enabled app, kubectl patch allows app to change targetRevision.
-			stdout, stderr, err := ExecAt(Boot0, "kubectl", "patch",
-				"-n", ArgoCDNamespace, "app", "guestbook", "--type=merge",
-				"-p", `'{"spec":{"source":{"targetRevision":"`+CommitID+`"}}}'`)
+			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "set", "guestbook", "--revision", CommitID)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

@@ -145,7 +145,6 @@ func testSetup() {
 				"--path", "argocd-config/overlays/gcp",
 				"--dest-namespace", ArgoCDNamespace,
 				"--dest-server", "https://kubernetes.default.svc",
-				"--sync-policy", "automated",
 				"--revision", CommitID)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)

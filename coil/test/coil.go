@@ -17,10 +17,7 @@ func testCoil() {
 	It("should deploy coil by Argo CD", func() {
 		By("synchronizing coil")
 		Eventually(func() error {
-			// To apply target commitID for auto-sync enabled app, kubectl patch allows app to change targetRevision.
-			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "patch",
-				"-n", test.ArgoCDNamespace, "app", "coil", "--type=merge",
-				"-p", `'{"spec":{"source":{"targetRevision":"`+test.CommitID+`"}}}'`)
+			stdout, stderr, err := test.ExecAt(test.Boot0, "argocd", "app", "set", "coil", "--revision", test.CommitID)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
