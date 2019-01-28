@@ -21,7 +21,7 @@ func RunBeforeSuite() {
 
 	// sync VM root filesystem to store newly generated SSH host keys.
 	for h := range sshClients {
-		execSafeAt(h, "sync")
+		ExecSafeAt(h, "sync")
 	}
 
 	log.DefaultLogger().SetOutput(GinkgoWriter)

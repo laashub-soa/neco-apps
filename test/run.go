@@ -152,7 +152,8 @@ func doExec(agent *sshAgent, input []byte, args ...string) ([]byte, []byte, erro
 	return outBuf.Bytes(), errBuf.Bytes(), err
 }
 
-func execSafeAt(host string, args ...string) []byte {
+// ExecSafeAt executes command at given host and returns only stdout
+func ExecSafeAt(host string, args ...string) []byte {
 	stdout, stderr, err := ExecAt(host, args...)
 	ExpectWithOffset(1, err).To(Succeed(), "[%s] %v, stdout: %s, stderr: %s", host, args, stdout, stderr)
 	return stdout

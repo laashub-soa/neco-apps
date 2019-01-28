@@ -61,7 +61,7 @@ func testSetup() {
 	})
 
 	It("should install Argo CD", func() {
-		execSafeAt(Boot0, "kubectl", "create", "namespace", ArgoCDNamespace)
+		ExecSafeAt(Boot0, "kubectl", "create", "namespace", ArgoCDNamespace)
 
 		data, err := ioutil.ReadFile("install.yaml")
 		Expect(err).ShouldNot(HaveOccurred())
@@ -70,7 +70,7 @@ func testSetup() {
 	})
 
 	It("should install argocd CLI", func() {
-		execSafeAt(Boot0, "sudo",
+		ExecSafeAt(Boot0, "sudo",
 			"env", "HTTP_PROXY=http://10.0.49.3:3128", "HTTPS_PROXY=http://10.0.49.3:3128",
 			"rkt", "run",
 			"--insecure-options=image",
@@ -86,7 +86,7 @@ func testSetup() {
 		// admin password is same as pod name
 		var podList corev1.PodList
 		Eventually(func() error {
-			data := execSafeAt(Boot0, "kubectl", "get", "pods", "-n", ArgoCDNamespace,
+			data := ExecSafeAt(Boot0, "kubectl", "get", "pods", "-n", ArgoCDNamespace,
 				"-l", "app=argocd-server", "-o", "json")
 			return json.Unmarshal(data, &podList)
 		}).Should(Succeed())
@@ -95,7 +95,7 @@ func testSetup() {
 
 		By("getting node address")
 		var nodeList corev1.NodeList
-		data := execSafeAt(Boot0, "kubectl", "get", "nodes", "-o", "json")
+		data := ExecSafeAt(Boot0, "kubectl", "get", "nodes", "-o", "json")
 		err := json.Unmarshal(data, &nodeList)
 		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 		Expect(nodeList.Items).ShouldNot(BeEmpty())
@@ -112,7 +112,7 @@ func testSetup() {
 
 		By("getting node port")
 		var svc corev1.Service
-		data = execSafeAt(Boot0, "kubectl", "get", "svc/argocd-server", "-n", ArgoCDNamespace, "-o", "json")
+		data = ExecSafeAt(Boot0, "kubectl", "get", "svc/argocd-server", "-n", ArgoCDNamespace, "-o", "json")
 		err = json.Unmarshal(data, &svc)
 		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 		Expect(svc.Spec.Ports).ShouldNot(BeEmpty())
@@ -133,11 +133,6 @@ func testSetup() {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			stdout, stderr, err = ExecAt(Boot0, "argocd", "account", "update-password",
-				"--current-password", password, "--new-password", "password")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
 			return nil
 		}).Should(Succeed())
 	})
@@ -147,7 +142,7 @@ func testSetup() {
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "create", "argocd-config",
 				"--repo", "https://github.com/cybozu-go/neco-ops.git",
-				"--path", "argocd-config/overlays/stage",
+				"--path", "argocd-config/overlays/gcp",
 				"--dest-namespace", ArgoCDNamespace,
 				"--dest-server", "https://kubernetes.default.svc",
 				"--sync-policy", "automated",
