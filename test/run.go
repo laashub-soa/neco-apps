@@ -93,7 +93,7 @@ func parsePrivateKey(keyPath string) (ssh.Signer, error) {
 }
 
 func prepareSSHClients(addresses ...string) error {
-	sshKey, err := parsePrivateKey(sshKeyFile)
+	sshKey, err := parsePrivateKey(SSHKeyFile)
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,8 @@ func prepareSSHClients(addresses ...string) error {
 	return nil
 }
 
-func execAt(host string, args ...string) (stdout, stderr []byte, e error) {
+// ExecAt executes command at given host
+func ExecAt(host string, args ...string) (stdout, stderr []byte, e error) {
 	return execAtWithInput(host, nil, args...)
 }
 
@@ -152,7 +153,7 @@ func doExec(agent *sshAgent, input []byte, args ...string) ([]byte, []byte, erro
 }
 
 func execSafeAt(host string, args ...string) []byte {
-	stdout, stderr, err := execAt(host, args...)
+	stdout, stderr, err := ExecAt(host, args...)
 	ExpectWithOffset(1, err).To(Succeed(), "[%s] %v, stdout: %s, stderr: %s", host, args, stdout, stderr)
 	return stdout
 }

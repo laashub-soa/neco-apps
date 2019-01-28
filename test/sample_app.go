@@ -15,13 +15,13 @@ func testSampleApp() {
 		By("synchronizing guestbook sample app")
 		Eventually(func() error {
 			// To apply target commitID for auto-sync enabled app, kubectl patch allows app to change targetRevision.
-			stdout, stderr, err := execAt(boot0, "kubectl", "patch",
-				"-n", argoCDNamespace, "app", "guestbook", "--type=merge",
-				"-p", `'{"spec":{"source":{"targetRevision":"`+commitID+`"}}}'`)
+			stdout, stderr, err := ExecAt(Boot0, "kubectl", "patch",
+				"-n", ArgoCDNamespace, "app", "guestbook", "--type=merge",
+				"-p", `'{"spec":{"source":{"targetRevision":"`+CommitID+`"}}}'`)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			stdout, stderr, err = execAt(boot0, "argocd", "app", "sync", "guestbook", "--timeout", "20")
+			stdout, stderr, err = ExecAt(Boot0, "argocd", "app", "sync", "guestbook", "--timeout", "20")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -30,7 +30,7 @@ func testSampleApp() {
 
 		By("checking guestbook sample app status")
 		Eventually(func() error {
-			stdout, stderr, err := execAt(boot0, "kubectl", "get", "app", "guestbook", "-n", argoCDNamespace, "-o", "json")
+			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "app", "guestbook", "-n", ArgoCDNamespace, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

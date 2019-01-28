@@ -11,3 +11,7 @@ test:
 setup:
 	GO111MODULE=off go get github.com/onsi/ginkgo/ginkgo
 	GO111MODULE=off go get -t ./...
+
+# this target expects to be executed after `test` target
+test-coil:
+	./test.sh ../coil/test

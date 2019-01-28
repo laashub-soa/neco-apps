@@ -1,9 +1,10 @@
-package test
+package coil
 
 import (
 	"os"
 	"testing"
 
+	"github.com/cybozu-go/neco-ops/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -17,11 +18,10 @@ func Test(t *testing.T) {
 	RunSpecs(t, "Test")
 }
 
-var _ = BeforeSuite(RunBeforeSuite)
+var _ = BeforeSuite(test.RunBeforeSuite)
 
 // This must be the only top-level test container.
 // Other tests and test containers must be listed in this.
 var _ = Describe("GitOps Test", func() {
-	Context("setup", testSetup)
-	Context("sampleApp", testSampleApp)
+	Context("coil", testCoil)
 })
