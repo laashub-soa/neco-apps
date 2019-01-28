@@ -24,4 +24,5 @@ var _ = BeforeSuite(RunBeforeSuite)
 var _ = Describe("GitOps Test", func() {
 	Context("setup", testSetup)
 	Context("sampleApp", testSampleApp)
+	Context("coil", testCoil)
 })

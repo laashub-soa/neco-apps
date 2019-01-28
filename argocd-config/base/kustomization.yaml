@@ -1,4 +1,5 @@
 resources:
 - guestbook.yaml
+- coil.yaml
 apiVersion: v1beta1
 kind: Kustomization
