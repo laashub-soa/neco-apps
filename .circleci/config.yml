@@ -98,6 +98,11 @@ jobs:
             tar zxf - --strip-components=1 -C /tmp/ && \
             mv /tmp/bin/hub /usr/local/bin/hub
       - run:
+          name: Configure GIT
+          command: |
+            git config --global user.email "neco@cybozu.com"
+            git config --global user.name "cybozu-neco"
+      - run:
           name: Create a branch with the tag
           command: |
             git branch op-${CIRCLE_TAG} ${CIRCLE_TAG}
