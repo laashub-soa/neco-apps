@@ -85,18 +85,20 @@ jobs:
             apt-get update
             apt-get install -y --no-install-recommends jq
             gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE}
+
   create-pull-request:
     docker:
       - image: quay.io/cybozu/ubuntu-dev:18.04
     steps:
       - checkout
-      - name: Install hub command
-        command: |
-          curl -sSLf https://github.com/github/hub/releases/download/v2.8.3/hub-linux-amd64-2.8.3.tgz | \
-          tar zxf - --strip-components=1 -C /tmp/ && \
-          mv /tmp/bin/hub /usr/local/bin/hub
+      - run:
+          name: Install hub command
+          command: |
+            curl -sSLf https://github.com/github/hub/releases/download/v2.8.3/hub-linux-amd64-2.8.3.tgz | \
+            tar zxf - --strip-components=1 -C /tmp/ && \
+            mv /tmp/bin/hub /usr/local/bin/hub
       - run: hub push origin ${CIRCLE_BRANCH}:op-${CIRCLE_TAG}
-      - run: hub pull-request --message="[CI]Release ${CIRCLE_TAG}" --base=cybozu-go:release --head=cybozu-go:op-${CIRCLE_TAG}
+      - run: hub pull-request --message="[CI] Release ${CIRCLE_TAG}" --base=cybozu-go:release --head=cybozu-go:op-${CIRCLE_TAG}
 
 workflows:
   version: 2
