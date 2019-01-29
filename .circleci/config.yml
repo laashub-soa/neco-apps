@@ -101,7 +101,7 @@ jobs:
           name: Create a branch with the tag
           command: |
             git branch op-${CIRCLE_TAG} ${CIRCLE_TAG}
-            git push origin op-${CIRCLE_TAG}
+            hub push origin op-${CIRCLE_TAG}
       - run:
           name: Create a pull request
           command: |
