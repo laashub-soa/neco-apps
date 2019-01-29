@@ -40,6 +40,16 @@ The following describes an example of time line based development flow with the 
 8. `CircleCI`: CI does not work because no `neco-ops` cluster in this time.
 9. Go back to 1. tomorrow.
 
+### CD of each cluster
+
+- stage: watch `argocd-config/overlays/stage` on `master` branch. All changes of `master` are always deployed to staging cluster.
+- bk: TBD
+- prod: watch `argoc-config/overlays/prod` on `release` branch. To deploy changes for production cluster. Operator has to do as follows:
+    1. Team makes sure all changes since last commit of `release` branch are stable with `neco-ops` CI result and staging cluster deployment.
+    2. Operator add a git tag `release-xxxx.xx.xx-x` to `master` branch, and push the tag.
+    3. CI create a new branch using its tag, then create a new pull request for merging to `release` branch.
+    4. After operator merge its PR, `release` branch is updated, Argo CD on production cluster detects changes of the branch, and deploy it.
+
 Directory tree
 --------------
 
@@ -120,16 +130,16 @@ CI in this repository runs deployment test using `neco-ops` instance. Test resou
 Typical test step is:
 
 - Run [Ginkgo][] based deployment test.
-    0. Load initialized state of the placemat snapshot by `pmctl snapshot load`.
-    1. Login to `neco-opts` instance.
-    2. Deploy Argo CD by `kubectl`.
-    3. Initialize Argo CD client with `argocd login SERVER --name admin --password xxxxx`.
-    4. Deploy Argo CD configuration `argocd-config` by:
+    1. Load initialized state of the placemat snapshot by `pmctl snapshot load`.
+    2. Login to `neco-opts` instance.
+    3. Deploy Argo CD by `kubectl`.
+    4. Initialize Argo CD client with `argocd login SERVER --name admin --password xxxxx`.
+    5. Deploy Argo CD configuration `argocd-config` by:
         ```console
         argocd app create argocd-config -f https://github.com/cybozu-go/neco-ops --path argocd-config/overlays/stage --dest-namespace=argocd ...
         ````
-    5. Deploy `argocd-config` and other apps through Argo CD by `argocd app sync APPNAME`.
-    6. Check some status.
+    6. Deploy `argocd-config` and other apps through Argo CD by `argocd app sync APPNAME`.
+    7. Check some status.
 
 License
 -------

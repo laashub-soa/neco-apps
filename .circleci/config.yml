@@ -86,6 +86,32 @@ jobs:
             apt-get install -y --no-install-recommends jq
             gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE}
 
+  create-pull-request:
+    docker:
+      - image: quay.io/cybozu/ubuntu-dev:18.04
+    steps:
+      - checkout
+      - run:
+          name: Install hub command
+          command: |
+            curl -sSLf https://github.com/github/hub/releases/download/v2.8.3/hub-linux-amd64-2.8.3.tgz | \
+            tar zxf - --strip-components=1 -C /tmp/ && \
+            mv /tmp/bin/hub /usr/local/bin/hub
+      - run:
+          name: Configure GIT
+          command: |
+            git config --global user.email "neco@cybozu.com"
+            git config --global user.name "cybozu-neco"
+      - run:
+          name: Create a branch with the tag
+          command: |
+            git branch op-${CIRCLE_TAG} ${CIRCLE_TAG}
+            hub push origin op-${CIRCLE_TAG}
+      - run:
+          name: Create a pull request
+          command: |
+            hub pull-request --message="[CI] Release ${CIRCLE_TAG}" --base=cybozu-go:release --head=cybozu-go:op-${CIRCLE_TAG}
+
 workflows:
   version: 2
   main:
@@ -94,7 +120,7 @@ workflows:
   auto-start:
     triggers:
       - schedule:
-          cron: "30 21 * * 0-4"
+          cron: "30 22 * * 0-4"
           filters:
             branches:
               only: master
@@ -109,3 +135,11 @@ workflows:
               only: master
     jobs:
       - stop-neco-ops
+  production-release:
+    jobs:
+      - create-pull-request:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^release-.*/
