@@ -97,8 +97,15 @@ jobs:
             curl -sSLf https://github.com/github/hub/releases/download/v2.8.3/hub-linux-amd64-2.8.3.tgz | \
             tar zxf - --strip-components=1 -C /tmp/ && \
             mv /tmp/bin/hub /usr/local/bin/hub
-      - run: hub push origin ${CIRCLE_BRANCH}:op-${CIRCLE_TAG}
-      - run: hub pull-request --message="[CI] Release ${CIRCLE_TAG}" --base=cybozu-go:release --head=cybozu-go:op-${CIRCLE_TAG}
+      - run:
+          name: Create a branch with the tag
+          command: |
+            git branch op-${CIRCLE_TAG} ${CIRCLE_TAG}
+            git push origin op-${CIRCLE_TAG}
+      - run:
+          name: Create a pull request
+          command: |
+            hub pull-request --message="[CI] Release ${CIRCLE_TAG}" --base=cybozu-go:release --head=cybozu-go:op-${CIRCLE_TAG}
 
 workflows:
   version: 2
