@@ -115,7 +115,7 @@ workflows:
   auto-start:
     triggers:
       - schedule:
-          cron: "30 21 * * 0-4"
+          cron: "30 22 * * 0-4"
           filters:
             branches:
               only: master
