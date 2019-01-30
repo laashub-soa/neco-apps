@@ -18,6 +18,7 @@ make setup
 make kustomize-check
 make COMMIT_ID=${CIRCLE_SHA1} test
 
+# Run tests only changes of app directories since origin/master
 targets="$(git diff origin/master ${CIRCLE_SHA1} --name-only | cut -d '/' -f 1 | uniq)"
 for target in \${targets}; do
     if test -f ../\${target}/test/suite_test.go; then

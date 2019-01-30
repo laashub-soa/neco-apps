@@ -136,7 +136,7 @@ Typical test step is:
     4. Initialize Argo CD client with `argocd login SERVER --name admin --password xxxxx`.
     5. Deploy Argo CD configuration `argocd-config` by:
         ```console
-        argocd app create argocd-config -f https://github.com/cybozu-go/neco-ops --path argocd-config/overlays/stage --dest-namespace=argocd ...
+        argocd app create argocd-config -f https://github.com/cybozu-go/neco-ops --path argocd-config/overlays/gcp --dest-namespace=argocd ...
         ````
     6. Deploy `argocd-config` and other apps through Argo CD by `argocd app sync APPNAME`.
     7. Check some status.
