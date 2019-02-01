@@ -34,6 +34,3 @@ MIT
 
 [Kubernetes]: https://kubernetes.io/
 [Kustomize]: https://github.com/kubernetes-sigs/kustomize
-[Argo CD]: https://github.com/argoproj/argo-cd
-[Alertmanager]: https://prometheus.io/docs/alerting/alertmanager/
-[Ginkgo]: https://github.com/onsi/ginkgo
