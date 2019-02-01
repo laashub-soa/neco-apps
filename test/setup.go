@@ -86,9 +86,19 @@ func testSetup() {
 		Eventually(func() error {
 			data := ExecSafeAt(Boot0, "kubectl", "get", "pods", "-n", ArgoCDNamespace,
 				"-l", "app=argocd-server", "-o", "json")
-			return json.Unmarshal(data, &podList)
+			err := json.Unmarshal(data, &podList)
+			if err != nil {
+				return err
+			}
+			if podList.Items == nil {
+				return errors.New("podList.Items is nil")
+			}
+			if len(podList.Items) != 1 {
+				return fmt.Errorf("podList.Items is not 1: %d", len(podList.Items))
+			}
+			return nil
 		}).Should(Succeed())
-		Expect(podList.Items).ShouldNot(BeEmpty())
+
 		password := podList.Items[0].Name
 
 		By("getting node address")
