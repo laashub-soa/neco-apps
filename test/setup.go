@@ -1,6 +1,7 @@
 package test
 
 import (
+	"errors"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
