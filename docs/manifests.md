@@ -82,7 +82,7 @@ The typical test step is:
 
 - Run [Ginkgo][] based deployment test.
     1. Load initialized state of the placemat snapshot by `pmctl snapshot load`.
-    2. Login to `neco-opts` instance.
+    2. Login to `neco-ops` instance.
     3. Deploy Argo CD by `kubectl`.
     4. Initialize Argo CD client with `argocd login SERVER --name admin --password xxxxx`.
     5. Deploy Argo CD configuration `argocd-config` by:
@@ -91,3 +91,5 @@ The typical test step is:
         ````
     6. Deploy `argocd-config` and other apps through Argo CD by `argocd app sync APPNAME`.
     7. Check some status.
+
+[Ginkgo]: https://github.com/onsi/ginkgo

@@ -36,3 +36,6 @@ See details of the deployment step in [release.md](release.md).
 - stage: watch `argocd-config/overlays/stage` in **master HEAD** branch. All changes of `master` are always deployed to staging cluster.
 - bk: TBD
 - prod: watch `argocd-config/overlays/prod` in **release HEAD** branch. To deploy changes for a production cluster.
+
+[Argo CD]: https://github.com/argoproj/argo-cd
+[Alertmanager]: https://prometheus.io/docs/alerting/alertmanager/
