@@ -33,4 +33,5 @@ License
 MIT
 
 [Kubernetes]: https://kubernetes.io/
+[Argo CD]: https://github.com/argoproj/argo-cd
 [Kustomize]: https://github.com/kubernetes-sigs/kustomize
