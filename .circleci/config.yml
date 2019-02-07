@@ -36,14 +36,14 @@ jobs:
             echo $GCLOUD_SERVICE_ACCOUNT > account.json
             gcloud auth activate-service-account --key-file=account.json
       - run:
-          name: Check dctest environment for neco-ops is already running
+          name: (Re)Create instance
+          no_output_timeout: 30m
           command: |
             if gcloud compute ssh cybozu@neco-ops --quiet --project ${PROJECT} --zone ${ZONE} --command="test -f /tmp/setup-done"; then
                 exit 0
             fi
-      - run:
-          name: (Re)Create instance
-          command: |
+            apt-get update
+            apt-get install -y --no-install-recommends jq
             gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE} || true
             gcloud compute instances create neco-ops \
                 --project ${PROJECT} \
@@ -54,12 +54,6 @@ jobs:
                 --boot-disk-size ${DISK_SIZE} \
                 --local-ssd interface=scsi \
                 --scopes https://www.googleapis.com/auth/devstorage.read_write
-      - run:
-          name: Launch placemat
-          no_output_timeout: 30m
-          command: |
-            apt-get update
-            apt-get install -y --no-install-recommends jq
             gcloud compute scp ./bin/run.sh cybozu@neco-ops: --quiet --project ${PROJECT} --zone ${ZONE}
             gcloud compute ssh cybozu@neco-ops --quiet --project ${PROJECT} --zone ${ZONE} \
                 --command="sudo /home/cybozu/run.sh"
