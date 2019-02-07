@@ -3,8 +3,8 @@ GINKGO = env GO111MODULE=off $(GOPATH)/bin/ginkgo --failFast -v
 SSH_PRIVKEY = $(realpath ./dctest_key)
 TEST_ID = $(shell basename $(dir $(GOPATH)))
 COMMIT_ID=
-KUSTOMIZATION_YAMLS = $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
-export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_YAMLS
+KUSTOMIZATION_DIRS = $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
+export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS
 
 test:
 	./test.sh
@@ -12,8 +12,11 @@ test:
 kustomize-check:
 	./kustomize-check.sh
 
+kustomize-fix:
+	./kustomize-fix.sh
+
 setup:
-	GO111MODULE=off go get github.com/onsi/ginkgo/ginkgo sigs.k8s.io/kustomize
+	GO111MODULE=off go get -u github.com/onsi/ginkgo/ginkgo sigs.k8s.io/kustomize
 	GO111MODULE=off go get -t ./...
 
 # this target expects to be executed after `test` target
