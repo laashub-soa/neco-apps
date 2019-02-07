@@ -42,10 +42,9 @@ jobs:
                 exit 0
             fi
       - run:
-          name: Create instance
+          name: (Re)Create instance
           command: |
-            apt-get update
-            apt-get install -y --no-install-recommends jq
+            gcloud compute instances delete neco-ops --quiet || true
             gcloud compute instances create neco-ops \
                 --project ${PROJECT} \
                 --zone ${ZONE} \
