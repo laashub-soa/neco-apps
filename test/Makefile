@@ -6,17 +6,25 @@ COMMIT_ID=
 KUSTOMIZATION_DIRS = $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
 export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS
 
+# Follow Argo CD installed kustomize version
+# https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L33
+KUSTOMIZE_VERSION = 1.0.11
+
 test:
 	./test.sh
 
 kustomize-check:
 	./kustomize-check.sh
 
-kustomize-fix:
-	./kustomize-fix.sh
+# NOTE: Enable this target when Argo CD uses kustomize 2.0.0
+#kustomize-fix:
+#	./kustomize-fix.sh
 
 setup:
-	GO111MODULE=off go get -u github.com/onsi/ginkgo/ginkgo sigs.k8s.io/kustomize
+	curl -sSLf -O https://github.com/kubernetes-sigs/kustomize/releases/download/v$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_linux_amd64
+	sudo mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 /usr/local/bin/kustomize
+	chmod +x /usr/local/bin/kustomize
+	GO111MODULE=off go get -u github.com/onsi/ginkgo/ginkgo
 	GO111MODULE=off go get -t ./...
 
 # this target expects to be executed after `test` target
