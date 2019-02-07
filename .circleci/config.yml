@@ -36,6 +36,12 @@ jobs:
             echo $GCLOUD_SERVICE_ACCOUNT > account.json
             gcloud auth activate-service-account --key-file=account.json
       - run:
+          name: Check instance is already running
+          command: |
+            if gcloud compute ssh cybozu@neco-ops --quiet --project ${PROJECT} --zone ${ZONE} --command="/bin/true"; then
+                exit 0
+            fi
+      - run:
           name: Create instance
           command: |
             apt-get update
@@ -119,16 +125,10 @@ workflows:
   version: 2
   main:
     jobs:
-      - test
-  auto-start:
-    triggers:
-      - schedule:
-          cron: "30 22 * * 0-4"
-          filters:
-            branches:
-              only: master
-    jobs:
       - start-neco-ops
+      - test:
+          requires:
+            - start-neco-ops
   auto-shutdown:
     triggers:
       - schedule:
