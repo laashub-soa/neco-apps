@@ -36,15 +36,15 @@ jobs:
             echo $GCLOUD_SERVICE_ACCOUNT > account.json
             gcloud auth activate-service-account --key-file=account.json
       - run:
-          name: Check instance is already running
+          name: Check dctest environment for neco-ops is already running
           command: |
-            if gcloud compute ssh cybozu@neco-ops --quiet --project ${PROJECT} --zone ${ZONE} --command="/bin/true"; then
+            if gcloud compute ssh cybozu@neco-ops --quiet --project ${PROJECT} --zone ${ZONE} --command="test -f /tmp/setup-done"; then
                 exit 0
             fi
       - run:
           name: (Re)Create instance
           command: |
-            gcloud compute instances delete neco-ops --quiet || true
+            gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE} || true
             gcloud compute instances create neco-ops \
                 --project ${PROJECT} \
                 --zone ${ZONE} \
