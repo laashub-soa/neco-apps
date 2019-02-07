@@ -4,11 +4,21 @@ executors:
     docker:
       - image: google/cloud-sdk
     environment:
+      INSTANCE_NAME: neco-ops
       PROJECT: neco-test
       ZONE: asia-northeast1-c
       MACHINE_TYPE: n1-highmem-8
       IMAGE: debian-9-stretch-v20180911-vmx-enabled
       DISK_SIZE: 20GB
+
+commands:
+  store-service-account:
+    steps:
+      - run:
+          name: Store Service Account
+          command: |
+            echo $GCLOUD_SERVICE_ACCOUNT > account.json
+            gcloud auth activate-service-account --key-file=account.json
 
 jobs:
   test:
@@ -36,28 +46,24 @@ jobs:
             if [ "$now" -lt "$end" ]; then
                 exit 0
             fi
-            gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE}
+            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE}
 
   start-neco-ops:
     executor: gcloud
     steps:
       - checkout
-      - run:
-          name: Store Service Account
-          command: |
-            echo $GCLOUD_SERVICE_ACCOUNT > account.json
-            gcloud auth activate-service-account --key-file=account.json
+      - store-service-account
       - run:
           name: (Re)Create instance
           no_output_timeout: 30m
           command: |
-            if gcloud compute ssh cybozu@neco-ops --quiet --project ${PROJECT} --zone ${ZONE} --command="test -f /tmp/setup-done"; then
+            if gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} --command="test -f /tmp/setup-done"; then
                 exit 0
             fi
             apt-get update
             apt-get install -y --no-install-recommends jq
-            gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE} || true
-            gcloud compute instances create neco-ops \
+            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} || true
+            gcloud compute instances create ${INSTANCE_NAME} \
                 --project ${PROJECT} \
                 --zone ${ZONE} \
                 --machine-type ${MACHINE_TYPE} \
@@ -66,28 +72,24 @@ jobs:
                 --boot-disk-size ${DISK_SIZE} \
                 --local-ssd interface=scsi \
                 --scopes https://www.googleapis.com/auth/devstorage.read_write
-            gcloud compute scp ./bin/run.sh cybozu@neco-ops: --quiet --project ${PROJECT} --zone ${ZONE}
-            gcloud compute ssh cybozu@neco-ops --quiet --project ${PROJECT} --zone ${ZONE} \
+            gcloud compute scp ./bin/run.sh cybozu@${INSTANCE_NAME}: --quiet --project ${PROJECT} --zone ${ZONE}
+            gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} \
                 --command="sudo /home/cybozu/run.sh"
       - run:
           name: Delete instance
           command: |
-            gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE}
+            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE}
           when: on_fail
 
   stop-neco-ops:
     executor: gcloud
     steps:
       - checkout
-      - run:
-          name: Store Service Account
-          command: |
-            echo $GCLOUD_SERVICE_ACCOUNT > account.json
-            gcloud auth activate-service-account --key-file=account.json
+      - store-service-account
       - run:
           name: Delete instance
           command: |
-            gcloud compute instances delete neco-ops --quiet --project ${PROJECT} --zone ${ZONE}
+            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE}
 
   create-pull-request:
     docker:
