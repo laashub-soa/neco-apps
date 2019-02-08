@@ -23,4 +23,5 @@ make placemat
 sleep 3
 make SUITE=bootstrap test-light
 pmctl snapshot save init
+touch /tmp/setup-done
 exit $?
