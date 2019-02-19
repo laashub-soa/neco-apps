@@ -21,7 +21,7 @@ export GO111MODULE=on
 make setup
 make placemat
 sleep 3
-make SUITE=bootstrap test-light
+make SUITE=./bootstrap TAGS=release test
 pmctl snapshot save init
 touch /tmp/setup-done
 exit $?
