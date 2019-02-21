@@ -1,0 +1,8 @@
+apiVersion: v1beta1
+kind: Kustomization
+resources:
+  - cronjob.yaml
+  - role.yaml
+  - rolebinding.yaml
+  - serviceaccount.yaml
+  - namespace.yaml
