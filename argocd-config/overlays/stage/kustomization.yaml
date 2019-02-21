@@ -6,3 +6,4 @@ patchesStrategicMerge:
 - guestbook.yaml
 - coil.yaml
 - egress.yaml
+- monitoring.yaml
