@@ -18,6 +18,8 @@ func testMachinesEndpoints() {
 			if err != nil {
 				return err
 			}
+
+			return nil
 		}).Should(Succeed())
 	})
 
@@ -35,12 +37,17 @@ func testMachinesEndpoints() {
 				return err
 			}
 
-			if len(endpoints.Subsets.Addresses) == 0 {
+			if len(endpoints.Subsets) != 1 {
+				return errors.New("len(endpoints.Subsets) != 1")
+			}
+			if len(endpoints.Subsets[0].Addresses) == 0 {
 				return errors.New("no address in endpoints")
 			}
-			if len(endpoints.Subsets.Ports) == 0 {
+			if len(endpoints.Subsets[0].Ports) == 0 {
 				return errors.New("no port in endpoints")
 			}
+
+			return nil
 		}).Should(Succeed())
 	})
 }
