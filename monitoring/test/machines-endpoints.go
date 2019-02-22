@@ -14,7 +14,7 @@ func testMachinesEndpoints() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
 			_, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
-				"get", "cronjob/machines-endpoints-cronjob", "-o=json")
+				"get", "cronjob/machines-endpoints-cronjob")
 			if err != nil {
 				return err
 			}
