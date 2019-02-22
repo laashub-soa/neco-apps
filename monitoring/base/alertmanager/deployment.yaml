@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  labels:
+    app: alertmanager
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+        - name: alertmanager
+          image: quay.io/cybozu/prometheus:2.7
+          command: ["alertmanager"]
+          args: ["--config.file=/etc/alertmanager/alertmanager.yaml"]
+          ports:
+            - containerPort: 9093
+          volumeMounts:
+            - name: alertmanager-config-volume
+              mountPath: /etc/alertmanager/
+      volumes:
+        - name: alertmanager-config-volume
+          secret:
+            secretName: alertmanager
+            defaultMode: 420
