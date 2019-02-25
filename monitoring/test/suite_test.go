@@ -26,4 +26,5 @@ var _ = Describe("GitOps Test", func() {
 	Context("monitoring", testMonitoring)
 	Context("machines-endpoints", testMachinesEndpoints)
 	Context("kube-state-metrics", testKubeStateMetrics)
+	Context("prometheus", testPrometheus)
 })
