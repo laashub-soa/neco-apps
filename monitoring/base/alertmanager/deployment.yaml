@@ -4,7 +4,6 @@ metadata:
   name: alertmanager
   labels:
     app: alertmanager
-  namespace: monitoring
 spec:
   replicas: 1
   selector:
