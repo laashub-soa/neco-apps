@@ -1,0 +1,26 @@
+apiVersion: v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - machines-endpoints/cronjob.yaml
+  - machines-endpoints/role.yaml
+  - machines-endpoints/rolebinding.yaml
+  - machines-endpoints/serviceaccount.yaml
+  - kube-state-metrics/deployment.yaml
+  - kube-state-metrics/role.yaml
+  - kube-state-metrics/rolebinding.yaml
+  - kube-state-metrics/service.yaml
+  - kube-state-metrics/serviceaccount.yaml
+  - prometheus/clusterrole.yaml
+  - prometheus/clusterrolebinding.yaml
+  - prometheus/deployment.yaml
+  - prometheus/service.yaml
+  - prometheus/serviceaccount.yaml
+  - alertmanager/deployment.yaml
+  - alertmanager/service.yaml
+
+configMapGenerator:
+  - name: prometheus-server-conf
+    files:
+      - prometheus/prometheus.yaml
+      - prometheus/alert.rules
