@@ -12,6 +12,25 @@ import (
 
 func testMonitoring() {
 	It("should be deployed by Argo CD", func() {
+		By("setting monitoring-application parameters")
+		Eventually(func() error {
+			// in some case, doing 'argocd app set' once is not sufficient somehow...
+			stdout, stderr, err := test.ExecAt(test.Boot0, "argocd", "app", "set", "monitoring", "--revision", test.CommitID)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			stdout, stderr, err = test.ExecAt(test.Boot0, "kubectl", "get", "namespace", "monitoring")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("setting application secrets")
+		_, _, err := test.ExecAtWithInput(test.Boot0, []byte(alertmanagerSecret), "kubectl", "--namespace=monitoring",
+			"create", "secret", "generic", "alertmanager", "-f")
+		Expect(err).NotTo(HaveOccurred())
+
 		By("synchronizing monitoring")
 		Eventually(func() error {
 			stdout, stderr, err := test.ExecAt(test.Boot0, "argocd", "app", "set", "monitoring", "--revision", test.CommitID)

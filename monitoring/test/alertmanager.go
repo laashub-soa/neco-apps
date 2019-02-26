@@ -12,7 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-const secret = `
+const alertmanagerSecret = `
 route:
   receiver: slack
   group_wait: 5s # Send a notification after 5 seconds
@@ -33,9 +33,6 @@ receivers:
 
 func testAlertmanager() {
 	It("should be deployed successfully", func() {
-		_, _, err := test.ExecAtWithInput(test.Boot0, []byte(secret), "kubectl", "--namespace=monitoring",
-                                "create", "secret", "generic", "alertmanager", "-f")
-		Expect(err).NotTo(HaveOccurred())
 		Eventually(func() error {
 			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
 				"get", "deployment/alertmanager", "-o=json")
