@@ -16,6 +16,8 @@ resources:
   - prometheus/deployment.yaml
   - prometheus/service.yaml
   - prometheus/serviceaccount.yaml
+  - alertmanager/deployment.yaml
+  - alertmanager/service.yaml
 
 configMapGenerator:
   - name: prometheus-server-conf

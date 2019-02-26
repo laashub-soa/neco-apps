@@ -119,11 +119,12 @@ func prepareSSHClients(addresses ...string) error {
 
 // ExecAt executes command at given host
 func ExecAt(host string, args ...string) (stdout, stderr []byte, e error) {
-	return execAtWithInput(host, nil, args...)
+	return ExecAtWithInput(host, nil, args...)
 }
 
+// ExecAtWithInput executes command at given host with input
 // WARNING: `input` can contain secret data.  Never output `input` to console.
-func execAtWithInput(host string, input []byte, args ...string) (stdout, stderr []byte, e error) {
+func ExecAtWithInput(host string, input []byte, args ...string) (stdout, stderr []byte, e error) {
 	agent := sshClients[host]
 	return doExec(agent, input, args...)
 }
