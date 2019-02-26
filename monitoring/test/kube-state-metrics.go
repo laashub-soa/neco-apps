@@ -13,7 +13,7 @@ import (
 func testKubeStateMetrics() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=kube-system",
 				"get", "deployment/kube-state-metrics", "-o=json")
 			if err != nil {
 				return err
