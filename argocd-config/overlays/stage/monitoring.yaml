@@ -7,4 +7,5 @@ spec:
   source:
     path: monitoring/overlays/stage
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true

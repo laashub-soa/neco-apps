@@ -7,4 +7,5 @@ spec:
   source:
     path: guestbook/overlays/stage
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true
