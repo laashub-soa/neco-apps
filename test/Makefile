@@ -25,7 +25,7 @@ setup:
 	sudo mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 /usr/local/bin/kustomize
 	chmod +x /usr/local/bin/kustomize
 	GO111MODULE=off go get -u github.com/onsi/ginkgo/ginkgo
-	GO111MODULE=off go get -t ./...
+	cd ..; GO111MODULE=off go get -t ./...
 
 # this target expects to be executed after `test` target
 test-%:
