@@ -17,7 +17,7 @@ spec:
       serviceAccountName: prometheus
       containers:
         - name: prometheus
-          image: quay.io/cybozu/prometheus:2.7
+          image: quay.io/cybozu/prometheus:2.7.1.3
           command: ["prometheus"]
           args: ["--config.file=/etc/prometheus/prometheus.yaml"]
           ports:
