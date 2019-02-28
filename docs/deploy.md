@@ -18,7 +18,8 @@ Staging cluster
       --path argocd-config/overlays/stage \
       --dest-namespace argocd \
       --dest-server https://kubernetes.default.svc \
-      --sync-policy automated
+      --sync-policy automated \
+      --auto-prune
     ```
 5. Argo CD in the staging cluster watches changes of the **master HEAD** branch.
 
@@ -44,6 +45,7 @@ Production cluster
       --dest-namespace argocd \
       --dest-server https://kubernetes.default.svc \
       --sync-policy automated \
+      --auto-prune \
       --revision release
     ```
 3. Argo CD in the production cluster watches changes of the **release HEAD** branch.
