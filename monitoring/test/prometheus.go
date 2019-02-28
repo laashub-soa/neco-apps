@@ -8,6 +8,7 @@ import (
 	"github.com/cybozu-go/neco-ops/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	promv1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -32,7 +33,7 @@ func testPrometheus() {
 			return nil
 		}).Should(Succeed())
 	})
-
+	var podName string
 	It("should reply successfully", func() {
 		Eventually(func() error {
 			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
@@ -48,7 +49,7 @@ func testPrometheus() {
 			if len(podList.Items) != 1 {
 				return errors.New("prometheus pod doesn't exist")
 			}
-			podName := podList.Items[0].Name
+			podName = podList.Items[0].Name
 
 			_, _, err = test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/alerts")
@@ -56,6 +57,33 @@ func testPrometheus() {
 				return err
 			}
 			return nil
+		}).Should(Succeed())
+	})
+
+	It("should find endpoint", func() {
+		Eventually(func() error {
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring", "exec",
+				podName, "curl", "http://localhost:9090/api/v1/targets")
+			if err != nil {
+				return err
+			}
+
+			var response struct {
+				TargetsResult promv1.TargetsResult `json:"data"`
+			}
+			err = json.Unmarshal(stdout, &response)
+			if err != nil {
+				return err
+			}
+
+			for _, target := range response.TargetsResult.Active {
+				if value, ok := target.Labels["kubernetes_name"]; ok {
+					if value == "prometheus-node-targets" {
+						return nil
+					}
+				}
+			}
+			return errors.New("cannot found node targets")
 		}).Should(Succeed())
 	})
 }
