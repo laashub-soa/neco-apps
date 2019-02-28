@@ -34,7 +34,7 @@ spec:
       serviceAccountName: coil-controller
       containers:
         - name: controller
-          image: quay.io/cybozu/coil:1.0.0-1
+          image: quay.io/cybozu/coil:1.0.1.2
           command:
             - /coil-controller
             - "--etcd-endpoints=@cke-etcd"
