@@ -40,7 +40,7 @@ spec:
               topologyKey: "cke.cybozu.com/rack"
       containers:
         - name: unbound
-          image: quay.io/cybozu/unbound:1.8.1-2
+          image: quay.io/cybozu/unbound:1.9.0.1
           imagePullPolicy: IfNotPresent
           args:
             - -c

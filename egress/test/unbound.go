@@ -34,14 +34,14 @@ func testUnbound() {
 
 	It("should resolve www.cybozu.com", func() {
 		By("running a test pod")
-		podName := "unbound-test-" + test.CommitID
+		podName := "unbound-test"
 		test.ExecSafeAt(test.Boot0, "kubectl", "run", podName,
 			"--image=$(ckecli images | grep quay.io/cybozu/cke-tools)",
 			"--generator=run-pod/v1", "--", "/bin/sleep", "infinity")
 
-		By("executing getent hosts www.cybozu.com in test pod")
+		By("executing getent hosts www.cybozu.com")
 		Eventually(func() error {
-			_, _, err := test.ExecAt(test.Boot0, "kubectl", "exec", "test",
+			_, _, err := test.ExecAt(test.Boot0, "kubectl", "exec", podName,
 				"getent", "hosts", "www.cybozu.com")
 			return err
 		}).Should(Succeed())
