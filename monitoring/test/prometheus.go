@@ -78,12 +78,12 @@ func testPrometheus() {
 
 			for _, target := range response.TargetsResult.Active {
 				if value, ok := target.Labels["kubernetes_name"]; ok {
-					if value == "prometheus-node-targets" {
+					if value == "prometheus-node-targets" && target.Health == promv1.HealthGood {
 						return nil
 					}
 				}
 			}
-			return errors.New("cannot found node targets")
+			return errors.New("cannot find accessible node target")
 		}).Should(Succeed())
 	})
 }
