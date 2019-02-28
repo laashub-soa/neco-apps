@@ -40,7 +40,7 @@ spec:
               topologyKey: "cke.cybozu.com/rack"
       containers:
         - name: squid
-          image: quay.io/cybozu/squid:3.5.27-1-3
+          image: quay.io/cybozu/squid:3.5.27.1.4
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /var/spool/squid
