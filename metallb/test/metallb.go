@@ -134,6 +134,10 @@ func testMetalLB() {
 				return err
 			}
 
+			if len(service.Status.LoadBalancer.Ingress) == 0 {
+				return errors.New("LoadBalancer status is not updated")
+			}
+
 			actualIP := service.Status.LoadBalancer.Ingress[0].IP
 			if actualIP != targetIP {
 				return fmt.Errorf("LoadBalancer is not %s, %s", targetIP, actualIP)
