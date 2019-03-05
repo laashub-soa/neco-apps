@@ -53,12 +53,12 @@ Production cluster
 ### Apply changes
 
 1. Deployment team confirms all changes the since last commit of `origin/release` branch are stable according to the `neco-ops` CI result and the staging cluster deployment by `origin/master`.
-2. Developer adds a git tag `release-YYYY.MM.DD-UNIQUE_ID` with `master HEAD` branch, and push the tag.
+2. Developer adds a git tag `release-YYYY.MM.DD-UNIQUE_ID` with `master HEAD` branch, and push the tag.  
     **TODO: This operation might be automated by the simple script**
     ```console
     $ git checkout master
     $ git pull
-    $ git tag $(date +%Y.%m.%d)-UNIQUE_ID
+    $ git tag release-$(date +%Y.%m.%d)-UNIQUE_ID
     $ git push origin master --tags
     ```
 3. CI creates a new branch using its tag, then create a new PR which merges to `release` branch.
