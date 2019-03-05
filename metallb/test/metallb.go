@@ -57,18 +57,22 @@ func testMetalLB() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
 			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=metallb-system",
-				"get", "deployments/speaker", "-o=json")
+				"get", "daemonsets/speaker", "-o=json")
 			if err != nil {
 				return err
 			}
-			deployment := new(appsv1.Deployment)
-			err = json.Unmarshal(stdout, deployment)
+			ds := new(appsv1.DaemonSet)
+			err = json.Unmarshal(stdout, ds)
 			if err != nil {
 				return err
 			}
 
-			if int(deployment.Status.AvailableReplicas) != 3 {
-				return fmt.Errorf("AvailableReplicas is not 3: %d", int(deployment.Status.AvailableReplicas))
+			if ds.Status.DesiredNumberScheduled <= 0 {
+				return errors.New("speaker daemonset's desiredNumberScheduled is not updated")
+			}
+
+			if ds.Status.DesiredNumberScheduled != ds.Status.NumberAvailable {
+				return fmt.Errorf("not all nodes running speaker daemonset: %d", ds.Status.NumberAvailable)
 			}
 			return nil
 		}).Should(Succeed())
@@ -94,7 +98,7 @@ func testMetalLB() {
 
 	It("should deploy load balancer type service", func() {
 		By("deployment Pods")
-		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "run", "nginx", "--replicas=4", "--image=nginx")
+		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "run", "nginx", "--replicas=2", "--image=nginx")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
@@ -110,15 +114,32 @@ func testMetalLB() {
 				return err
 			}
 
-			if deployment.Status.ReadyReplicas != 4 {
-				return errors.New("ReadyReplicas is not 4")
+			if deployment.Status.ReadyReplicas != 2 {
+				return errors.New("ReadyReplicas is not 2")
 			}
 			return nil
 		}).Should(Succeed())
 
 		By("create Service")
 		targetIP := "10.72.32.29"
-		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "expose", "deployment", "nginx", "--port=80", "--target-port=80", "--type=LoadBalancer", "--load-balancer-ip="+targetIP)
+		loadBalancer := `
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  selector:
+    run: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+  loadBalancerIP: 10.72.32.29
+  externalTrafficPolicy: Local
+`
+		_, stderr, err = test.ExecAtWithInput(test.Boot0, []byte(loadBalancer), "kubectl", "create", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting service are ready")
