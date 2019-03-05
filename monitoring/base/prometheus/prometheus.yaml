@@ -49,9 +49,9 @@ scrape_configs:
         regex: "kube-state-metrics"
       - action: labelmap
         regex: __meta_kubernetes_service_(.+)
-      - source_labels: [__meta_kubernetes_service_port_number]
+      - source_labels: [__meta_kubernetes_service_port_name]
         action: keep
-        regex: "8080"
+        regex: http-metrics
   - job_name: 'machines-endpoints'
     kubernetes_sd_configs:
       - role: endpoints
