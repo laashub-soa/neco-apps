@@ -38,6 +38,19 @@ scrape_configs:
         regex: (.+)
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
+  - job_name: "kube-state-metrics"
+    kubernetes_sd_configs:
+      - role: service
+        namespaces:
+          names: ["kube-system"]
+    relabel_configs:
+      - action: keep
+        source_labels: [__meta_kubernetes_service_name]
+        regex: "kube-state-metrics"
+      - action: labelmap
+        regex: __meta_kubernetes_service_(.+)
+      - target_label: __address__
+        replacement: kube-state-metrics.kube-system.svc:8080
   - job_name: 'machines-endpoints'
     kubernetes_sd_configs:
       - role: endpoints
