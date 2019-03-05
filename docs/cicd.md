@@ -31,7 +31,7 @@ The following describes an example of timeline based development flow with the K
 CD of each cluster
 ------------------
 
-See details of the deployment step in [release.md](release.md).
+See details of the deployment step in [deploy.md](deploy.md).
 
 - stage: watch `argocd-config/overlays/stage` in **master HEAD** branch. All changes of `master` are always deployed to staging cluster.
 - bk: TBD
