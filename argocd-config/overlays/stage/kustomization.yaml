@@ -4,3 +4,4 @@ apiVersion: v1beta1
 kind: Kustomization
 patchesStrategicMerge:
 - monitoring.yaml
+- metallb.yaml
