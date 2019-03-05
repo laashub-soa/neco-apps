@@ -2,7 +2,7 @@ BOOT0 = 10.72.48.0
 GINKGO = env GO111MODULE=on GOFLAGS=-mod=vendor $(GOPATH)/bin/ginkgo --failFast -v
 SSH_PRIVKEY = $(realpath ./dctest_key)
 TEST_ID = $(shell basename $(dir $(GOPATH)))
-COMMIT_ID=
+COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 KUSTOMIZATION_DIRS = $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
 export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS
 
