@@ -21,4 +21,7 @@ while true; do
     sleep 1
 done
 
+EXTERNAL_PID=$(pmctl pod show external | jq .pid)
+export EXTERNAL_PID
+
 sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH; $GINKGO"

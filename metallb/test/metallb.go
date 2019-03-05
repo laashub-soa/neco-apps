@@ -142,14 +142,15 @@ func testMetalLB() {
 		}).Should(Succeed())
 
 		By("access service from boot-0")
-		_, stderr, err = test.ExecAt(test.Boot0, "curl", targetIP, "-m", "5", "--retry", "2")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		Eventually(func() error {
+			_, _, err := test.ExecAt(test.Boot0, "curl", targetIP, "-m", "5")
+			return err
+		}).Should(Succeed())
 
 		By("access service from external")
-		cmd := exec.Command("sudo", "pmctl", "pod", "enter", "external", "--", "curl", targetIP, "-m", "5", "--retry", "2")
-		out, err := cmd.CombinedOutput()
-
-		Expect(err).NotTo(HaveOccurred(), "output: %s, err: %v", string(out), err)
+		Eventually(func() error {
+			cmd := exec.Command("sudo", "nsenter", "-n", "-t", test.ExternalPid, "curl", targetIP, "-m", "5")
+			return cmd.Run()
+		}).Should(Succeed())
 	})
-
 }
