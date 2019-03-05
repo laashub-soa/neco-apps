@@ -23,5 +23,4 @@ var _ = BeforeSuite(RunBeforeSuite)
 // Other tests and test containers must be listed in this.
 var _ = Describe("GitOps Test", func() {
 	Context("setup", testSetup)
-	Context("sampleApp", testSampleApp)
 })
