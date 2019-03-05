@@ -16,7 +16,6 @@ scrape_configs:
     tls_config:
       ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
     bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-
     relabel_configs:
     - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
       action: keep
@@ -28,7 +27,6 @@ scrape_configs:
     bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
     kubernetes_sd_configs:
       - role: node
-
     relabel_configs:
       - action: labelmap
         regex: __meta_kubernetes_node_label_(.+)
@@ -38,10 +36,13 @@ scrape_configs:
         regex: (.+)
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
-  - job_name: 'kubernetes-service-endpoints'
+  - job_name: 'machines-endpoints'
     kubernetes_sd_configs:
       - role: endpoints
     relabel_configs:
+      - action: keep
+        source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_endpoints_name]
+        regex: monitoring;prometheus-node-targets
       - action: labelmap
         regex: __meta_kubernetes_service_label_(.+)
       - source_labels: [__meta_kubernetes_namespace]
@@ -51,11 +52,12 @@ scrape_configs:
         action: replace
         target_label: kubernetes_name
   - job_name: 'kubernetes-pods'
-
     kubernetes_sd_configs:
       - role: pod
-
     relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
       - action: labelmap
         regex: __meta_kubernetes_pod_label_(.+)
       - source_labels: [__meta_kubernetes_namespace]
