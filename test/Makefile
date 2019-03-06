@@ -33,3 +33,9 @@ setup:
 # this target expects to be executed after `test` target
 test-%:
 	./test.sh ../$*/test
+
+test-all:
+	./test.sh
+	./test.sh ../metallb/test
+	# monitoring test is always last step for checking all deployed metrics
+	env METRICS=true ./test.sh ../monitoring/test

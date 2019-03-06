@@ -28,4 +28,7 @@ var _ = Describe("GitOps Test", func() {
 	Context("kube-state-metrics", testKubeStateMetrics)
 	Context("prometheus", testPrometheus)
 	Context("alertmanager", testAlertmanager)
+	if os.Getenv("METRICS") == "true" {
+		Context("metrics", testMetrics)
+	}
 })

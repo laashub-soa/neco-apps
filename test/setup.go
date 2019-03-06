@@ -1,8 +1,8 @@
 package test
 
 import (
-	"errors"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"strconv"
@@ -66,18 +66,6 @@ func testSetup() {
 		Expect(err).ShouldNot(HaveOccurred())
 		stdout, stderr, err := ExecAtWithInput(Boot0, data, "kubectl", "apply", "-n", ArgoCDNamespace, "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-	})
-
-	It("should install argocd CLI", func() {
-		ExecSafeAt(Boot0, "sudo",
-			"env", "HTTP_PROXY=http://10.0.49.3:3128", "HTTPS_PROXY=http://10.0.49.3:3128",
-			"rkt", "run",
-			"--insecure-options=image",
-			"--volume", "host,kind=host,source=/usr/local/bin",
-			"--mount", "volume=host,target=/host",
-			"quay.io/cybozu/argocd:0.11",
-			"--user=0", "--group=0",
-			"--exec", "/usr/local/argocd/install-tools")
 	})
 
 	It("should login to Argo CD", func() {
