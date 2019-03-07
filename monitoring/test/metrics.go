@@ -3,6 +3,7 @@ package monitoring
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/cybozu-go/neco-ops/test"
 	. "github.com/onsi/ginkgo"
@@ -35,19 +36,35 @@ func testMetrics() {
 		}).Should(Succeed())
 
 		By("retrieving job_name from prometheus.yaml")
-		stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
-			"get", "configmap", "--selector=app=prometheus", "-o=json")
-		Expect(err).NotTo(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-
-		cmList := new(corev1.ConfigMapList)
-		err = json.Unmarshal(stdout, cmList)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(len(cmList.Items)).To(Equal(1))
-		data, ok := cmList.Items[0].Data["prometheus.yaml"]
-		Expect(ok).NotTo(BeFalse())
 		promConfig := new(promconfig.Config)
-		err = json.Unmarshal([]byte(data), promConfig)
-		Expect(err).NotTo(HaveOccurred())
+		Eventually(func() error {
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
+				"get", "configmap", "--selector=app=prometheus", "-o=json")
+			if err != nil {
+				return err
+			}
+
+			cmList := new(corev1.ConfigMapList)
+			err = json.Unmarshal(stdout, cmList)
+			if err != nil {
+				return err
+			}
+			if len(cmList.Items) != 1 {
+				return fmt.Errorf("configMap is not 1, %d", len(cmList.Items))
+			}
+
+			data, ok := cmList.Items[0].Data["prometheus.yaml"]
+			if !ok {
+				return errors.New("prometheus.yaml does not exist")
+
+			}
+			err = json.Unmarshal([]byte(data), promConfig)
+			if err != nil {
+				return err
+			}
+			return nil
+		}).Should(Succeed())
+
 		var jobNames []model.LabelName
 		for _, sc := range promConfig.ScrapeConfigs {
 			jobNames = append(jobNames, model.LabelName(sc.JobName))
