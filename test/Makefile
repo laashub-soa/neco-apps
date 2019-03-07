@@ -16,10 +16,7 @@ KUSTOMIZE_VERSION = 1.0.11
 
 # Deployment order for make test-all
 DEPLOY_ORDER = \
-	metallb \
-# policyagent \
-# rook \
-# ... \
+	metallb
 
 test:
 	./test.sh
