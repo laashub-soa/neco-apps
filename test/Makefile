@@ -14,6 +14,13 @@ export GOFLAGS
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L33
 KUSTOMIZE_VERSION = 1.0.11
 
+# Deployment order for make test-all
+DEPLOY_ORDER = \
+	metallb \
+# policyagent \
+# rook \
+# ... \
+
 test:
 	./test.sh
 
@@ -35,7 +42,9 @@ test-%:
 	./test.sh ../$*/test
 
 test-all:
-	./test.sh
-	./test.sh ../metallb/test
+	$(MAKE) test
+	for target in $(DEPLOY_ORDER); do \
+		$(MAKE) test-$${target}; \
+	done
 	# monitoring test is always last step for checking all deployed metrics
 	env METRICS=true ./test.sh ../monitoring/test
