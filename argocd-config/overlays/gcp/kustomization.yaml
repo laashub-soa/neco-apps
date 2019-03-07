@@ -1,0 +1,6 @@
+apiVersion: v1beta1
+kind: Kustomization
+bases:
+- ../../base
+patchesStrategicMerge:
+- monitoring.yaml

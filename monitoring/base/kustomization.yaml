@@ -18,9 +18,11 @@ resources:
   - prometheus/serviceaccount.yaml
   - alertmanager/deployment.yaml
   - alertmanager/service.yaml
-
 configMapGenerator:
   - name: prometheus-server-conf
     files:
       - prometheus/prometheus.yaml
-      - prometheus/alert.rules
+      - prometheus/alert_rules.yaml
+  - name: alertmanager
+    files:
+      - alertmanager/neco.template

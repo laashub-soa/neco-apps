@@ -18,14 +18,18 @@ spec:
         - name: alertmanager
           image: quay.io/cybozu/prometheus:2.7.1.3
           command: ["alertmanager"]
-          args: ["--config.file=/etc/alertmanager/alertmanager.yaml"]
+          args: ["--config.file=/etc/alertmanager.secret/alertmanager.yaml"]
           ports:
             - containerPort: 9093
           volumeMounts:
             - name: alertmanager-config-volume
               mountPath: /etc/alertmanager/
+            - name: alertmanager-secret-volume
+              mountPath: /etc/alertmanager.secret/
       volumes:
         - name: alertmanager-config-volume
+          configMap:
+            name: alertmanager
+        - name: alertmanager-secret-volume
           secret:
             secretName: alertmanager
-            defaultMode: 420
