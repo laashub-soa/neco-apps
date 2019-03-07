@@ -13,4 +13,4 @@ groups:
         for: 20m
         annotations:
           summary: Some application is out-of-sync.
-          runbook: https://github.dev.cybozu.co.jp/pages/Neco/wiki/procedure_k8s_app_management/
+          runbook: "https://github.dev.cybozu.co.jp/pages/Neco/wiki/procedure_k8s_app_management/#appoutofsync"

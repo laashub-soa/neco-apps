@@ -144,7 +144,7 @@ func testSetup() {
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "create", "argocd-config",
 				"--repo", "https://github.com/cybozu-go/neco-ops.git",
-				"--path", "argocd-config/base",
+				"--path", "argocd-config/overlays/gcp",
 				"--dest-namespace", ArgoCDNamespace,
 				"--dest-server", "https://kubernetes.default.svc",
 				"--revision", CommitID)
