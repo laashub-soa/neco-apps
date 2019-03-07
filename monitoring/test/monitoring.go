@@ -26,7 +26,7 @@ func testMonitoring() {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			stdout, stderr, err = test.ExecAt(test.Boot0, "argocd", "app", "sync", "monitoring", "--timeout", "20")
+			stdout, stderr, err = test.ExecAt(test.Boot0, "argocd", "app", "sync", "monitoring", "--timeout", "60")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

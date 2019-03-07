@@ -1,7 +1,5 @@
 apiVersion: v1beta1
 kind: Kustomization
 resources:
-- coil.yaml
-- egress.yaml
 - monitoring.yaml
 - metallb.yaml

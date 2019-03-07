@@ -33,6 +33,7 @@ func testPrometheus() {
 			return nil
 		}).Should(Succeed())
 	})
+
 	var podName string
 	It("should reply successfully", func() {
 		Eventually(func() error {

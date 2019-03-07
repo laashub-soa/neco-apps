@@ -12,7 +12,8 @@ How to run tests
     make test
     ```
 
-5. Setup and run tests for apps by `make test-metallb`, `make test-monitoring`, ...
+5. Setup and run tests for apps by `make test-metallb`, `make test-monitoring`, ...  
+   If you want to deploy all apps, run `make test-all`.
 
 Running `make test` initializes VMs at the point of the snapshot.
 Do it carefully!

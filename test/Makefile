@@ -14,6 +14,10 @@ export GOFLAGS
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L33
 KUSTOMIZE_VERSION = 1.0.11
 
+# Deployment order for make test-all
+DEPLOY_ORDER = \
+	metallb
+
 test:
 	./test.sh
 
@@ -33,3 +37,11 @@ setup:
 # this target expects to be executed after `test` target
 test-%:
 	./test.sh ../$*/test
+
+test-all:
+	$(MAKE) test
+	for target in $(DEPLOY_ORDER); do \
+		$(MAKE) test-$${target}; \
+	done
+	# monitoring test is always last step for checking all deployed metrics
+	env METRICS=true ./test.sh ../monitoring/test
