@@ -64,8 +64,13 @@ func testSetup() {
 	It("should install Argo CD", func() {
 		data, err := ioutil.ReadFile("install.yaml")
 		Expect(err).ShouldNot(HaveOccurred())
-		stdout, stderr, err := ExecAtWithInput(Boot0, data, "kubectl", "apply", "-n", ArgoCDNamespace, "-f", "-")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		Eventually(func() error {
+			stdout, stderr, err := ExecAtWithInput(Boot0, data, "kubectl", "apply", "-n", ArgoCDNamespace, "-f", "-")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 	})
 
 	It("should login to Argo CD", func() {
