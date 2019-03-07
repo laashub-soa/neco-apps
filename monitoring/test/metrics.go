@@ -11,12 +11,14 @@ import (
 	promv1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
 	promconfig "github.com/prometheus/prometheus/config"
+	yaml "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 )
 
 func testMetrics() {
 	It("should be up all scraping", func() {
 		var podName string
+		By("retrieving prometheus podName")
 		Eventually(func() error {
 			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
 				"get", "pods", "--selector=app=prometheus", "-o=json")
@@ -36,40 +38,25 @@ func testMetrics() {
 		}).Should(Succeed())
 
 		By("retrieving job_name from prometheus.yaml")
+		stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
+			"get", "configmap", "-o=json")
+		Expect(err).NotTo(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+
+		cmList := new(corev1.ConfigMapList)
+		err = json.Unmarshal(stdout, cmList)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(len(cmList.Items)).To(Equal(1))
+		data, ok := cmList.Items[0].Data["prometheus.yaml"]
+		Expect(ok).NotTo(BeFalse())
 		promConfig := new(promconfig.Config)
-		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
-				"get", "configmap", "-o=json")
-			if err != nil {
-				return err
-			}
-
-			cmList := new(corev1.ConfigMapList)
-			err = json.Unmarshal(stdout, cmList)
-			if err != nil {
-				return err
-			}
-			if len(cmList.Items) != 1 {
-				return fmt.Errorf("configMap is not 1, %d", len(cmList.Items))
-			}
-
-			data, ok := cmList.Items[0].Data["prometheus.yaml"]
-			if !ok {
-				return errors.New("prometheus.yaml does not exist")
-
-			}
-			err = json.Unmarshal([]byte(data), promConfig)
-			if err != nil {
-				return err
-			}
-			return nil
-		}).Should(Succeed())
-
+		err = yaml.Unmarshal([]byte(data), promConfig)
+		Expect(err).NotTo(HaveOccurred())
 		var jobNames []model.LabelName
 		for _, sc := range promConfig.ScrapeConfigs {
 			jobNames = append(jobNames, model.LabelName(sc.JobName))
 		}
 
+		By("checking discovered active labels and statuses")
 		Eventually(func() error {
 			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/targets")
@@ -85,16 +72,16 @@ func testMetrics() {
 				return err
 			}
 
-			for _, target := range response.TargetsResult.Active {
-				for _, jobName := range jobNames {
+			for _, jobName := range jobNames {
+				for _, target := range response.TargetsResult.Active {
 					if _, ok := target.Labels[jobName]; ok {
-						if target.Health == promv1.HealthGood {
-							return nil
+						if target.Health != promv1.HealthGood {
+							return fmt.Errorf("target is not up, job_name: %s", jobName)
 						}
 					}
 				}
 			}
-			return errors.New("metrics is not health")
+			return nil
 		}).Should(Succeed())
 	})
 }
