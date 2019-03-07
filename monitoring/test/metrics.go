@@ -39,7 +39,7 @@ func testMetrics() {
 		promConfig := new(promconfig.Config)
 		Eventually(func() error {
 			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=monitoring",
-				"get", "configmap", "--selector=app=prometheus", "-o=json")
+				"get", "configmap", "-o=json")
 			if err != nil {
 				return err
 			}
