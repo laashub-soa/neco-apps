@@ -1,6 +1,0 @@
-bases:
-- ../../base
-apiVersion: v1beta1
-kind: Kustomization
-patchesStrategicMerge:
-- egress.yaml
