@@ -16,16 +16,7 @@ cd test
 export GO111MODULE=on
 make setup
 make kustomize-check
-make COMMIT_ID=${CIRCLE_SHA1} test
-
-# Run tests only changes of app directories since origin/master
-targets="$(git diff origin/master ${CIRCLE_SHA1} --name-only | cut -d '/' -f 1 | uniq)"
-for target in \${targets}; do
-    if test -f ../\${target}/test/suite_test.go; then
-        echo "Run test-\${target}"
-        make COMMIT_ID=${CIRCLE_SHA1} test-\${target}
-    fi
-done
+make COMMIT_ID=${CIRCLE_SHA1} test-all
 EOF
 chmod +x run.sh
 
