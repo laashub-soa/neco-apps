@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
 spec:
   source:
-    path: monitoring/overlays/stage
+    path: monitoring/overlays/stage0
   syncPolicy:
     automated:
       prune: true

@@ -1,0 +1,16 @@
+groups:
+  - name: example
+    rules:
+      - alert: K8sAPIServersDegraded
+        expr: count(up{job="kubernetes-apiservers"} == 1) < 3
+        for: 1m
+        annotations:
+          summary: The number of kube-apiserver is less than 3.
+  - name: applications CD
+    rules:
+      - alert: AppOutOfSync
+        expr: count(argocd_app_sync_status{sync_status="Synced"} == 0) > 0
+        for: 20m
+        annotations:
+          summary: Some application is out-of-sync.
+          runbook: "https://github.dev.cybozu.co.jp/pages/Neco/wiki/procedure_k8s_app_management/#appoutofsync"
