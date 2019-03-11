@@ -44,4 +44,4 @@ test-all:
 		$(MAKE) test-$${target}; \
 	done
 	# monitoring test is always last step for checking all deployed metrics
-	env METRICS=true ./test.sh ../monitoring/test
+	$(MAKE) test-monitoring

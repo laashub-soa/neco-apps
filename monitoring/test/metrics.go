@@ -45,12 +45,18 @@ func testMetrics() {
 		cmList := new(corev1.ConfigMapList)
 		err = json.Unmarshal(stdout, cmList)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(len(cmList.Items)).To(Equal(1))
-		data, ok := cmList.Items[0].Data["prometheus.yaml"]
-		Expect(ok).NotTo(BeFalse())
+
+		var promConfigFound bool
 		promConfig := new(promconfig.Config)
-		err = yaml.Unmarshal([]byte(data), promConfig)
-		Expect(err).NotTo(HaveOccurred())
+		for _, cm := range cmList.Items {
+			if data, ok := cm.Data["prometheus.yaml"]; ok {
+				err := yaml.Unmarshal([]byte(data), promConfig)
+				Expect(err).NotTo(HaveOccurred())
+				promConfigFound = true
+			}
+		}
+		Expect(promConfigFound).To(BeTrue())
+
 		var jobNames []model.LabelName
 		for _, sc := range promConfig.ScrapeConfigs {
 			jobNames = append(jobNames, model.LabelName(sc.JobName))
