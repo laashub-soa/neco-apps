@@ -42,11 +42,6 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - all
-            add:
-            - net_raw
 
 ---
 apiVersion: apps/v1
