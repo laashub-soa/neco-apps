@@ -359,6 +359,12 @@ spec:
           value: http://squid.internet-egress.svc.cluster.local:3128
         - name: HTTPS_PROXY
           value: http://squid.internet-egress.svc.cluster.local:3128
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
