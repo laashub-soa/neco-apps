@@ -295,6 +295,8 @@ spec:
       labels:
         app: argocd-application-controller
     spec:
+      securityContext:
+        runAsUser: 999
       containers:
       - command:
         - argocd-application-controller
@@ -334,6 +336,8 @@ spec:
       labels:
         app: argocd-repo-server
     spec:
+      securityContext:
+        runAsUser: 999
       automountServiceAccountToken: false
       containers:
       - command:
@@ -369,6 +373,8 @@ spec:
       labels:
         app: argocd-server
     spec:
+      securityContext:
+        runAsUser: 999
       containers:
       - command:
         - argocd-server
