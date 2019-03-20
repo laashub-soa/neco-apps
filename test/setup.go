@@ -78,9 +78,12 @@ func testSetup() {
 		// admin password is same as pod name
 		var podList corev1.PodList
 		Eventually(func() error {
-			data := ExecSafeAt(Boot0, "kubectl", "get", "pods", "-n", ArgoCDNamespace,
+			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "pods", "-n", ArgoCDNamespace,
 				"-l", "app=argocd-server", "-o", "json")
-			err := json.Unmarshal(data, &podList)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			err := json.Unmarshal(stdout, &podList)
 			if err != nil {
 				return err
 			}
