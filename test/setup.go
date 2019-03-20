@@ -83,7 +83,7 @@ func testSetup() {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			err := json.Unmarshal(stdout, &podList)
+			err = json.Unmarshal(stdout, &podList)
 			if err != nil {
 				return err
 			}
