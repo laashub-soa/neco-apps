@@ -16,6 +16,8 @@ spec:
       annotations:
         prometheus.io/port: "7472"
     spec:
+      securityContext:
+        runAsUser: 10000
       serviceAccountName: speaker
       terminationGracePeriodSeconds: 0
       hostNetwork: true
