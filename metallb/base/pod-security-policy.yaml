@@ -5,7 +5,6 @@ metadata:
   annotations:
     seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default'
     seccomp.security.alpha.kubernetes.io/defaultProfileName:  'docker/default'
-    cke.cybozu.com/revision: "1"
 spec:
   privileged: false
   # Required to prevent escalations to root.
@@ -24,6 +23,9 @@ spec:
     # Assume that persistentVolumes set up by the cluster admin are safe to use.
     - 'persistentVolumeClaim'
   hostNetwork: true
+  hostPorts:
+    - max: 7472
+      min: 7472
   hostIPC: false
   hostPID: false
   runAsUser:
