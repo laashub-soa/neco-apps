@@ -98,12 +98,14 @@ func testMetalLB() {
 
 	It("should deploy load balancer type service", func() {
 		By("deployment Pods")
-		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "run", "nginx", "--replicas=2", "--image=nginx")
+		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "run", "busybox", "--image=docker.io/busybox:latest", "--replicas=2",
+			`--overrides='{"spec":{"template":{"spec":{"securityContext":{"runAsUser":10000}}}}}'`,
+			"--", "httpd", "-f", "-p", "8000", "-h", "/etc")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "deployments/nginx", "-o", "json")
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "deployments/busybox", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -126,15 +128,15 @@ func testMetalLB() {
 kind: Service
 apiVersion: v1
 metadata:
-  name: nginx
+  name: busybox
   namespace: default
 spec:
   selector:
-    run: nginx
+    run: busybox
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 80
+    targetPort: 8000
   type: LoadBalancer
   loadBalancerIP: 10.72.32.29
   externalTrafficPolicy: Local
@@ -144,7 +146,7 @@ spec:
 
 		By("waiting service are ready")
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "service/nginx", "-o", "json")
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "service/busybox", "-o", "json")
 			if err != nil {
 				return err
 			}
