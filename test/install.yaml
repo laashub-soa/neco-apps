@@ -295,8 +295,6 @@ spec:
       labels:
         app: argocd-application-controller
     spec:
-      securityContext:
-        runAsUser: 999
       containers:
       - command:
         - argocd-application-controller
@@ -304,7 +302,7 @@ spec:
         - "20"
         - --operation-processors
         - "10"
-        image: quay.io/cybozu/argocd:0.11.2.1
+        image: quay.io/cybozu/argocd:0.11.2.3
         imagePullPolicy: Always
         name: argocd-application-controller
         ports:
@@ -336,13 +334,11 @@ spec:
       labels:
         app: argocd-repo-server
     spec:
-      securityContext:
-        runAsUser: 999
       automountServiceAccountToken: false
       containers:
       - command:
         - argocd-repo-server
-        image: quay.io/cybozu/argocd:0.11.2.1
+        image: quay.io/cybozu/argocd:0.11.2.3
         imagePullPolicy: Always
         name: argocd-repo-server
         ports:
@@ -379,12 +375,10 @@ spec:
       labels:
         app: argocd-server
     spec:
-      securityContext:
-        runAsUser: 999
       containers:
       - command:
         - argocd-server
-        image: quay.io/cybozu/argocd:0.11.2.1
+        image: quay.io/cybozu/argocd:0.11.2.3
         imagePullPolicy: Always
         name: argocd-server
         ports:
