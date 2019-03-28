@@ -123,8 +123,5 @@ scrape_configs:
         regex: (.+):(?:\d+)
         replacement: ${1}:9105
         target_label: __address__
-      - source_labels: [__meta_kubernetes_endpoint_port_name]
-        action: replace
-        target_label: "http-monitor-hw-exporter"
       - action: labelmap
         regex: __meta_kubernetes_endpoint_(.+)
