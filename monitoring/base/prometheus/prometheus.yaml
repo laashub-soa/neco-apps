@@ -109,3 +109,19 @@ scrape_configs:
         target_label: __address__
       - action: labelmap
         regex: __meta_kubernetes_endpoint_(.+)
+  - job_name: "monitor-hw"
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: ["monitoring"]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoints_name]
+        action: keep
+        regex: prometheus-node-targets
+      - source_labels: [__address__]
+        action: replace
+        regex: (.+):(?:\d+)
+        replacement: ${1}:9105
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_endpoint_(.+)
