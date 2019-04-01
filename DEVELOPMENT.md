@@ -1,245 +1,143 @@
 Guide for developers
 ====================
 
+This repository contains Kubernetes manifests that will be delivered to
+Neco data centers automatically by [Argo CD][].
+
 Adding a new application
 ------------------------
 
-まずアプリ名のディレクトリを作り、その下のディレクトリ構造を作る。
-`overlays` 下には環境名(`gcp`, `stage0`, `tokyo0`)のディレクトリを掘る。
-(差分がない環境については `overlays` 下は作成不要。)
+Determine the name of the new application, then make `base` directory for it:
 
 ```console
 $ APP_NAME=foo
 $ mkdir -p ${APP_NAME}/base
-$ mkdir -p ${APP_NAME}/overlays/gcp
-$ mkdir -p ${APP_NAME}/overlays/stage0
-$ mkdir -p ${APP_NAME}/overlays/tokyo0
 ```
 
-### 共通部分
+### Common manifests
 
-アプリのマニフェストのうち、環境に依らない部分を base に置く。
-overlays により補完するので、ここに置いたファイルは一部が欠けたもので
-よいこともある。
-(パッチストラテジーに依る。)
+Manifests that are common to all environments go to `base` directory.
 
-リソースごとに別ファイルとすると管理しやすい。
+A manifest can be incomplete as long as it will be complemented by
+*overlays* as described later.
 
-!!! Note
-    [Argo CD][] による検出の都合上、YAML ファイルの拡張子は `.yml` ではなく
-    `.yaml` とする。
+Note that manifests extension should be `.yaml` instead of `.yml`
+because ArgoCD searches only `*.yaml` files.
 
 ```console
 $ edit ${APP_NAME}/base/deployment.yaml
 $ edit ${APP_NAME}/base/service.yaml
 ```
 
-これらを [Kustomize][] で束ねる。
-
-!!! Note
-    単にファイルを束ねるだけではなく、ConfigMap の YAML ファイルを(ファイルに
-    手でテキストブロックを埋め込むのではなく)ファイルから作成するとか、
-    各リソースに共通ラベルを付与するとか、いろいろできる。
+Then, create `kustomization.yaml` for [Kustomize][].
 
 ```console
-$ edit ${APP_NAME}/base/kustomization.yaml
-```
-
-```yaml
+$ cat <<EOF > ${APP_NAME}/base/kustomization.yaml
 apiVersion: v1beta1
 kind: Kustomization
 resources:
 - deployment.yaml
 - service.yaml
+EOF
 ```
 
-### 環境依存部分
+### Environment-specific manifests
 
-環境(`gcp`, `stage0`, `tokyo0`)ごとにファイルを作る。
-環境による部分のパッチを置く。
+For each data center such as `gcp`, `stage0`, `tokyo0`, you may create
+patch manifets as follows:
 
 ```console
-$ ENVIRONMENT=stage
-$ edit ${APP_NAME}/overlays/${ENVIRONMENT}/deployment_replicas.yaml
+$ ENV=stage0
+$ mkdir -p ${APP_NAME}/overlays/${ENV}
+$ vi ${APP_NAME}/overlays/${ENV}/deployment_replicas.yaml
 ```
 
-[Kustomize][] で base を指定しつつパッチを束ねる。
+Create `kustomization.yaml` to apply patches to base manifets.
 
-```
-$ edit ${APP_NAME}/overlays/${ENVIRONMENT}/kustomization.yaml
-```
-
-```yaml
+```console
+$ cat <<EOF > ${APP_NAME}/overlays/${ENV}/kustomization.yaml
 apiVersion: v1beta1
 kind: Kustomization
 bases:
 - ../../base
 patches:
 - deployment_replicas.yaml
+EOF
 ```
 
-環境による部分がない場合は、`${APP_NAME}/overlays/${ENVIRONMENT}` の
-ディレクトリごと作成不要である。
-
-### マニフェストの合成確認
-
-環境ごとにマニフェストが正しく合成されるか、確認する。
+### Verify manifests
 
 ```console
 $ (cd test; make setup)
 $ kustomize build ${APP_NAME}/base > /tmp/app.yaml
-$ kustomize build ${APP_NAME}/overlays/${ENVIRONMENT} > /tmp/app.yaml
-(各環境について /tmp/app.yaml の中身を確認する)
+$ kustomize build ${APP_NAME}/overlays/${ENV} > /tmp/app_${ENV}.yaml
+$ diff -u /tmp/app.yaml /tmp/app_${ENV}.yaml
 ```
 
-!!! note
-    合成されたマニフェストを目で確認するのは難しい。
-    少なくとも合成そのものが成功することは確認したい。
+Apply the generated manifest using `kubectl apply --dry-run -f FILE`
+in the dctest environment.
 
-    GCP 環境用の合成結果を手元の placemat 環境で試すには、まずマニフェストの
-    文法等のチェックとして `kubectl apply -f app.yaml --dry-run` が使える。
-    さらに `kubectl apply -f app.yaml` で適用すると、実際に使えるマニフェストで
-    あるかどうかが分かる。
-    この際に、用いられている namespace が単一で非明示的なら
-    `kubectl apply --namespace=NS` で指定できるが、複数・明示的な場合は
-    非明示的な方を `kubectl config set-context CONTEXT --namespace=NS` で
-    コンテキストに設定する必要がある。
+### Add the application to Argo CD
 
-    GCP 環境について確認が取れれば、それ以外の環境については、環境間で
-    合成結果の diff を取って意図した差分となっているか確認することができる。
-
-### Argo CD への登録
-
-ここまでに作成したリソースを、[Argo CD][] の対象となるアプリケーションとして
-登録する。
-`argocd-config` ディレクトリ下を変更する。
-
-base および環境ごとに CRD Application とその差分の YAML ファイルを作成する。
-差分がない環境については overlays は不要。
+Add following files under `argocd-config` directory:
 
 ```console
 $ edit argocd-config/base/${APP_NAME}.yaml
-$ edit argocd-config/overlays/${ENVIRONMENT}/${APP_NAME}.yaml
+$ edit argocd-config/overlays/${ENV}/${APP_NAME}.yaml
 ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-(中身については省略; いじるのは以下のあたり
-  - metadata/name
-  - spec/source/path
-  - spec/destination/namespace
-  - spec/syncPolicy/automated
-)
-```
+Examples are [argocd-config/base/metallb.yaml](argocd-config/base/metallb.yaml)
+and [argocd-config/overlays/stage0/metallb.yaml](argocd-config/overlays/stage0/metallb.yaml).
 
-追加したファイルを kustomization.yaml に記載する。
+Add the filenames to `kustomization.yaml` for ArgoCD.
 
 ```console
 $ edit argocd-config/base/kustomization.yaml
-$ edit argocd-config/overlays/${ENVIRONMENT}/kustomization.yaml
+$ edit argocd-config/overlays/${ENV}/kustomization.yaml
 ```
 
-Argo CD 用のマニフェストの合成についても確認できる。
+Testing
+-------
 
-```console
-$ kustomize build argocd-config/base
-$ kustomize build argocd-config/overlays/${ENVIRONMENT}
-```
-
-### テスト追加
-
-そのアプリのデプロイのテスト、およびデプロイされたアプリの動作のテストを
-追加する。
+Tests should be written using `ginkgo` and `gomega` as follows:
 
 ```console
 $ edit ${APP_NAME}/test/suite_test.go
-$ edit ${APP_NAME}/test/...  # デプロイのテストや動作のテスト
+$ edit ${APP_NAME}/test/some_test.go
 ```
 
-新しく追加したアプリを`DEPLOY_ORDER`に追加する。`make test-all`実行時のデプロイ順序になっているため、順番を考慮する。
-例えば、`Type: LoadBalancer`の`Kind: Service`をデプロイする場合は、`metallb`よりも後にする必要がある。
+Add the new test to `DEPLOY_ORDER` in `test/Makefile`.
+
+Deployment
+----------
+
+### Deploy to staging environments
+
+Merged changes to `master` branch will be applied automatically.
+
+### Deploy to production environments
+
+Argo CD in production environments refers to `release` branch.
+
+CircleCI will create a pull request to update `release` branch
+when a tag is pushed as follows:
 
 ```console
-$ edit test/Makefile
-```
-
-例
-```makefile
-# Deployment order for make test-all
-DEPLOY_ORDER = \
-        metallb \
-        teleport \
-        policyagent \
-        rook
-```
-
-### 適用
-
-#### Staging 環境への適用
-
-Staging 環境については、変更が master ブランチにマージされれば自動的に
-適用される。
-
-#### Prod 環境への適用
-
-Prod 環境については、master が Staging 環境で検証されたのちにまず以下の
-操作を行う。
-
-```console
-# Prod 用手順
 $ git checkout master
-$ git tag release-$(date +%Y.%m.%d)-(同日の通し番号)
-$ git push --tags
+$ git tag release-$(date +%Y.%m.%d)-1
+$ git push origin --tags
 ```
 
-これにより release ブランチへのプルリクエストが作成される。
-これをマージすると自動的に適用される。
+Then merge the pull request.
 
+Trouble shooting
+----------------
 
-アプリケーションの変更
-----------------------
+Make sure you are logging in Argo CD.
 
-追加と同様に頑張る。
+### Out of sync
 
-!!! warning
-    自動同期されないアプリケーションについては手動による同期をとる必要がある。
-    現時点では全てのアプリケーションが自動同期の設定となっている。
-
-    ```console
-    # syncの状態を確認する。
-    $ argocd app list
-    
-    # 以下でシンクされていないものをシンクさせる。
-    $ argocd app sync APP_NAME
-    ```
-
-
-トラブルシューティング
-----------------------
-
-`ckecli kubernetes issue` は済んでいるものとする。
-
-### ログイン
-
-`argocd` コマンドを使うためには Argo CD にログインする必要がある。
-これは 1 つの環境について一度行えばよい。
-
-パスワードは[秘密のメモ](https://bozuman.cybozu.com/k/33029/)を参照のこと。
-
-```console
-$ NODE_ADDRESS=$(kubectl get nodes -o json | jq -r '.items[0].status.addresses[] | select(.type == "InternalIP") | .address')
-$ echo ${NODE_ADDRESS}
-$ NODE_PORT=$(kubectl get svc/argocd-server -n argocd -o json | jq -r '.spec.ports[] | select(.name == "http") | .nodePort')
-$ echo ${NODE_PORT}
-$ argocd login ${NODE_ADDRESS}:${NODE_PORT} --insecure --username admin
-Password: (パスワードを入力する)
-```
-
-### AppOutOfSync
-
-いずれかのアプリケーションの同期がとれていない状態である。
-アラートを発した環境で、まずどのアプリケーションに問題があるのかを調べる。
+When `argocd app list` shows `OutOfSync` status for an application as follows:
 
 ```console
 $ argocd app list
@@ -249,24 +147,14 @@ metallb        https://kubernetes.default.svc  metallb-system  default  Synced  
 monitoring     https://kubernetes.default.svc  monitoring      default  OutOfSync  Missing      <none>      <none>
 ```
 
-`STATUS`, `HEALTH`, `SYNCPOLICY` の欄が重要。
-`STATUS: OutOfSync` となっているアプリケーションがまず怪しい。
-ほかには、あるアプリケーションが `STATUS: Synced` ではあるものの
-`HEALTH: Healthy` ではないために、次のアプリケーションの処理に進めず
-とばっちりで `STATUS: OutOfSync` となることもあるかもしれない。
-その場合は `STATUS: Synced` であっても `HEALTH` に異常のあるものが怪しい。
-
-怪しいアプリケーションについて、手動での同期を試したりリソースの情報を
-見たりする。
+Try manual synchronization or investigate further details:
 
 ```console
 $ argocd app sync monitoring
 $ argocd app get monitoring
 ```
 
-`Target`, `Path` の指す先や `Sync Status`, `Sync Revision` に現れる
-コミット ID (あるいはブランチ名や `HEAD`)が正しいか確認する。
-また、`STATUS` や `HEALTH` が怪しいリソースがあったらその情報を見る。
+Or use `kubectl describe` for Kubernetes resources:
 
 ```console
 $ kubectl describe -n monitoring deployment alertmanager
