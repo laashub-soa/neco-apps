@@ -22,7 +22,7 @@ func testMetalLB() {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			stdout, stderr, err = test.ExecAt(test.Boot0, "argocd", "app", "sync", "metallb", "--timeout", "20")
+			stdout, stderr, err = test.ExecAt(test.Boot0, "argocd", "app", "sync", "metallb")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
