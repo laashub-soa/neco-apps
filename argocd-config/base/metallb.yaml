@@ -9,6 +9,9 @@ spec:
     repoURL: https://github.com/cybozu-go/neco-ops.git
     targetRevision: HEAD
     path: metallb/base
+    syncPolicy:
+      automated:
+        prune: true
   destination:
     server: https://kubernetes.default.svc
     namespace: metallb-system
