@@ -39,7 +39,10 @@ jobs:
       - checkout
       - store-service-account
       - run:
+          name: Wait for previous builds
           command: |
+            apt-get update
+            apt-get install -y --no-install-recommends jq
             ./bin/wait-for-previous-builds.sh --job test
       - run:
           command: |
@@ -57,7 +60,10 @@ jobs:
       - checkout
       - store-service-account
       - run:
+          name: Wait for previous builds
           command: |
+            apt-get update
+            apt-get install -y --no-install-recommends jq
             ./bin/wait-for-previous-builds.sh --job start-neco-ops
       - run:
           name: (Re)Create instance
@@ -66,8 +72,6 @@ jobs:
             if gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} --command="test -f /tmp/setup-done"; then
                 exit 0
             fi
-            apt-get update
-            apt-get install -y --no-install-recommends jq
             gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} || true
             gcloud compute instances create ${INSTANCE_NAME} \
                 --project ${PROJECT} \
