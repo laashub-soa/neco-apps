@@ -40,6 +40,9 @@ jobs:
       - store-service-account
       - run:
           command: |
+            ./bin/wait-for-previous-builds.sh --job test
+      - run:
+          command: |
             ./bin/run-test.sh
           no_output_timeout: 30m
       - run:
@@ -53,6 +56,9 @@ jobs:
     steps:
       - checkout
       - store-service-account
+      - run:
+          command: |
+            ./bin/wait-for-previous-builds.sh --job start-neco-ops
       - run:
           name: (Re)Create instance
           no_output_timeout: 30m
