@@ -4,3 +4,4 @@ bases:
 - ../../base
 patchesStrategicMerge:
 - monitoring.yaml
+- metallb.yaml

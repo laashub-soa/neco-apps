@@ -4,5 +4,4 @@ metadata:
   name: metallb
   namespace: argocd
 spec:
-  source:
-    path: metallb/overlays/stage0
+  syncPolicy: null

@@ -6,6 +6,3 @@ metadata:
 spec:
   source:
     path: monitoring/overlays/stage0
-  syncPolicy:
-    automated:
-      prune: true
