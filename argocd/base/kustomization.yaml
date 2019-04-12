@@ -1,0 +1,10 @@
+apiVersion: v1beta1
+kind: Kustomization
+resources:
+- namespace.yaml
+- serviceaccount.yaml
+- role.yaml
+- rolebinding.yaml
+- deployment.yaml
+- configmap.yaml
+- pod-security-policy.yaml

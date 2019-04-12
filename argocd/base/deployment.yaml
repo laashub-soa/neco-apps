@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-application-controller
+spec:
+  selector:
+    matchLabels:
+      app: argocd-application-controller
+  template:
+    metadata:
+      labels:
+        app: argocd-application-controller
+    spec:
+      containers:
+        - command:
+            - argocd-application-controller
+            - --status-processors
+            - "20"
+            - --operation-processors
+            - "10"
+          image: quay.io/cybozu/argocd:0.11.2.3
+          imagePullPolicy: Always
+          name: argocd-application-controller
+          ports:
+            - containerPort: 8083
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 8083
+          env:
+            - name: NO_PROXY
+              value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server
+            - name: HTTP_PROXY
+              value: http://squid.internet-egress.svc.cluster.local:3128
+            - name: HTTPS_PROXY
+              value: http://squid.internet-egress.svc.cluster.local:3128
+      serviceAccountName: argocd-application-controller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+spec:
+  selector:
+    matchLabels:
+      app: argocd-repo-server
+  template:
+    metadata:
+      labels:
+        app: argocd-repo-server
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - command:
+            - argocd-repo-server
+          image: quay.io/cybozu/argocd:0.11.2.3
+          imagePullPolicy: Always
+          name: argocd-repo-server
+          ports:
+            - containerPort: 8081
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 8081
+          env:
+            - name: NO_PROXY
+              value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server
+            - name: HTTP_PROXY
+              value: http://squid.internet-egress.svc.cluster.local:3128
+            - name: HTTPS_PROXY
+              value: http://squid.internet-egress.svc.cluster.local:3128
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+spec:
+  selector:
+    matchLabels:
+      app: argocd-server
+  template:
+    metadata:
+      labels:
+        app: argocd-server
+    spec:
+      containers:
+        - command:
+            - argocd-server
+          image: quay.io/cybozu/argocd:0.11.2.3
+          imagePullPolicy: Always
+          name: argocd-server
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 30
+          volumeMounts:
+          env:
+            - name: NO_PROXY
+              value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server
+            - name: HTTP_PROXY
+              value: http://squid.internet-egress.svc.cluster.local:3128
+            - name: HTTPS_PROXY
+              value: http://squid.internet-egress.svc.cluster.local:3128
+      serviceAccountName: argocd-server
