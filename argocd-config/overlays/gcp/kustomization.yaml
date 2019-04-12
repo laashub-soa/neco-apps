@@ -3,5 +3,6 @@ kind: Kustomization
 bases:
 - ../../base
 patchesStrategicMerge:
+- argocd.yaml
 - monitoring.yaml
 - metallb.yaml

@@ -66,7 +66,7 @@ spec:
             - ""
             - --appendonly
             - "no"
-          image: quay.io/cybozu/redis:5.0.4
+          image: quay.io/cybozu/redis:5.0.4.1
           imagePullPolicy: Always
           name: redis
           ports:
