@@ -2,9 +2,10 @@ apiVersion: v1beta1
 kind: Kustomization
 resources:
 - namespace.yaml
+- crd.yaml
 - serviceaccount.yaml
-- role.yaml
-- rolebinding.yaml
-- deployment.yaml
+- rbac.yaml
 - configmap.yaml
-- pod-security-policy.yaml
+- secret.yaml
+- service.yaml
+- deployment.yaml
