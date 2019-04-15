@@ -12,11 +12,14 @@ export GOFLAGS
 
 # Follow Argo CD installed kustomize version
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L33
-KUSTOMIZE_VERSION = 1.0.11
+KUSTOMIZE_VERSION = 2.0.3
 
 # Deployment order for make test-all
 DEPLOY_ORDER = \
 	metallb
+
+install.yaml:
+	kustomize build ../argocd/base/ > install.yaml
 
 test:
 	./test.sh
@@ -45,3 +48,6 @@ test-all:
 	done
 	# monitoring test is always last step for checking all deployed metrics
 	$(MAKE) test-monitoring
+
+clean:
+	rm -f install.yaml
