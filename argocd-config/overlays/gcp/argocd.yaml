@@ -4,6 +4,4 @@ metadata:
   name: argocd
   namespace: argocd
 spec:
-  source:
-    path: argocd/overlays/gcp
   syncPolicy: null

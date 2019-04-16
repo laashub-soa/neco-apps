@@ -34,13 +34,6 @@ spec:
             periodSeconds: 10
             tcpSocket:
               port: 8082
-          env:
-            - name: NO_PROXY
-              value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server
-            - name: HTTP_PROXY
-              value: http://squid.internet-egress.svc.cluster.local:3128
-            - name: HTTPS_PROXY
-              value: http://squid.internet-egress.svc.cluster.local:3128
       serviceAccountName: argocd-application-controller
 ---
 apiVersion: apps/v1
@@ -108,7 +101,7 @@ spec:
               port: 8081
           env:
             - name: NO_PROXY
-              value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server
+              value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server,argocd-server-metrics,argocd-redis
             - name: HTTP_PROXY
               value: http://squid.internet-egress.svc.cluster.local:3128
             - name: HTTPS_PROXY
@@ -152,11 +145,4 @@ spec:
               port: 8080
             initialDelaySeconds: 3
             periodSeconds: 30
-          env:
-            - name: NO_PROXY
-              value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server
-            - name: HTTP_PROXY
-              value: http://squid.internet-egress.svc.cluster.local:3128
-            - name: HTTPS_PROXY
-              value: http://squid.internet-egress.svc.cluster.local:3128
       serviceAccountName: argocd-server

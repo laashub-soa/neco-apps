@@ -11,7 +11,7 @@ GOFLAGS = -mod=vendor
 export GOFLAGS
 
 # Follow Argo CD installed kustomize version
-# https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L33
+# https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L32
 KUSTOMIZE_VERSION = 2.0.3
 
 # Deployment order for make test-all
