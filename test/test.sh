@@ -38,4 +38,9 @@ done
 
 ./dcssh cybozu@boot-0 "for host in \$(sabactl machines get --role worker | jq -r '.[] | .spec.ipv4[0]'); do ckecli ssh cybozu@\${host} sudo systemctl restart chronyd.service; done"
 
+# Restart CKE. Vault token will be expired.
+for boot in boot-0 boot-1 boot-2 boot-3; do
+  ./dcssh cybozu@${boot} sudo systemctl restart cke.service
+done
+
 sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH; $GINKGO"
