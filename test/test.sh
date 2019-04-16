@@ -33,9 +33,9 @@ for boot in boot-0 boot-1 boot-2 boot-3; do
     fi
     sleep 1
   done
-  ./dcssh cybozu@${boot} podenter chrony chronyc makestep
+  ./dcssh cybozu@${boot} sudo systemctl restart chronyd.service
 done
 
-./dcssh cybozu@boot-0 "for host in \$(sabactl machines get --role worker | jq -r '.[] | .spec.ipv4[0]'); do ckecli ssh cybozu@\${host} /opt/bin/podenter chrony chrony chronyc makestep; done"
+./dcssh cybozu@boot-0 "for host in \$(sabactl machines get --role worker | jq -r '.[] | .spec.ipv4[0]'); do ckecli ssh cybozu@\${host} sudo systemctl restart chronyd.service; done"
 
 sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH; $GINKGO"
