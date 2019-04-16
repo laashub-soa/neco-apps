@@ -18,10 +18,10 @@ KUSTOMIZE_VERSION = 2.0.3
 DEPLOY_ORDER = \
 	metallb
 
-install.yaml:
+install.yaml: $(shell find ../argocd/base)
 	kustomize build ../argocd/base/ > install.yaml
 
-test:
+test: install.yaml
 	./test.sh
 
 kustomize-check:
@@ -38,7 +38,7 @@ setup:
 	go install github.com/onsi/ginkgo/ginkgo
 
 # this target expects to be executed after `test` target
-test-%:
+test-%: install.yaml
 	./test.sh ../$*/test
 
 test-all:
@@ -51,3 +51,5 @@ test-all:
 
 clean:
 	rm -f install.yaml
+
+.PHONY:	test kustomize-check setup test-monitoring test-metallb test-all clean

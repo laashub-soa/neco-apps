@@ -79,7 +79,7 @@ func testSetup() {
 		var podList corev1.PodList
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "pods", "-n", ArgoCDNamespace,
-				"-l", "app=argocd-server", "-o", "json")
+				"-l", "app.kubernetes.io/name=argocd-server", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
