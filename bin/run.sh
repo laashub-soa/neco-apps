@@ -22,6 +22,9 @@ make setup
 make placemat
 sleep 3
 make SUITE=./bootstrap TAGS=release test
+for boot in boot-0 boot-1 boot-2; do
+  ./dcssh cybozu@${boot} sudo systemctl stop cke.service
+done
 pmctl snapshot save init
 touch /tmp/setup-done
 exit $?
