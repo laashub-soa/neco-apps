@@ -37,6 +37,9 @@ setup:
 	chmod +x /usr/local/bin/kustomize
 	go install github.com/onsi/ginkgo/ginkgo
 
+save:
+	./save.sh
+
 # this target expects to be executed after `test` target
 test-%: install.yaml
 	./test.sh ../$*/test
@@ -52,4 +55,4 @@ test-all:
 clean:
 	rm -f install.yaml
 
-.PHONY:	test kustomize-check setup test-monitoring test-metallb test-all clean
+.PHONY:	test kustomize-check setup save test-monitoring test-metallb test-all clean
