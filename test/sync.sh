@@ -8,6 +8,7 @@ waitTimeSync() {
     if [ $(( host_time - target_time )) -lt 5 ]; then
       break
     fi
+    sleep 1
   done
 }
 
