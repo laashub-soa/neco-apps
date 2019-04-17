@@ -57,4 +57,4 @@ for boot in boot-0 boot-1 boot-2; do
   ./dcssh cybozu@${boot} sudo systemctl start cke.service
 done
 
-#sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH; $GINKGO"
+sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH; $GINKGO"
