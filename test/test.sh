@@ -24,6 +24,17 @@ done
 EXTERNAL_PID=$(pmctl pod show external | jq .pid)
 export EXTERNAL_PID
 
+waitTimeSync() {
+  target=$1
+  while true; do
+    target_time=$(./dcssh cybozu@${target} date +%s)
+    host_time=$(date "+%s")
+    if [ $(( host_time - target_time )) -lt 5 ]; then
+      break
+    fi
+  done
+}
+
 # Sync with NTP. Nodes restored from snapshot will be out of time.
 echo "wait for boot servers..."
 for boot in boot-0 boot-1 boot-2 boot-3; do
@@ -34,13 +45,15 @@ for boot in boot-0 boot-1 boot-2 boot-3; do
     sleep 1
   done
   ./dcssh cybozu@${boot} sudo systemctl restart chronyd.service
+  waitTimeSync ${boot}
 done
 
-./dcssh cybozu@boot-0 "for host in \$(sabactl machines get --role worker | jq -r '.[] | .spec.ipv4[0]'); do ckecli ssh cybozu@\${host} sudo systemctl restart chronyd.service; done"
+./dcscp sync.sh cybozu@boot-0:
+./dcssh cybozu@boot-0 "./sync.sh"
 
 # Restart CKE. Vault token will be expired.
 for boot in boot-0 boot-1 boot-2; do
   ./dcssh cybozu@${boot} sudo systemctl start cke.service
 done
 
-sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH; $GINKGO"
+#sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH; $GINKGO"
