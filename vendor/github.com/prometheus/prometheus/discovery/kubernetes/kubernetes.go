@@ -80,7 +80,7 @@ func (c *Role) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	case RoleNode, RolePod, RoleService, RoleEndpoint, RoleIngress:
 		return nil
 	default:
-		return fmt.Errorf("unknown Kubernetes SD role %q", *c)
+		return fmt.Errorf("Unknown Kubernetes SD role %q", *c)
 	}
 }
 
@@ -104,7 +104,7 @@ func (c *SDConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	if c.Role == "" {
-		return fmt.Errorf("role missing (one of: pod, service, endpoints, node, ingress)")
+		return fmt.Errorf("role missing (one of: pod, service, endpoints, node)")
 	}
 	if len(c.BearerToken) > 0 && len(c.BearerTokenFile) > 0 {
 		return fmt.Errorf("at most one of bearer_token & bearer_token_file must be configured")
@@ -137,7 +137,7 @@ func init() {
 	prometheus.MustRegister(eventCount)
 
 	// Initialize metric vectors.
-	for _, role := range []string{"endpoints", "node", "pod", "service", "ingress"} {
+	for _, role := range []string{"endpoints", "node", "pod", "service"} {
 		for _, evt := range []string{"add", "delete", "update"} {
 			eventCount.WithLabelValues(role, evt)
 		}
@@ -238,7 +238,7 @@ func New(l log.Logger, conf *SDConfig) (*Discovery, error) {
 		}
 	}
 
-	kcfg.UserAgent = "Prometheus/discovery"
+	kcfg.UserAgent = "prometheus/discovery"
 
 	c, err := kubernetes.NewForConfig(kcfg)
 	if err != nil {

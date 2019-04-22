@@ -1,31 +1,31 @@
 module github.com/cybozu-go/neco-ops
 
+go 1.12
+
 require (
-	github.com/argoproj/argo-cd v0.11.2
+	github.com/Azure/go-autorest/autorest v0.1.0 // indirect
+	github.com/argoproj/argo-cd v0.12.1
+	github.com/aws/aws-sdk-go v1.19.15 // indirect
 	github.com/cybozu-go/log v1.5.0
-	github.com/gogo/protobuf v1.2.1 // indirect
-	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
-	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
-	github.com/googleapis/gnostic v0.2.0 // indirect
-	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc // indirect
+	github.com/gophercloud/gophercloud v0.0.0-20190419190354-e53f839b56ea // indirect
+	github.com/hashicorp/consul/api v1.0.1 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
-	github.com/json-iterator/go v1.1.5 // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
-	github.com/onsi/ginkgo v1.7.0
-	github.com/onsi/gomega v1.4.3
-	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/prometheus/client_golang v0.9.2
-	github.com/prometheus/common v0.0.0-20181126121408-4724e9255275
-	github.com/prometheus/prometheus v0.0.0-20190131111325-62e591f928dd
-	github.com/sirupsen/logrus v1.3.0 // indirect
-	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25
-	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421 // indirect
-	golang.org/x/time v0.0.0-20181108054448-85acf8d2951c // indirect
-	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/src-d/go-git.v4 v4.10.0 // indirect
-	gopkg.in/yaml.v2 v2.2.1
-	k8s.io/api v0.0.0-20190222213804-5cb15d344471
-	k8s.io/apimachinery v0.0.0-20190221213512-86fb29eff628 // indirect
-	k8s.io/client-go v10.0.0+incompatible // indirect
-	k8s.io/klog v0.2.0 // indirect
+	github.com/miekg/dns v1.1.8 // indirect
+	github.com/onsi/ginkgo v1.8.0
+	github.com/onsi/gomega v1.5.0
+	github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
+	github.com/prometheus/common v0.3.0
+	github.com/prometheus/prometheus v2.5.0+incompatible
+	github.com/prometheus/tsdb v0.7.0 // indirect
+	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
+	golang.org/x/crypto v0.0.0-20190418165655-df01cb2cc480
+	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a // indirect
+	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
+	google.golang.org/api v0.3.2 // indirect
+	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
+	gopkg.in/src-d/go-git.v4 v4.11.0 // indirect
+	gopkg.in/yaml.v2 v2.2.2
+	k8s.io/api v0.0.0-20190419092548-c5cad27821f6
+	k8s.io/client-go v11.0.0+incompatible // indirect
+	k8s.io/utils v0.0.0-20190308190857-21c4ce38f2a7 // indirect
 )

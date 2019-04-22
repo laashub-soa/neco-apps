@@ -43,10 +43,8 @@ const (
 	ec2LabelInstanceState   = ec2Label + "instance_state"
 	ec2LabelInstanceType    = ec2Label + "instance_type"
 	ec2LabelOwnerID         = ec2Label + "owner_id"
-	ec2LabelPlatform        = ec2Label + "platform"
 	ec2LabelPublicDNS       = ec2Label + "public_dns_name"
 	ec2LabelPublicIP        = ec2Label + "public_ip"
-	ec2LabelPrivateDNS      = ec2Label + "private_dns_name"
 	ec2LabelPrivateIP       = ec2Label + "private_ip"
 	ec2LabelPrimarySubnetID = ec2Label + "primary_subnet_id"
 	ec2LabelSubnetID        = ec2Label + "subnet_id"
@@ -251,15 +249,8 @@ func (d *Discovery) refresh() (tg *targetgroup.Group, err error) {
 				}
 
 				labels[ec2LabelPrivateIP] = model.LabelValue(*inst.PrivateIpAddress)
-				if inst.PrivateDnsName != nil {
-					labels[ec2LabelPrivateDNS] = model.LabelValue(*inst.PrivateDnsName)
-				}
 				addr := net.JoinHostPort(*inst.PrivateIpAddress, fmt.Sprintf("%d", d.port))
 				labels[model.AddressLabel] = model.LabelValue(addr)
-
-				if inst.Platform != nil {
-					labels[ec2LabelPlatform] = model.LabelValue(*inst.Platform)
-				}
 
 				if inst.PublicIpAddress != nil {
 					labels[ec2LabelPublicIP] = model.LabelValue(*inst.PublicIpAddress)
