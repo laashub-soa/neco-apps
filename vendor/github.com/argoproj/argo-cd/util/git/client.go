@@ -31,7 +31,7 @@ type Client interface {
 // ClientFactory is a factory of Git Clients
 // Primarily used to support creation of mock git clients during unit testing
 type ClientFactory interface {
-	NewClient(repoURL, path, username, password, sshPrivateKey string) (Client, error)
+	NewClient(repoURL, path, username, password, sshPrivateKey string, insecureIgnoreHostKey bool) (Client, error)
 }
 
 // nativeGitClient implements Client interface using git CLI
@@ -47,7 +47,7 @@ func NewFactory() ClientFactory {
 	return &factory{}
 }
 
-func (f *factory) NewClient(repoURL, path, username, password, sshPrivateKey string) (Client, error) {
+func (f *factory) NewClient(repoURL, path, username, password, sshPrivateKey string, insecureIgnoreHostKey bool) (Client, error) {
 	clnt := nativeGitClient{
 		repoURL: repoURL,
 		root:    path,
@@ -58,7 +58,9 @@ func (f *factory) NewClient(repoURL, path, username, password, sshPrivateKey str
 			return nil, err
 		}
 		auth := &ssh2.PublicKeys{User: "git", Signer: signer}
-		auth.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+		if insecureIgnoreHostKey {
+			auth.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+		}
 		clnt.auth = auth
 	} else if username != "" || password != "" {
 		auth := &http.BasicAuth{Username: username, Password: password}
@@ -103,10 +105,23 @@ func (m *nativeGitClient) Init() error {
 // Fetch fetches latest updates from origin
 func (m *nativeGitClient) Fetch() error {
 	log.Debugf("Fetching repo %s at %s", m.repoURL, m.root)
+	// Two techniques are used for fetching the remote depending if the remote is SSH vs. HTTPS
+	// If http, we fork/exec the git CLI since the go-git client does not properly support git
+	// providers such as AWS CodeCommit and Azure DevOps.
+	if _, ok := m.auth.(*ssh2.PublicKeys); ok {
+		return m.goGitFetch()
+	}
+	_, err := m.runCredentialedCmd("git", "fetch", "origin", "--tags", "--force")
+	return err
+}
+
+// goGitFetch fetches the remote using go-git
+func (m *nativeGitClient) goGitFetch() error {
 	repo, err := git.PlainOpen(m.root)
 	if err != nil {
 		return err
 	}
+
 	log.Debug("git fetch origin --tags --force")
 	err = repo.Fetch(&git.FetchOptions{
 		RemoteName: git.DefaultRemoteName,
@@ -118,16 +133,6 @@ func (m *nativeGitClient) Fetch() error {
 		return nil
 	}
 	return err
-	// git fetch does not update the HEAD reference. The following command will update the local
-	// knowledge of what remote considers the “default branch”
-	// See: https://stackoverflow.com/questions/8839958/how-does-origin-head-get-set
-	// NOTE(jessesuen): disabling the following code because:
-	// 1. we no longer perform a `git checkout HEAD`, instead relying on `ls-remote` and checking
-	//    out a specific SHA1.
-	// 2. This command is the only other command that we use (excluding fetch/ls-remote) which
-	//    requires remote access, and there appears to be no go-git equivalent to this command.
-	// _, err = m.runCmd("git", "remote", "set-head", "origin", "-a")
-	// return err
 }
 
 // LsFiles lists the local working tree, including only files that are under source control
@@ -239,13 +244,27 @@ func (m *nativeGitClient) CommitSHA() (string, error) {
 // runCmd is a convenience function to run a command in a given directory and return its output
 func (m *nativeGitClient) runCmd(command string, args ...string) (string, error) {
 	cmd := exec.Command(command, args...)
+	return m.runCmdOutput(cmd)
+}
+
+// runCredentialedCmd is a convenience function to run a git command with username/password credentials
+func (m *nativeGitClient) runCredentialedCmd(command string, args ...string) (string, error) {
+	cmd := exec.Command(command, args...)
+	if auth, ok := m.auth.(*http.BasicAuth); ok {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("GIT_ASKPASS=git-ask-pass.sh"))
+		cmd.Env = append(cmd.Env, fmt.Sprintf("GIT_USERNAME=%s", auth.Username))
+		cmd.Env = append(cmd.Env, fmt.Sprintf("GIT_PASSWORD=%s", auth.Password))
+	}
+	return m.runCmdOutput(cmd)
+}
+
+func (m *nativeGitClient) runCmdOutput(cmd *exec.Cmd) (string, error) {
 	log.Debug(strings.Join(cmd.Args, " "))
 	cmd.Dir = m.root
-	env := os.Environ()
-	env = append(env, "HOME=/dev/null")
-	env = append(env, "GIT_CONFIG_NOSYSTEM=true")
-	env = append(env, "GIT_ASKPASS=")
-	cmd.Env = env
+	cmd.Env = append(cmd.Env, os.Environ()...)
+	cmd.Env = append(cmd.Env, "HOME=/dev/null")
+	cmd.Env = append(cmd.Env, "GIT_CONFIG_NOSYSTEM=true")
+	cmd.Env = append(cmd.Env, "GIT_CONFIG_NOGLOBAL=true")
 	out, err := cmd.Output()
 	if len(out) > 0 {
 		log.Debug(string(out))
