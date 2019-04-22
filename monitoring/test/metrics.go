@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/gomega"
 	promv1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
-	promconfig "github.com/prometheus/prometheus/config"
 	yaml "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -47,10 +46,15 @@ func testMetrics() {
 		Expect(err).NotTo(HaveOccurred())
 
 		var promConfigFound bool
-		promConfig := new(promconfig.Config)
+
+		var promConfig struct {
+			ScrapeConfigs []struct {
+				JobName string `json:"job_name"`
+			} `json:"scrape_configs"`
+		}
 		for _, cm := range cmList.Items {
 			if data, ok := cm.Data["prometheus.yaml"]; ok {
-				err := yaml.Unmarshal([]byte(data), promConfig)
+				err := yaml.Unmarshal([]byte(data), &promConfig)
 				Expect(err).NotTo(HaveOccurred())
 				promConfigFound = true
 			}
