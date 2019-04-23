@@ -11,14 +11,17 @@ GOFLAGS = -mod=vendor
 export GOFLAGS
 
 # Follow Argo CD installed kustomize version
-# https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L33
-KUSTOMIZE_VERSION = 1.0.11
+# https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L32
+KUSTOMIZE_VERSION = 2.0.3
 
 # Deployment order for make test-all
 DEPLOY_ORDER = \
 	metallb
 
-test:
+install.yaml: $(shell find ../argocd/base)
+	kustomize build ../argocd/base/ > install.yaml
+
+test: install.yaml
 	./test.sh
 
 kustomize-check:
@@ -34,8 +37,11 @@ setup:
 	chmod +x /usr/local/bin/kustomize
 	go install github.com/onsi/ginkgo/ginkgo
 
+save:
+	./save.sh
+
 # this target expects to be executed after `test` target
-test-%:
+test-%: install.yaml
 	./test.sh ../$*/test
 
 test-all:
@@ -45,3 +51,8 @@ test-all:
 	done
 	# monitoring test is always last step for checking all deployed metrics
 	$(MAKE) test-monitoring
+
+clean:
+	rm -f install.yaml
+
+.PHONY:	test kustomize-check setup save test-monitoring test-metallb test-all clean

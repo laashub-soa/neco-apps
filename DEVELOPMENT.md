@@ -33,7 +33,7 @@ Then, create `kustomization.yaml` for [Kustomize][].
 
 ```console
 $ cat <<EOF > ${APP_NAME}/base/kustomization.yaml
-apiVersion: v1beta1
+apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - deployment.yaml
@@ -56,7 +56,7 @@ Create `kustomization.yaml` to apply patches to base manifets.
 
 ```console
 $ cat <<EOF > ${APP_NAME}/overlays/${ENV}/kustomization.yaml
-apiVersion: v1beta1
+apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
 - ../../base
