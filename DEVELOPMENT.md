@@ -106,7 +106,7 @@ $ edit ${APP_NAME}/test/suite_test.go
 $ edit ${APP_NAME}/test/some_test.go
 ```
 
-Add the new test to `DEPLOY_ORDER` in `test/Makefile`.
+Add the new test to `TESTS` in `test/Makefile`.
 
 Deployment
 ----------

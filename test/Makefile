@@ -14,9 +14,12 @@ export GOFLAGS
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L32
 KUSTOMIZE_VERSION = 2.0.3
 
-# Deployment order for make test-all
-DEPLOY_ORDER = \
-	metallb
+# Individual tests; these are called from "test-all" in this order.
+# Monitoring test is always last step for checking all deployed metrics.
+TESTS = \
+	test-metallb \
+	test-monitoring
+
 
 install.yaml: $(shell find ../argocd/base)
 	kustomize build ../argocd/base/ > install.yaml
@@ -41,18 +44,16 @@ save:
 	./save.sh
 
 # this target expects to be executed after `test` target
-test-%: install.yaml
+$(TESTS): test-%: install.yaml
 	./test.sh ../$*/test
 
 test-all:
 	$(MAKE) test
-	for target in $(DEPLOY_ORDER); do \
-		$(MAKE) test-$${target}; \
+	for target in $(TESTS); do \
+		$(MAKE) $${target}; \
 	done
-	# monitoring test is always last step for checking all deployed metrics
-	$(MAKE) test-monitoring
 
 clean:
 	rm -f install.yaml
 
-.PHONY:	test kustomize-check setup save test-monitoring test-metallb test-all clean
+.PHONY:	test kustomize-check setup save $(TESTS) test-all clean
