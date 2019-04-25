@@ -14,3 +14,8 @@ data:
       protocol: bgp
       addresses:
       - 10.72.32.0/20
+    - name: internet
+      protocol: bgp
+      addresses:
+      - 172.17.0.16/28
+      auto-assign: false

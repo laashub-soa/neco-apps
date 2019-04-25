@@ -84,5 +84,5 @@ spec:
               labelSelector:
                 matchLabels:
                   app: contour
-              topologyKey: kubernetes.io/hostname
+              topologyKey: "cke.cybozu.com/rack"
 ---
