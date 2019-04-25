@@ -51,7 +51,7 @@ $(TESTS): test-%: install.yaml
 test-all:
 	$(MAKE) test
 	for target in $(TESTS); do \
-		$(MAKE) $${target}; \
+		$(MAKE) $${target} || exit 1; \
 	done
 
 clean:
