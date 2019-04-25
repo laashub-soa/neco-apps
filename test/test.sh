@@ -28,14 +28,15 @@ loadSnapshot () {
     waitTimeSync ${boot}
   done
 
-  # Sync worker nodes with NTP.
-  ./dcscp sync.sh cybozu@boot-0:
-  ./dcssh cybozu@boot-0 "./sync.sh"
-
   # Restart Vault.  Vault will fail to read etcd otherwise.
   for boot in boot-0 boot-1 boot-2; do
     ./dcssh cybozu@${boot} sudo systemctl start vault.service
   done
+
+  # Sync worker nodes with NTP.  This uses Vault via "ckecli ssh".
+  ./dcscp sync.sh cybozu@boot-0:
+  ./dcssh cybozu@boot-0 "./sync.sh"
+
   # Restart CKE. Vault token will be expired.
   for boot in boot-0 boot-1 boot-2; do
     ./dcssh cybozu@${boot} sudo systemctl start cke.service
