@@ -6,5 +6,4 @@ resources:
 - role.yaml
 - rolebinding.yaml
 - deployment.yaml
-- configmap.yaml
 - pod-security-policy.yaml

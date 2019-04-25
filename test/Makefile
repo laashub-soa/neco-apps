@@ -18,6 +18,7 @@ KUSTOMIZE_VERSION = 2.0.3
 # Monitoring test is always last step for checking all deployed metrics.
 TESTS = \
 	test-metallb \
+	test-ingress \
 	test-monitoring
 
 
@@ -50,7 +51,7 @@ $(TESTS): test-%: install.yaml
 test-all:
 	$(MAKE) test
 	for target in $(TESTS); do \
-		$(MAKE) $${target}; \
+		$(MAKE) $${target} || exit 1; \
 	done
 
 clean:

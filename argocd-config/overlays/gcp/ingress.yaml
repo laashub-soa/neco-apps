@@ -1,9 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: metallb
+  name: ingress
   namespace: argocd
 spec:
-  source:
-    path: metallb/overlays/gcp
   syncPolicy: null

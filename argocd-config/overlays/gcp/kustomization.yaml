@@ -4,5 +4,6 @@ bases:
 - ../../base
 patchesStrategicMerge:
 - argocd.yaml
+- ingress.yaml
 - monitoring.yaml
 - metallb.yaml
