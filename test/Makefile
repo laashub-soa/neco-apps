@@ -18,6 +18,7 @@ KUSTOMIZE_VERSION = 2.0.3
 # Monitoring test is always last step for checking all deployed metrics.
 TESTS = \
 	test-metallb \
+	test-ingress \
 	test-monitoring
 
 
