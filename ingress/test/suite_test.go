@@ -18,7 +18,14 @@ func Test(t *testing.T) {
 	RunSpecs(t, "Test")
 }
 
-var _ = BeforeSuite(test.RunBeforeSuite)
+var _ = BeforeSuite(func() {
+	test.RunBeforeSuite()
+	test.ExecAt(test.Boot0, "kubectl", "create", "namespace", "test-ingress")
+})
+
+var _ = AfterSuite(func() {
+	test.ExecAt(test.Boot0, "kubectl", "delete", "namespace", "test-ingress")
+})
 
 // This must be the only top-level test container.
 // Other tests and test containers must be listed in this.

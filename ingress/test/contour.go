@@ -77,12 +77,12 @@ func testContour() {
 
 	It("should deploy IngressRoute", func() {
 		By("deployment Pods")
-		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
+		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "-n", "test-ingress", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "deployments/testhttpd", "-o", "json")
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "-n", "test-ingress", "get", "deployments/testhttpd", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -99,7 +99,7 @@ func testContour() {
 			return nil
 		}).Should(Succeed())
 
-		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "expose", "deployment", "testhttpd", "--port=80", "--target-port=8000", "--name=testhttpd")
+		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "-n", "test-ingress", "expose", "deployment", "testhttpd", "--port=80", "--target-port=8000", "--name=testhttpd")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("create IngressRoute")
@@ -109,9 +109,10 @@ apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute
 metadata:
   name: root
+  namespace: test-ingress
 spec:
   virtualhost:
-    fqdn: ingress.neco-ops.cybozu-ne.co
+    fqdn: test-ingress.neco-ops.cybozu-ne.co
   routes:
     - match: /testhttpd
       services:
@@ -147,7 +148,7 @@ spec:
 
 		By("access service from operation")
 		Eventually(func() error {
-			cmd := exec.Command("curl", "--header", "Host: ingress.neco-ops.cybozu-ne.co", targetIP+"/testhttpd", "-m", "5", "--fail")
+			cmd := exec.Command("curl", "--header", "Host: test-ingress.neco-ops.cybozu-ne.co", targetIP+"/testhttpd", "-m", "5", "--fail")
 			return cmd.Run()
 		}).Should(Succeed())
 	})
