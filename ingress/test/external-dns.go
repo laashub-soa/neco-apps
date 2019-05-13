@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func testExternalDNS() {
@@ -56,31 +55,44 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("resolving xxx.neco-ops.cybozu-ne.co")
-		var nodeList corev1.NodeList
-		data := test.ExecSafeAt(test.Boot0, "kubectl", "get", "nodes", "-o", "json")
-		err = json.Unmarshal(data, &nodeList)
-		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
-		Expect(nodeList.Items).ShouldNot(BeEmpty())
-		node := nodeList.Items[0]
-		var nodeAddress string
-		for _, addr := range node.Status.Addresses {
-			if addr.Type != corev1.NodeInternalIP {
-				continue
+		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "run",
+			"test-ubuntu", "--image=quay.io/cybozu/ubuntu-debug:18.04",
+			"--command", "--", "/bin/sleep", "180")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+
+		Eventually(func() error {
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "get", "deployments/test-ubuntu", "-o", "json")
+			if err != nil {
+				return err
 			}
-			nodeAddress = addr.Address
-		}
-		Expect(nodeAddress).ShouldNot(BeNil())
+
+			deployment := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deployment)
+			if err != nil {
+				return err
+			}
+
+			if deployment.Status.ReadyReplicas != 1 {
+				return errors.New("ReadyReplicas is not 1")
+			}
+			return nil
+		}).Should(Succeed())
+
 		Eventually(func() error {
 			domainName := test.TestID + ".neco-ops.cybozu-ne.co"
-			stdout, stderr, err := test.ExecAt(test.Boot0, "ckecli", "ssh", nodeAddress, "getent", "hosts", domainName)
+			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "exec", "test-ubuntu", "--", "dig", "+noall", "+answer", "@ns-gcp-private.googledomains.com.", domainName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			ipAddress := strings.Fields(string(bytes.TrimSpace(stdout)))[0]
+			// expected: xxx.neco-ops.cybozu-ne.co. 300 IN A 10.10.10.10
+			ipAddress := strings.Fields(string(bytes.TrimSpace(stdout)))[4]
 			if ipAddress != "10.0.5.9" {
 				return errors.New("expected IP address is 10.0.5.9, but actual IP address is " + ipAddress)
 			}
 			return nil
 		}).Should(Succeed())
+
+		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "delete", "deployment", "test-ubuntu")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 }
