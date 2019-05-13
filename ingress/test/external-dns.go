@@ -55,7 +55,7 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("resolving xxx.neco-ops.cybozu-ne.co")
-		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "run",
+		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "run",
 			"test-ubuntu", "--image=quay.io/cybozu/ubuntu-debug:18.04",
 			"--command", "--", "/bin/sleep", "180")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
@@ -92,7 +92,7 @@ spec:
 			return nil
 		}).Should(Succeed())
 
-		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "delete", "deployment", "test-ubuntu")
+		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "delete", "deployment", "test-ubuntu")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 }
