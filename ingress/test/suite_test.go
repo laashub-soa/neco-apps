@@ -31,4 +31,5 @@ var _ = AfterSuite(func() {
 // Other tests and test containers must be listed in this.
 var _ = Describe("GitOps Test", func() {
 	Context("contour", testContour)
+	Context("externalDNS", testExternalDNS)
 })
