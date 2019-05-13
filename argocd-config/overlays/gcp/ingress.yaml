@@ -4,4 +4,6 @@ metadata:
   name: ingress
   namespace: argocd
 spec:
+  source:
+    path: ingress/overlays/gcp
   syncPolicy: null

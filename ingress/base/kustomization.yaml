@@ -5,3 +5,7 @@ resources:
 - contour/deployment.yaml
 - contour/rbac.yaml
 - contour/service.yaml
+- external-dns/common.yaml
+- external-dns/deployment.yaml
+- external-dns/rbac.yaml
+- external-dns/service.yaml
