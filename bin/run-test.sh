@@ -13,6 +13,7 @@ git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAM
 cd \$HOME/${TEST_DIR}/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
 git checkout -qf ${CIRCLE_SHA1}
 cd test
+cp \$HOME/${TEST_DIR}/account.json ./
 export GO111MODULE=on
 make setup
 make kustomize-check
@@ -24,7 +25,7 @@ chmod +x run.sh
 $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="rm -rf /home/cybozu/${CIRCLE_PROJECT_REPONAME}-*"
 
 $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="mkdir -p /home/cybozu/${TEST_DIR}"
-$GCLOUD compute scp --zone=${ZONE} run.sh cybozu@${INSTANCE_NAME}:${TEST_DIR}
+$GCLOUD compute scp --zone=${ZONE} run.sh account.json cybozu@${INSTANCE_NAME}:${TEST_DIR}
 $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="/home/cybozu/${TEST_DIR}/run.sh"
 
 exit $?

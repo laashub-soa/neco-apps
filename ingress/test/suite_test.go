@@ -14,6 +14,11 @@ func Test(t *testing.T) {
 		t.Skip("no SSH_PRIVKEY envvar")
 	}
 
+	_, _, err := test.ExecAt(test.Boot0, "test", "-e", "account.json")
+	if err != nil {
+		t.Skip("Google Service Account file does not exist.  Skip Cloud DNS-related tests.")
+	}
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Test")
 }
@@ -30,6 +35,7 @@ var _ = AfterSuite(func() {
 // This must be the only top-level test container.
 // Other tests and test containers must be listed in this.
 var _ = Describe("GitOps Test", func() {
+	Context("setup", testSetup)
 	Context("contour", testContour)
 	Context("externalDNS", testExternalDNS)
 })

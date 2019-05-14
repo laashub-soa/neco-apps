@@ -32,3 +32,17 @@ spec:
         - --registry=txt
         - --txt-owner-id=neco
         - --log-format=json
+        env:
+        - name: HTTP_PROXY
+          value: http://squid.internet-egress.svc.cluster.local:3128
+        - name: HTTPS_PROXY
+          value: http://squid.internet-egress.svc.cluster.local:3128
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/external-dns.secret/account.json
+        volumeMounts:
+        - name: external-dns-secret-volume
+          mountPath: /etc/external-dns.secret/
+      volumes:
+      - name: external-dns-secret-volume
+        secret:
+          secretName: external-dns
