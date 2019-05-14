@@ -55,9 +55,35 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("resolving xxx.neco-ops.cybozu-ne.co")
-		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "run",
-			"test-ubuntu", "--image=quay.io/cybozu/ubuntu-debug:18.04",
-			"--command", "--", "/bin/sleep", "180")
+		ubuntu := `
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: test-ubuntu
+  name: test-ubuntu
+  namespace: internet-egress
+spec:
+  selector:
+    matchLabels:
+      run: test-ubuntu
+  template:
+    metadata:
+      labels:
+        run: test-ubuntu
+    spec:
+      containers:
+      - command:
+        - /bin/sleep
+        - "180"
+        image: quay.io/cybozu/ubuntu-debug:18.04
+        imagePullPolicy: IfNotPresent
+        name: test-ubuntu
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534 # nobody
+`
+		_, stderr, err = test.ExecAtWithInput(test.Boot0, []byte(ubuntu), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		Eventually(func() error {
