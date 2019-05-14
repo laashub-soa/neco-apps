@@ -117,7 +117,7 @@ spec:
 				return err
 			}
 			if len(podList.Items) != 1 {
-				return errors.New("prometheus pod doesn't exist")
+				return errors.New("ubuntu pod doesn't exist")
 			}
 			podName := podList.Items[0].Name
 			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "exec", podName, "-n", "internet-egress", "--", "dig", "+noall", "+answer", "@ns-gcp-private.googledomains.com.", domainName)
@@ -125,9 +125,9 @@ spec:
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			// expected: xxx.neco-ops.cybozu-ne.co. 300 IN A 10.10.10.10
-			ipAddress := strings.Fields(string(bytes.TrimSpace(stdout)))[4]
-			if ipAddress != "10.0.5.9" {
-				return errors.New("expected IP address is 10.0.5.9, but actual IP address is " + ipAddress)
+			fields := strings.Fields(string(bytes.TrimSpace(stdout)))
+			if len(fields) < 5 || fields[4] != "10.0.5.9" {
+				return errors.New("expected IP address is 10.0.5.9, but actual response is " + string(stdout))
 			}
 			return nil
 		}).Should(Succeed())
