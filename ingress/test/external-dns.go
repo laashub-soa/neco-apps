@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func testExternalDNS() {
@@ -106,7 +107,20 @@ spec:
 
 		Eventually(func() error {
 			domainName := test.TestID + ".neco-ops.cybozu-ne.co"
-			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "exec", "test-ubuntu", "--", "dig", "+noall", "+answer", "@ns-gcp-private.googledomains.com.", domainName)
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "get", "pod", "--selector=run=test-ubuntu", "-o", "json")
+			if err != nil {
+				return err
+			}
+			podList := new(corev1.PodList)
+			err = json.Unmarshal(stdout, podList)
+			if err != nil {
+				return err
+			}
+			if len(podList.Items) != 1 {
+				return errors.New("prometheus pod doesn't exist")
+			}
+			podName := podList.Items[0].Name
+			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "exec", podName, "-n", "internet-egress", "--", "dig", "+noall", "+answer", "@ns-gcp-private.googledomains.com.", domainName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
