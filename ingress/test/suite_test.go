@@ -14,9 +14,12 @@ func Test(t *testing.T) {
 		t.Skip("no SSH_PRIVKEY envvar")
 	}
 
-	_, _, err := test.ExecAt(test.Boot0, "test", "-e", "account.json")
+	_, err := os.Stat("../../test/account.json")
 	if err != nil {
-		t.Skip("Google Service Account file does not exist.  Skip Cloud DNS-related tests.")
+		if os.IsNotExist(err) {
+			t.Skip("Google Service Account file does not exist.  Skip Cloud DNS-related tests.")
+		}
+		t.Fatal(err)
 	}
 
 	RegisterFailHandler(Fail)
