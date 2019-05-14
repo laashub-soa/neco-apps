@@ -74,12 +74,10 @@ spec:
         run: test-ubuntu
     spec:
       containers:
-      - command:
-        - /bin/sleep
-        - "180"
+      - name: test-ubuntu
+        command: ["/bin/sleep", "Infinity"]
         image: quay.io/cybozu/ubuntu-debug:18.04
         imagePullPolicy: IfNotPresent
-        name: test-ubuntu
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534 # nobody
@@ -120,7 +118,7 @@ spec:
 				return errors.New("ubuntu pod doesn't exist")
 			}
 			podName := podList.Items[0].Name
-			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "exec", podName, "-n", "internet-egress", "--", "dig", "+noall", "+answer", "@ns-gcp-private.googledomains.com.", domainName)
+			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "-n", "internet-egress", "exec", podName, "--", "dig", "+noall", "+answer", "@ns-gcp-private.googledomains.com.", domainName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
