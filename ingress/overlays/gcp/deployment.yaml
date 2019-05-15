@@ -11,7 +11,7 @@ spec:
         - --source=crd
         - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
         - --crd-source-kind=DNSEndpoint
-        - --domain-filter=cybozu-ne.co
+        - --domain-filter=dev-ne.co
         - --provider=google
         - --google-project=neco-test
         - --policy=sync
