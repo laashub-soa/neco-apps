@@ -1,4 +1,4 @@
-package ingress
+package test
 
 import (
 	"encoding/json"
@@ -11,24 +11,31 @@ import (
 )
 
 func testSetup() {
-	It("should deploy contour by Argo CD", func() {
-		By("synchronizing contour")
+	It("should deploy external-dns by Argo CD", func() {
+		By("registering secrets")
+		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "create", "namespace", "external-dns")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "--namespace=external-dns", "create", "secret",
+			"generic", "external-dns", "--from-file=account.json")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+
+		By("synchronizing external-dns")
 		Eventually(func() error {
-			stdout, stderr, err := test.ExecAt(test.Boot0, "argocd", "app", "set", "ingress", "--revision", test.CommitID)
+			stdout, stderr, err := test.ExecAt(test.Boot0, "argocd", "app", "set", "external-dns", "--revision", test.CommitID)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			stdout, stderr, err = test.ExecAt(test.Boot0, "argocd", "app", "sync", "ingress")
+			stdout, stderr, err = test.ExecAt(test.Boot0, "argocd", "app", "sync", "external-dns")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			return nil
 		}).Should(Succeed())
 
-		By("checking ingress status")
+		By("checking external-dns status")
 		Eventually(func() error {
 			stdout, stderr, err := test.ExecAt(test.Boot0,
-				"kubectl", "get", "app", "ingress", "-n", test.ArgoCDNamespace, "-o", "json")
+				"kubectl", "get", "app", "external-dns", "-n", test.ArgoCDNamespace, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

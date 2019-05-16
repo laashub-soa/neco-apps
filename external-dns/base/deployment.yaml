@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
@@ -29,6 +29,7 @@ spec:
         - --provider=google
         - --google-project=cybozu-neco
         - --policy=sync
+        - --namespace=ingress
         - --registry=txt
         - --txt-owner-id=neco
         - --log-format=json

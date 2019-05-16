@@ -1,4 +1,4 @@
-package ingress
+package test
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ import (
 func testExternalDNS() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=ingress",
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=external-dns",
 				"get", "deployment/external-dns", "-o=json")
 			if err != nil {
 				return err
@@ -43,8 +43,8 @@ func testExternalDNS() {
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  name: dnsendpoint
-  namespace: test-ingress
+  name: test-endpoint
+  namespace: ingress
 spec:
   endpoints:
   - dnsName: %s
@@ -95,5 +95,10 @@ spec:
 			}
 			return nil
 		}).Should(Succeed())
+
+		By("cleaning up")
+		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "delete", "-n=ingress", "dnsendpoints/test-endpoint")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
+
 }

@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
@@ -14,6 +14,7 @@ spec:
         - --domain-filter=dev-ne.co
         - --provider=google
         - --google-project=neco-test
+        - --namespace=ingress
         - --policy=sync
         - --registry=txt
         - --txt-owner-id=neco
