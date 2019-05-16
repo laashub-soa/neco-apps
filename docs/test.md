@@ -38,7 +38,7 @@ Options
 
 ### `../test/account.json` file
 
-External DNS in Argo CD app `ingress` requires Google Application Credentials in JSON file.
+External DNS in Argo CD app `external-dns` requires Google Application Credentials in JSON file.
 neco-ops test runs `kubectl create secrets .... --from-file=account.json` to register `Secret` for External DNS.
-To run `ingress` test, put your account.json of the Google Cloud service account which has a role `roles/dns.admin`.
+To run `external-dns` test, put your account.json of the Google Cloud service account which has a role `roles/dns.admin`.
 See details of the role at https://cloud.google.com/iam/docs/understanding-roles#dns-roles
