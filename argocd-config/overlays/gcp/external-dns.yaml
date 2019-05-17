@@ -1,7 +1,9 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ingress
+  name: external-dns
   namespace: argocd
 spec:
+  source:
+    path: external-dns/overlays/gcp
   syncPolicy: null

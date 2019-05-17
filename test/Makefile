@@ -19,6 +19,7 @@ KUSTOMIZE_VERSION = 2.0.3
 TESTS = \
 	test-metallb \
 	test-ingress \
+	test-external-dns \
 	test-monitoring
 
 

@@ -41,6 +41,9 @@ loadSnapshot () {
   for boot in boot-0 boot-1 boot-2; do
     ./dcssh cybozu@${boot} sudo systemctl start cke.service
   done
+
+  # Copy Google Service Account file if exists.
+  if [ -e account.json ]; then ./dcscp account.json cybozu@boot-0:; fi
 }
 
 DIR="$1"
