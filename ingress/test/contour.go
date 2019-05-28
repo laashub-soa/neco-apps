@@ -7,6 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/cybozu-go/neco-ops/test"
+	"github.com/kubernetes-incubator/external-dns/endpoint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
@@ -62,7 +63,7 @@ func testContour() {
 		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "-n", "test-ingress", "expose", "deployment", "testhttpd", "--port=80", "--target-port=8000", "--name=testhttpd")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		By("create IngressRoute")
+		By("creating IngressRoute")
 		fqdn := "test-ingress.gcp0.dev-ne.co"
 		ingressRoute := fmt.Sprintf(`
 apiVersion: contour.heptio.com/v1beta1
@@ -82,7 +83,7 @@ spec:
 		_, stderr, err = test.ExecAtWithInput(test.Boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		By("get contour service")
+		By("getting contour service")
 		var targetIP string
 		Eventually(func() error {
 			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "-n", "ingress", "service/contour-global", "-o", "json")
@@ -106,10 +107,38 @@ spec:
 			return nil
 		}).Should(Succeed())
 
-		By("access service from operation")
+		By("accessing service from operation")
 		Eventually(func() error {
 			cmd := exec.Command("curl", "--header", "Host: "+fqdn, targetIP+"/testhttpd", "-m", "5", "--fail")
 			return cmd.Run()
+		}).Should(Succeed())
+
+		By("generating DNSEndpoint automatically")
+		Eventually(func() error {
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "-n", "ingress", "dnsendpoint/cp-root", "-o", "json")
+			if err != nil {
+				return err
+			}
+			de := new(endpoint.DNSEndpoint)
+			err = json.Unmarshal(stdout, de)
+			if err != nil {
+				return err
+			}
+			if len(de.Spec.Endpoints) == 0 {
+				return errors.New("len(de.Spec.Endpoints) == 0")
+			}
+
+			expectedIP := de.Spec.Endpoints[0].Targets[0]
+			stdout, _, err = test.ExecAt(test.Boot0, "kubectl", "get", "-n=ingress", "svc/contour-forest", "-o=template",
+				`--template="{{(index .status.loadBalancer.ingress 0).ip}}"`)
+			if err != nil {
+				return err
+			}
+			actualIP := string(stdout)
+			if expectedIP != actualIP {
+				return fmt.Errorf("expected IP is (%s), but actual is (%s)", expectedIP, actualIP)
+			}
+			return nil
 		}).Should(Succeed())
 	})
 }
