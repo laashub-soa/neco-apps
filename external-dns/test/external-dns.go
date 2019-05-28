@@ -37,7 +37,7 @@ func testExternalDNS() {
 	})
 
 	It("should create DNS record", func() {
-		domainName := test.TestID + ".neco-ops.dev-ne.co"
+		domainName := test.TestID + ".gcp0.dev-ne.co"
 		By("deploying DNSEndpoint")
 		dnsEndpoint := fmt.Sprintf(`
 apiVersion: externaldns.k8s.io/v1alpha1
@@ -56,7 +56,7 @@ spec:
 		_, stderr, err := test.ExecAtWithInput(test.Boot0, []byte(dnsEndpoint), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		By("resolving xxx.neco-ops.dev-ne.co")
+		By("resolving xxx.gcp0.dev-ne.co")
 		Eventually(func() error {
 			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "get", "nodes", "-o", "json")
 			if err != nil {
@@ -88,7 +88,7 @@ spec:
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			// expected: xxx.neco-ops.dev-ne.co. 300 IN A 10.0.5.9
+			// expected: xxx.gcp0.dev-ne.co. 300 IN A 10.0.5.9
 			fields := strings.Fields(string(bytes.TrimSpace(stdout)))
 			if len(fields) < 5 || fields[4] != "10.0.5.9" {
 				return errors.New("expected IP address is 10.0.5.9, but actual response is " + string(stdout))
