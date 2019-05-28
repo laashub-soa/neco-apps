@@ -1,4 +1,4 @@
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: contour
@@ -11,7 +11,7 @@ subjects:
   name: contour
   namespace: ingress
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: contour
@@ -128,6 +128,25 @@ rules:
       - services/status
     verbs:
       - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: contour-plus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: contour-plus
+subjects:
+- kind: ServiceAccount
+  name: contour
+  namespace: ingress
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: contour-plus
+rules:
   - apiGroups:
       - ""
     resources:

@@ -27,11 +27,9 @@ spec:
         args: ["serve", "--incluster"]
       - image: quay.io/cybozu/contour-plus:0.2.0
         name: contour-plus
-        command: ["/contour-plus"]
         args:
         - --crds="DNSEndpoint"
-        - --name-prefix="cp-"
-        - --service-name="ingress/contour-forest"
+        - --service-name="ingress/contour-global"
         env:
         - name: POD_NAMESPACE
           valueFrom:

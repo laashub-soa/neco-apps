@@ -64,7 +64,7 @@ func testContour() {
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("creating IngressRoute")
-		fqdn := "test-ingress.gcp0.dev-ne.co"
+		fqdn := "root.test-ingress.gcp0.dev-ne.co"
 		ingressRoute := fmt.Sprintf(`
 apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute
@@ -115,7 +115,7 @@ spec:
 
 		By("generating DNSEndpoint automatically")
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "-n", "ingress", "dnsendpoint/cp-root", "-o", "json")
+			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "-n", "ingress", "dnsendpoint/root", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -129,7 +129,7 @@ spec:
 			}
 
 			expectedIP := de.Spec.Endpoints[0].Targets[0]
-			stdout, _, err = test.ExecAt(test.Boot0, "kubectl", "get", "-n=ingress", "svc/contour-forest", "-o=template",
+			stdout, _, err = test.ExecAt(test.Boot0, "kubectl", "get", "-n=ingress", "svc/contour-global", "-o=template",
 				`--template="{{(index .status.loadBalancer.ingress 0).ip}}"`)
 			if err != nil {
 				return err
