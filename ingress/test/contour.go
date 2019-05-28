@@ -63,8 +63,8 @@ func testContour() {
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("create IngressRoute")
-
-		ingressRoute := `
+		fqdn := "test-ingress.gcp0.dev-ne.co"
+		ingressRoute := fmt.Sprintf(`
 apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute
 metadata:
@@ -72,13 +72,13 @@ metadata:
   namespace: test-ingress
 spec:
   virtualhost:
-    fqdn: test-ingress.neco-ops.cybozu-ne.co
+    fqdn: %s
   routes:
     - match: /testhttpd
       services:
         - name: testhttpd
           port: 80
-`
+`, fqdn)
 		_, stderr, err = test.ExecAtWithInput(test.Boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
@@ -108,7 +108,7 @@ spec:
 
 		By("access service from operation")
 		Eventually(func() error {
-			cmd := exec.Command("curl", "--header", "Host: test-ingress.neco-ops.cybozu-ne.co", targetIP+"/testhttpd", "-m", "5", "--fail")
+			cmd := exec.Command("curl", "--header", "Host: "+fqdn, targetIP+"/testhttpd", "-m", "5", "--fail")
 			return cmd.Run()
 		}).Should(Succeed())
 	})
