@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os/exec"
 
 	"github.com/kubernetes-incubator/external-dns/endpoint"
 	. "github.com/onsi/ginkgo"
@@ -64,9 +63,6 @@ func testContour() {
 			return nil
 		}).Should(Succeed())
 
-		_, stderr, err = ExecAt(Boot0, "kubectl", "-n", "test-ingress", "expose", "deployment", "testhttpd", "--port=80", "--target-port=8000", "--name=testhttpd")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
-
 		By("creating IngressRoute")
 		fqdn := "root.test-ingress.gcp0.dev-ne.co"
 		ingressRoute := fmt.Sprintf(`
@@ -111,15 +107,9 @@ spec:
 			return nil
 		}).Should(Succeed())
 
-		By("accessing service from operation")
+		By("confirming generated DNSEndpoint")
 		Eventually(func() error {
-			cmd := exec.Command("curl", "--header", "Host: "+fqdn, targetIP+"/testhttpd", "-m", "5", "--fail")
-			return cmd.Run()
-		}).Should(Succeed())
-
-		By("generating DNSEndpoint automatically")
-		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "-n", "ingress", "dnsendpoint/root", "-o", "json")
+			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "-n", "test-ingress", "dnsendpoint/root", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -132,17 +122,18 @@ spec:
 				return errors.New("len(de.Spec.Endpoints) == 0")
 			}
 
-			expectedIP := de.Spec.Endpoints[0].Targets[0]
-			stdout, _, err = ExecAt(Boot0, "kubectl", "get", "-n=ingress", "svc/contour-global", "-o=template",
-				`--template="{{(index .status.loadBalancer.ingress 0).ip}}"`)
-			if err != nil {
-				return err
-			}
 			actualIP := string(stdout)
-			if expectedIP != actualIP {
-				return fmt.Errorf("expected IP is (%s), but actual is (%s)", expectedIP, actualIP)
+			if targetIP != actualIP {
+				return fmt.Errorf("expected IP is (%s), but actual is (%s)", targetIP, actualIP)
 			}
 			return nil
+		}).Should(Succeed())
+
+		By("accessing with curl")
+		Eventually(func() error {
+			_, _, err := ExecAt(Boot0, "curl", "--resolve", fqdn+":80:"+targetIP,
+				"http://"+fqdn+"/testhttpd", "-m", "5", "--fail")
+			return err
 		}).Should(Succeed())
 	})
 }
