@@ -17,7 +17,7 @@ cp \$HOME/${TEST_DIR}/account.json ./
 export GO111MODULE=on
 make setup
 make kustomize-check
-make COMMIT_ID=${CIRCLE_SHA1} test-all
+make test COMMIT_ID=${CIRCLE_SHA1}
 EOF
 chmod +x run.sh
 

@@ -11,15 +11,9 @@ Staging cluster
 1. Install Argo CD command into your client.
 2. Deploy Argo CD like `../test/install.yaml` into your Kubernetes cluster.
 3. Login to the exposed `argocd-server` service.
-4. Create `argocd-config` app in Argo CD.
+4. Create Argo CD `Application`s as follows:
     ```console
-    $ argocd app create argocd-config \
-      --repo https://github.com/cybozu-go/neco-ops.git \
-      --path argocd-config/overlays/stage \
-      --dest-namespace argocd \
-      --dest-server https://kubernetes.default.svc \
-      --sync-policy automated \
-      --auto-prune
+    $ kubectl apply -k ./argocd-config/overlays/stage0
     ```
 5. Argo CD in the staging cluster watches changes of the **master HEAD** branch.
 
@@ -37,16 +31,10 @@ Production cluster
 *NOTE: Skip this step if Argo CD is already deployed*
 
 1. Setup Argo CD is as same as Staging Cluster.
-2. Create `argocd-config` app in Argo CD.
+2. Create Argo CD `Application`s as follows:
     ```console
-    $ argocd app create argocd-config \
-      --repo https://github.com/cybozu-go/neco-ops.git \
-      --path argocd-config/overlays/prod \
-      --dest-namespace argocd \
-      --dest-server https://kubernetes.default.svc \
-      --sync-policy automated \
-      --auto-prune \
-      --revision release
+    $ CLUSTER=tokyo0  # osaka0, ...
+    $ kubectl apply -k ./argocd-config/overlays/$CLUSTER
     ```
 3. Argo CD in the production cluster watches changes of the **release HEAD** branch.
 
@@ -59,7 +47,7 @@ Production cluster
     $ git checkout master
     $ git pull
     $ git tag release-$(date +%Y.%m.%d)-UNIQUE_ID
-    $ git push origin master --tags
+    $ git push origin --tags
     ```
 3. CI creates a new branch using its tag, then create a new PR which merges to `release` branch.
 4. Reviewer reviews it, and accept if LGTM.

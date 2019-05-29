@@ -46,14 +46,7 @@ loadSnapshot () {
   if [ -e account.json ]; then ./dcscp account.json cybozu@boot-0:; fi
 }
 
-DIR="$1"
-
-if [ -z "${DIR}" ]; then
-  # Load snapshot only when no DIR specified
-  loadSnapshot
-else
-  cd ${DIR}
-fi
+loadSnapshot
 
 PLACEMAT_PID=$(echo $(pgrep placemat) | tr " " ",")
 
