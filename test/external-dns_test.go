@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cybozu-go/neco-ops/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
@@ -17,7 +16,7 @@ import (
 func testExternalDNS() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=external-dns",
+			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=external-dns",
 				"get", "deployment/external-dns", "-o=json")
 			if err != nil {
 				return err
@@ -37,7 +36,7 @@ func testExternalDNS() {
 	})
 
 	It("should create DNS record", func() {
-		domainName := test.TestID + ".gcp0.dev-ne.co"
+		domainName := TestID + ".gcp0.dev-ne.co"
 		By("deploying DNSEndpoint")
 		dnsEndpoint := fmt.Sprintf(`
 apiVersion: externaldns.k8s.io/v1alpha1
@@ -53,12 +52,12 @@ spec:
     targets:
     - 10.0.5.9
 `, domainName)
-		_, stderr, err := test.ExecAtWithInput(test.Boot0, []byte(dnsEndpoint), "kubectl", "apply", "-f", "-")
+		_, stderr, err := ExecAtWithInput(Boot0, []byte(dnsEndpoint), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("resolving xxx.gcp0.dev-ne.co")
 		Eventually(func() error {
-			stdout, stderr, err := test.ExecAt(test.Boot0, "kubectl", "get", "nodes", "-o", "json")
+			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "nodes", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -84,7 +83,7 @@ spec:
 				return errors.New("can not get NodeIP")
 			}
 
-			stdout, stderr, err = test.ExecAt(test.Boot0, "ckecli", "ssh", nodeAddress, "dig", "+noall", "+answer", domainName)
+			stdout, stderr, err = ExecAt(Boot0, "ckecli", "ssh", nodeAddress, "dig", "+noall", "+answer", domainName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -97,8 +96,7 @@ spec:
 		}).Should(Succeed())
 
 		By("cleaning up")
-		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "delete", "-n=ingress", "dnsendpoints/test-endpoint")
+		_, stderr, err = ExecAt(Boot0, "kubectl", "delete", "-n=ingress", "dnsendpoints/test-endpoint")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
-
 }

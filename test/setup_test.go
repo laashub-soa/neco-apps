@@ -13,6 +13,25 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+const alertmanagerSecret = `
+route:
+  receiver: slack
+  group_wait: 5s # Send a notification after 5 seconds
+  routes:
+  - receiver: slack
+    continue: true # Continue notification to next receiver
+
+# Receiver configurations
+receivers:
+- name: slack
+  slack_configs:
+  - channel: '#test'
+    api_url: https://hooks.slack.com/services/XXX/XXX
+    icon_url: https://avatars3.githubusercontent.com/u/3380462 # Prometheus icon
+    http_config:
+      proxy_url: http://squid.internet-egress.svc.cluster.local:3128
+`
+
 // testSetup tests setup of Argo CD
 func testSetup() {
 	It("should be ready K8s cluster after loading snapshot", func() {
@@ -59,6 +78,24 @@ func testSetup() {
 
 			return nil
 		}).Should(Succeed())
+	})
+
+	It("should prepare secrets", func() {
+		By("creating namespace and secrets for external-dns")
+		_, stderr, err := ExecAt(Boot0, "kubectl", "create", "namespace", "external-dns")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		_, stderr, err = ExecAt(Boot0, "kubectl", "--namespace=external-dns", "create", "secret",
+			"generic", "external-dns", "--from-file=account.json")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+
+		By("creating namespace and secrets for alertmanager")
+		stdout, stderr, err := ExecAtWithInput(Boot0, []byte(alertmanagerSecret), "dd", "of=alertmanager.yaml")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		stdout, stderr, err = ExecAt(Boot0, "kubectl", "create", "namespace", "monitoring")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		stdout, stderr, err = ExecAt(Boot0, "kubectl", "--namespace=monitoring", "create", "secret",
+			"generic", "alertmanager", "--from-file", "alertmanager.yaml")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 	})
 
 	It("should install Argo CD", func() {
@@ -142,12 +179,17 @@ func testSetup() {
 		}).Should(Succeed())
 	})
 
+	It("should checkout neco-ops repository", func() {
+		ExecSafeAt(Boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-ops")
+		ExecSafeAt(Boot0, "cd", "neco-ops", ";", "git", "checkout", CommitID)
+		ExecSafeAt(Boot0, "sed", "-i", "s/HEAD/"+CommitID+"/", "./neco-ops/argocd-config/base/*.yaml")
+	})
+
 	It("should setup Argo CD application as Argo CD app", func() {
 		By("creating Argo CD app")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "create", "argocd-config",
-				"--repo", "https://github.com/cybozu-go/neco-ops.git",
-				"--path", "argocd-config/overlays/gcp",
+				"--file", "./neco-ops/argocd-config/overlays/gcp/kustomization.yaml",
 				"--dest-namespace", ArgoCDNamespace,
 				"--dest-server", "https://kubernetes.default.svc",
 				"--revision", CommitID)
@@ -166,27 +208,31 @@ func testSetup() {
 			return nil
 		}).Should(Succeed())
 
-		By("checking argocd-config app status")
+		By("checking app status")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "app", "argocd-config", "-n", ArgoCDNamespace, "-o", "json")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			var app argoappv1.Application
-			err = json.Unmarshal(stdout, &app)
-			if err != nil {
-				return err
-			}
-
-			for _, r := range app.Status.Resources {
-				if r.Status != argoappv1.SyncStatusCodeSynced {
-					return fmt.Errorf("app is not yet Synced: %s", r.Status)
+			apps := []string{"argocd", "external-dns", "ingress", "metallb", "monitoring"}
+			for _, a := range apps {
+				stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "app", a, "-n", ArgoCDNamespace, "-o", "json")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}
-				if r.Health.Status != argoappv1.HealthStatusHealthy {
-					return fmt.Errorf("app is not yet Healthy: %s", r.Health.Status)
+				var app argoappv1.Application
+				err = json.Unmarshal(stdout, &app)
+				if err != nil {
+					return err
+				}
+
+				for _, r := range app.Status.Resources {
+					if r.Status != argoappv1.SyncStatusCodeSynced {
+						return fmt.Errorf("%s is not yet Synced: %s", a, r.Status)
+					}
+					if r.Health.Status != argoappv1.HealthStatusHealthy {
+						return fmt.Errorf("%s is not yet Healthy: %s", a, r.Health.Status)
+					}
 				}
 			}
 			return nil
 		}).Should(Succeed())
 	})
 }
+

@@ -1,4 +1,4 @@
-package ingress
+package test
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/cybozu-go/neco-ops/test"
 	"github.com/kubernetes-incubator/external-dns/endpoint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -15,9 +14,14 @@ import (
 )
 
 func testContour() {
+	It("should create test-ingress namespace", func() {
+		ExecSafeAt(Boot0, "kubectl", "delete", "namespace", "test-ingress", "--ignore-not-found=true")
+		ExecSafeAt(Boot0, "kubectl", "create", "namespace", "test-ingress")
+	})
+
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=ingress",
+			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=ingress",
 				"get", "deployment/contour", "-o=json")
 			if err != nil {
 				return err
@@ -38,12 +42,12 @@ func testContour() {
 
 	It("should deploy IngressRoute", func() {
 		By("deployment Pods")
-		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "-n", "test-ingress", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
+		_, stderr, err := ExecAt(Boot0, "kubectl", "-n", "test-ingress", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "-n", "test-ingress", "get", "deployments/testhttpd", "-o", "json")
+			stdout, _, err := ExecAt(Boot0, "kubectl", "-n", "test-ingress", "get", "deployments/testhttpd", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -60,7 +64,7 @@ func testContour() {
 			return nil
 		}).Should(Succeed())
 
-		_, stderr, err = test.ExecAt(test.Boot0, "kubectl", "-n", "test-ingress", "expose", "deployment", "testhttpd", "--port=80", "--target-port=8000", "--name=testhttpd")
+		_, stderr, err = ExecAt(Boot0, "kubectl", "-n", "test-ingress", "expose", "deployment", "testhttpd", "--port=80", "--target-port=8000", "--name=testhttpd")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("creating IngressRoute")
@@ -80,13 +84,13 @@ spec:
         - name: testhttpd
           port: 80
 `, fqdn)
-		_, stderr, err = test.ExecAtWithInput(test.Boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
+		_, stderr, err = ExecAtWithInput(Boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("getting contour service")
 		var targetIP string
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "-n", "ingress", "service/contour-global", "-o", "json")
+			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "-n", "ingress", "service/contour-global", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -115,7 +119,7 @@ spec:
 
 		By("generating DNSEndpoint automatically")
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "-n", "ingress", "dnsendpoint/root", "-o", "json")
+			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "-n", "ingress", "dnsendpoint/root", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -129,7 +133,7 @@ spec:
 			}
 
 			expectedIP := de.Spec.Endpoints[0].Targets[0]
-			stdout, _, err = test.ExecAt(test.Boot0, "kubectl", "get", "-n=ingress", "svc/contour-global", "-o=template",
+			stdout, _, err = ExecAt(Boot0, "kubectl", "get", "-n=ingress", "svc/contour-global", "-o=template",
 				`--template="{{(index .status.loadBalancer.ingress 0).ip}}"`)
 			if err != nil {
 				return err
