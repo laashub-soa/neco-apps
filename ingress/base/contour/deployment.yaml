@@ -25,7 +25,7 @@ spec:
         name: contour
         command: ["contour"]
         args: ["serve", "--incluster"]
-      - image: quay.io/cybozu/contour-plus:0.2.0
+      - image: quay.io/cybozu/contour-plus:0.2.1
         name: contour-plus
         args:
         - --crds="DNSEndpoint"
