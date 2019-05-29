@@ -187,26 +187,7 @@ func testSetup() {
 
 	It("should setup Argo CD application as Argo CD app", func() {
 		By("creating Argo CD app")
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "create", "argocd-config",
-				"--file", "./neco-ops/argocd-config/overlays/gcp/kustomization.yaml",
-				"--dest-namespace", ArgoCDNamespace,
-				"--dest-server", "https://kubernetes.default.svc",
-				"--revision", CommitID)
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-
-		By("synchronizing Argo CD app")
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "argocd", "app", "sync", "argocd-config")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
+		ExecSafeAt(Boot0, "kubectl", "apply", "-k", "./neco-ops/argocd-config/overlays/gcp")
 
 		By("checking app status")
 		Eventually(func() error {
@@ -235,4 +216,3 @@ func testSetup() {
 		}).Should(Succeed())
 	})
 }
-

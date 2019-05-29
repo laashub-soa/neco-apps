@@ -6,4 +6,3 @@ metadata:
 spec:
   source:
     path: monitoring/overlays/gcp
-  syncPolicy: null
