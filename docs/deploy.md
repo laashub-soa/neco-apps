@@ -37,7 +37,17 @@ Production cluster
 *NOTE: Skip this step if Argo CD is already deployed*
 
 1. Setup Argo CD is as same as Staging cluster.
-2. Create `argocd-config` application as same sa Staging cluster.
+2. Create `argocd-config` application as follows:
+    ```console
+    $ argocd app create argocd-config \
+      --repo https://github.com/cybozu-go/neco-ops.git \
+      --path argocd-config/overlays/$(cat /etc/neco/cluster) \
+      --dest-namespace argocd \
+      --dest-server https://kubernetes.default.svc \
+      --sync-policy automated \
+      --auto-prune \
+      --revision release
+    ```
 3. Argo CD in the production cluster watches changes of the **release HEAD** branch.
 
 ### Apply changes
