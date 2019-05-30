@@ -15,7 +15,7 @@ import (
 func testMetalLB() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=metallb-system",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=metallb-system",
 				"get", "daemonsets/speaker", "-o=json")
 			if err != nil {
 				return err
@@ -37,7 +37,7 @@ func testMetalLB() {
 		}).Should(Succeed())
 
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=metallb-system",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=metallb-system",
 				"get", "deployments/controller", "-o=json")
 			if err != nil {
 				return err
@@ -57,12 +57,12 @@ func testMetalLB() {
 
 	It("should deploy load balancer type service", func() {
 		By("deployment Pods")
-		_, stderr, err := ExecAt(Boot0, "kubectl", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
+		_, stderr, err := ExecAt(boot0, "kubectl", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "deployments/testhttpd", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "deployments/testhttpd", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -98,12 +98,12 @@ spec:
   loadBalancerIP: 10.72.32.29
   externalTrafficPolicy: Local
 `
-		_, stderr, err = ExecAtWithInput(Boot0, []byte(loadBalancer), "kubectl", "create", "-f", "-")
+		_, stderr, err = ExecAtWithInput(boot0, []byte(loadBalancer), "kubectl", "create", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting service are ready")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "service/testhttpd", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "service/testhttpd", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -127,13 +127,13 @@ spec:
 
 		By("access service from boot-0")
 		Eventually(func() error {
-			_, _, err := ExecAt(Boot0, "curl", targetIP, "-m", "5")
+			_, _, err := ExecAt(boot0, "curl", targetIP, "-m", "5")
 			return err
 		}).Should(Succeed())
 
 		By("access service from external")
 		Eventually(func() error {
-			cmd := exec.Command("sudo", "nsenter", "-n", "-t", ExternalPid, "curl", targetIP, "-m", "5")
+			cmd := exec.Command("sudo", "nsenter", "-n", "-t", externalPID, "curl", targetIP, "-m", "5")
 			return cmd.Run()
 		}).Should(Succeed())
 	})

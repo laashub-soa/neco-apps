@@ -14,13 +14,13 @@ import (
 
 func testContour() {
 	It("should create test-ingress namespace", func() {
-		ExecSafeAt(Boot0, "kubectl", "delete", "namespace", "test-ingress", "--ignore-not-found=true")
-		ExecSafeAt(Boot0, "kubectl", "create", "namespace", "test-ingress")
+		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-ingress", "--ignore-not-found=true")
+		ExecSafeAt(boot0, "kubectl", "create", "namespace", "test-ingress")
 	})
 
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=ingress",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=ingress",
 				"get", "deployment/contour", "-o=json")
 			if err != nil {
 				return err
@@ -41,12 +41,12 @@ func testContour() {
 
 	It("should deploy IngressRoute", func() {
 		By("deployment Pods")
-		_, stderr, err := ExecAt(Boot0, "kubectl", "-n", "test-ingress", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
+		_, stderr, err := ExecAt(boot0, "kubectl", "-n", "test-ingress", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "-n", "test-ingress", "get", "deployments/testhttpd", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "-n", "test-ingress", "get", "deployments/testhttpd", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -80,13 +80,13 @@ spec:
         - name: testhttpd
           port: 80
 `, fqdn)
-		_, stderr, err = ExecAtWithInput(Boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
+		_, stderr, err = ExecAtWithInput(boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("getting contour service")
 		var targetIP string
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "-n", "ingress", "service/contour-global", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "ingress", "service/contour-global", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -109,7 +109,7 @@ spec:
 
 		By("confirming generated DNSEndpoint")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "-n", "test-ingress", "dnsendpoint/root", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "test-ingress", "dnsendpoint/root", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -131,7 +131,7 @@ spec:
 
 		By("accessing with curl")
 		Eventually(func() error {
-			_, _, err := ExecAt(Boot0, "curl", "--resolve", fqdn+":80:"+targetIP,
+			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdn+":80:"+targetIP,
 				"http://"+fqdn+"/testhttpd", "-m", "5", "--fail")
 			return err
 		}).Should(Succeed())

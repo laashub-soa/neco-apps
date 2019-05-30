@@ -37,7 +37,7 @@ func testSetup() {
 	It("should be ready K8s cluster after loading snapshot", func() {
 		By("re-issuing kubeconfig")
 		Eventually(func() error {
-			_, _, err := ExecAt(Boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
+			_, _, err := ExecAt(boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
 			if err != nil {
 				return err
 			}
@@ -46,7 +46,7 @@ func testSetup() {
 
 		By("waiting nodes")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "get", "nodes", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "nodes", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -82,18 +82,18 @@ func testSetup() {
 
 	It("should prepare secrets", func() {
 		By("creating namespace and secrets for external-dns")
-		_, stderr, err := ExecAt(Boot0, "kubectl", "create", "namespace", "external-dns")
+		_, stderr, err := ExecAt(boot0, "kubectl", "create", "namespace", "external-dns")
 		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		_, stderr, err = ExecAt(Boot0, "kubectl", "--namespace=external-dns", "create", "secret",
+		_, stderr, err = ExecAt(boot0, "kubectl", "--namespace=external-dns", "create", "secret",
 			"generic", "external-dns", "--from-file=account.json")
 		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 		By("creating namespace and secrets for alertmanager")
-		stdout, stderr, err := ExecAtWithInput(Boot0, []byte(alertmanagerSecret), "dd", "of=alertmanager.yaml")
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(alertmanagerSecret), "dd", "of=alertmanager.yaml")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		stdout, stderr, err = ExecAt(Boot0, "kubectl", "create", "namespace", "monitoring")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "create", "namespace", "monitoring")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		stdout, stderr, err = ExecAt(Boot0, "kubectl", "--namespace=monitoring", "create", "secret",
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "--namespace=monitoring", "create", "secret",
 			"generic", "alertmanager", "--from-file", "alertmanager.yaml")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 	})
@@ -102,7 +102,7 @@ func testSetup() {
 		data, err := ioutil.ReadFile("install.yaml")
 		Expect(err).ShouldNot(HaveOccurred())
 		Eventually(func() error {
-			stdout, stderr, err := ExecAtWithInput(Boot0, data, "kubectl", "apply", "-n", ArgoCDNamespace, "-f", "-")
+			stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "apply", "-n", argoCDNamespace, "-f", "-")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -115,7 +115,7 @@ func testSetup() {
 		// admin password is same as pod name
 		var podList corev1.PodList
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "pods", "-n", ArgoCDNamespace,
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n", argoCDNamespace,
 				"-l", "app.kubernetes.io/name=argocd-server", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
@@ -137,7 +137,7 @@ func testSetup() {
 
 		By("getting node address")
 		var nodeList corev1.NodeList
-		data := ExecSafeAt(Boot0, "kubectl", "get", "nodes", "-o", "json")
+		data := ExecSafeAt(boot0, "kubectl", "get", "nodes", "-o", "json")
 		err := json.Unmarshal(data, &nodeList)
 		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 		Expect(nodeList.Items).ShouldNot(BeEmpty())
@@ -154,7 +154,7 @@ func testSetup() {
 
 		By("getting node port")
 		var svc corev1.Service
-		data = ExecSafeAt(Boot0, "kubectl", "get", "svc/argocd-server", "-n", ArgoCDNamespace, "-o", "json")
+		data = ExecSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", argoCDNamespace, "-o", "json")
 		err = json.Unmarshal(data, &svc)
 		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 		Expect(svc.Spec.Ports).ShouldNot(BeEmpty())
@@ -170,7 +170,7 @@ func testSetup() {
 
 		By("logging in to Argo CD")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "argocd", "login", nodeAddress+":"+nodePort,
+			stdout, stderr, err := ExecAt(boot0, "argocd", "login", nodeAddress+":"+nodePort,
 				"--insecure", "--username", "admin", "--password", password)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
@@ -180,20 +180,20 @@ func testSetup() {
 	})
 
 	It("should checkout neco-ops repository", func() {
-		ExecSafeAt(Boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-ops")
-		ExecSafeAt(Boot0, "cd", "neco-ops", ";", "git", "checkout", CommitID)
-		ExecSafeAt(Boot0, "sed", "-i", "s/HEAD/"+CommitID+"/", "./neco-ops/argocd-config/base/*.yaml")
+		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-ops")
+		ExecSafeAt(boot0, "cd", "neco-ops", ";", "git", "checkout", commitID)
+		ExecSafeAt(boot0, "sed", "-i", "s/HEAD/"+commitID+"/", "./neco-ops/argocd-config/base/*.yaml")
 	})
 
 	It("should setup Argo CD application as Argo CD app", func() {
 		By("creating Argo CD app")
-		ExecSafeAt(Boot0, "kubectl", "apply", "-k", "./neco-ops/argocd-config/overlays/gcp")
+		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-ops/argocd-config/overlays/gcp")
 
 		By("checking app status")
 		Eventually(func() error {
 			apps := []string{"argocd", "external-dns", "ingress", "metallb", "monitoring"}
 			for _, a := range apps {
-				stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "app", a, "-n", ArgoCDNamespace, "-o", "json")
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "app", a, "-n", argoCDNamespace, "-o", "json")
 				if err != nil {
 					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}

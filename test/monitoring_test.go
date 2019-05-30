@@ -17,7 +17,7 @@ import (
 func testMachinesEndpoints() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			_, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring",
+			_, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "cronjob/machines-endpoints-cronjob")
 			if err != nil {
 				return err
@@ -29,7 +29,7 @@ func testMachinesEndpoints() {
 
 	It("should register endpoints", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "endpoints/prometheus-node-targets", "-o=json")
 			if err != nil {
 				return err
@@ -59,7 +59,7 @@ func testMachinesEndpoints() {
 func testKubeStateMetrics() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=kube-system",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=kube-system",
 				"get", "deployment/kube-state-metrics", "-o=json")
 			if err != nil {
 				return err
@@ -81,7 +81,7 @@ func testKubeStateMetrics() {
 func testPrometheus() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "deployment/prometheus", "-o=json")
 			if err != nil {
 				return err
@@ -102,7 +102,7 @@ func testPrometheus() {
 	var podName string
 	It("should reply successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "pods", "--selector=app=prometheus", "-o=json")
 			if err != nil {
 				return err
@@ -117,7 +117,7 @@ func testPrometheus() {
 			}
 			podName = podList.Items[0].Name
 
-			_, _, err = ExecAt(Boot0, "kubectl", "--namespace=monitoring", "exec",
+			_, _, err = ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/alerts")
 			if err != nil {
 				return err
@@ -128,7 +128,7 @@ func testPrometheus() {
 
 	It("should find endpoint", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring", "exec",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/targets")
 			if err != nil {
 				return err
@@ -157,7 +157,7 @@ func testPrometheus() {
 func testAlertmanager() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "deployment/alertmanager", "-o=json")
 			if err != nil {
 				return err
@@ -177,7 +177,7 @@ func testAlertmanager() {
 
 	It("should reply successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "pods", "--selector=app=alertmanager", "-o=json")
 			if err != nil {
 				return err
@@ -192,7 +192,7 @@ func testAlertmanager() {
 			}
 			podName := podList.Items[0].Name
 
-			_, _, err = ExecAt(Boot0, "kubectl", "--namespace=monitoring", "exec",
+			_, _, err = ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9093/-/healthy")
 			if err != nil {
 				return err
@@ -207,7 +207,7 @@ func testMetrics() {
 		var podName string
 		By("retrieving prometheus podName")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "pods", "--selector=app=prometheus", "-o=json")
 			if err != nil {
 				return err
@@ -225,7 +225,7 @@ func testMetrics() {
 		}).Should(Succeed())
 
 		By("retrieving job_name from prometheus.yaml")
-		stdout, stderr, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring",
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 			"get", "configmap", "-o=json")
 		Expect(err).NotTo(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 
@@ -256,7 +256,7 @@ func testMetrics() {
 
 		By("checking discovered active labels and statuses")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=monitoring", "exec",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/targets")
 			if err != nil {
 				return err

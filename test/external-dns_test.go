@@ -16,7 +16,7 @@ import (
 func testExternalDNS() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(Boot0, "kubectl", "--namespace=external-dns",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=external-dns",
 				"get", "deployment/external-dns", "-o=json")
 			if err != nil {
 				return err
@@ -36,7 +36,7 @@ func testExternalDNS() {
 	})
 
 	It("should create DNS record", func() {
-		domainName := TestID + ".gcp0.dev-ne.co"
+		domainName := testID + ".gcp0.dev-ne.co"
 		By("deploying DNSEndpoint")
 		dnsEndpoint := fmt.Sprintf(`
 apiVersion: externaldns.k8s.io/v1alpha1
@@ -52,12 +52,12 @@ spec:
     targets:
     - 10.0.5.9
 `, domainName)
-		_, stderr, err := ExecAtWithInput(Boot0, []byte(dnsEndpoint), "kubectl", "apply", "-f", "-")
+		_, stderr, err := ExecAtWithInput(boot0, []byte(dnsEndpoint), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("resolving xxx.gcp0.dev-ne.co")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(Boot0, "kubectl", "get", "nodes", "-o", "json")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "nodes", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -83,7 +83,7 @@ spec:
 				return errors.New("can not get NodeIP")
 			}
 
-			stdout, stderr, err = ExecAt(Boot0, "ckecli", "ssh", nodeAddress, "dig", "+noall", "+answer", domainName)
+			stdout, stderr, err = ExecAt(boot0, "ckecli", "ssh", nodeAddress, "dig", "+noall", "+answer", domainName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -96,7 +96,7 @@ spec:
 		}).Should(Succeed())
 
 		By("cleaning up")
-		_, stderr, err = ExecAt(Boot0, "kubectl", "delete", "-n=ingress", "dnsendpoints/test-endpoint")
+		_, stderr, err = ExecAt(boot0, "kubectl", "delete", "-n=ingress", "dnsendpoints/test-endpoint")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 }
