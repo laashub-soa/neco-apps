@@ -41,7 +41,41 @@ func testContour() {
 
 	It("should deploy IngressRoute", func() {
 		By("deployment Pods")
-		_, stderr, err := ExecAt(boot0, "kubectl", "-n", "test-ingress", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
+		deployYAML := `
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: testhttpd
+  namespace: test-ingress
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: testhttpd
+  template:
+    metadata:
+      labels:
+        run: testhttpd
+    spec:
+      containers:
+      - image: quay.io/cybozu/testhttpd:0
+        name: testhttpd
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testhttpd
+  namespace: test-ingress
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: testhttpd
+`
+		_, stderr, err := ExecAtWithInput(boot0, []byte(deployYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
@@ -121,8 +155,8 @@ spec:
 			if len(de.Spec.Endpoints) == 0 {
 				return errors.New("len(de.Spec.Endpoints) == 0")
 			}
+			actualIP := de.Spec.Endpoints[0].Targets[0]
 
-			actualIP := string(stdout)
 			if targetIP != actualIP {
 				return fmt.Errorf("expected IP is (%s), but actual is (%s)", targetIP, actualIP)
 			}
