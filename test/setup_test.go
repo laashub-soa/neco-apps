@@ -182,7 +182,7 @@ func testSetup() {
 	It("should checkout neco-ops repository", func() {
 		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-ops")
 		ExecSafeAt(boot0, "cd", "neco-ops", ";", "git", "checkout", commitID)
-		ExecSafeAt(boot0, "sed", "-i", "s/HEAD/"+commitID+"/", "./neco-ops/argocd-config/base/*.yaml")
+		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-ops/argocd-config/base/*.yaml")
 	})
 
 	It("should setup Argo CD application as Argo CD app", func() {

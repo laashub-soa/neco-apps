@@ -5,4 +5,5 @@ metadata:
   namespace: argocd
 spec:
   source:
+    targetRevision: HEAD
     path: monitoring/overlays/stage0
