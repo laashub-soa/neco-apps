@@ -11,9 +11,15 @@ Staging cluster
 1. Install Argo CD command into your client.
 2. Deploy Argo CD like `../test/install.yaml` into your Kubernetes cluster.
 3. Login to the exposed `argocd-server` service.
-4. Create Argo CD `Application`s as follows:
+4. Create `argocd-config` application as follows:
     ```console
-    $ kubectl apply -k ./argocd-config/overlays/stage0
+    $ argocd app create argocd-config \
+      --repo https://github.com/cybozu-go/neco-ops.git \
+      --path argocd-config/overlays/$(cat /etc/neco/cluster) \
+      --dest-namespace argocd \
+      --dest-server https://kubernetes.default.svc \
+      --sync-policy automated \
+      --auto-prune
     ```
 5. Argo CD in the staging cluster watches changes of the **master HEAD** branch.
 
@@ -30,12 +36,8 @@ Production cluster
 
 *NOTE: Skip this step if Argo CD is already deployed*
 
-1. Setup Argo CD is as same as Staging Cluster.
-2. Create Argo CD `Application`s as follows:
-    ```console
-    $ CLUSTER=tokyo0  # osaka0, ...
-    $ kubectl apply -k ./argocd-config/overlays/$CLUSTER
-    ```
+1. Setup Argo CD is as same as Staging cluster.
+2. Create `argocd-config` application as same sa Staging cluster.
 3. Argo CD in the production cluster watches changes of the **release HEAD** branch.
 
 ### Apply changes
