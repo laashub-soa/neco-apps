@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/cybozu-go/neco-ops.git
-    targetRevision: HEAD
+    targetRevision: release
     path: argocd/base
   destination:
     server: https://kubernetes.default.svc

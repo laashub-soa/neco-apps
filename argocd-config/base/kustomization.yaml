@@ -4,5 +4,5 @@ resources:
 - argocd.yaml
 - external-dns.yaml
 - ingress.yaml
-- monitoring.yaml
 - metallb.yaml
+- monitoring.yaml
