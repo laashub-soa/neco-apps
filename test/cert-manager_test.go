@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	certmanagerv1alpha1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 )
 
@@ -77,9 +79,9 @@ spec:
 			}
 			if status.Reason != "CertIssued" {
 				return fmt.Errorf("Certificate reason not CertIssued: %s", status.Reason)
-            }
+			}
 
-            return nil
+			return nil
 		}).Should(Succeed())
 	})
 }

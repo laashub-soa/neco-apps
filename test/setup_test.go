@@ -89,7 +89,7 @@ func testSetup() {
 		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 		By("disabling resource validation of the cert-manager on external-dns namespace")
-		_, stderr, err := ExecAt(boot0, "kubectl", "label", "namespace", "external-dns", "certmanager.k8s.io/disable-validation=true")
+		_, stderr, err = ExecAt(boot0, "kubectl", "label", "namespace", "external-dns", "certmanager.k8s.io/disable-validation=true")
 		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 		By("creating namespace and secrets for alertmanager")
