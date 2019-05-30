@@ -1,4 +1,4 @@
-package metallb
+package test
 
 import (
 	"encoding/json"
@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os/exec"
 
-	argoappv1 "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
-	"github.com/cybozu-go/neco-ops/test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
@@ -15,48 +13,9 @@ import (
 )
 
 func testMetalLB() {
-	It("should deploy metallb by Argo CD", func() {
-		By("synchronizing metallb")
-		Eventually(func() error {
-			stdout, stderr, err := test.ExecAt(test.Boot0, "argocd", "app", "set", "metallb", "--revision", test.CommitID)
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			stdout, stderr, err = test.ExecAt(test.Boot0, "argocd", "app", "sync", "metallb")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-
-		By("checking metallb status")
-		Eventually(func() error {
-			stdout, stderr, err := test.ExecAt(test.Boot0,
-				"kubectl", "get", "app", "metallb", "-n", test.ArgoCDNamespace, "-o", "json")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			var app argoappv1.Application
-			err = json.Unmarshal(stdout, &app)
-			if err != nil {
-				return err
-			}
-
-			for _, r := range app.Status.Resources {
-				if r.Status != argoappv1.SyncStatusCodeSynced {
-					return fmt.Errorf("app is not yet Synced: %s", r.Status)
-				}
-				if r.Health.Status != argoappv1.HealthStatusHealthy {
-					return fmt.Errorf("app is not yet Healthy: %s", r.Health.Status)
-				}
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=metallb-system",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=metallb-system",
 				"get", "daemonsets/speaker", "-o=json")
 			if err != nil {
 				return err
@@ -78,7 +37,7 @@ func testMetalLB() {
 		}).Should(Succeed())
 
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "--namespace=metallb-system",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=metallb-system",
 				"get", "deployments/controller", "-o=json")
 			if err != nil {
 				return err
@@ -98,12 +57,12 @@ func testMetalLB() {
 
 	It("should deploy load balancer type service", func() {
 		By("deployment Pods")
-		_, stderr, err := test.ExecAt(test.Boot0, "kubectl", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
+		_, stderr, err := ExecAt(boot0, "kubectl", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "deployments/testhttpd", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "deployments/testhttpd", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -139,12 +98,12 @@ spec:
   loadBalancerIP: 10.72.32.29
   externalTrafficPolicy: Local
 `
-		_, stderr, err = test.ExecAtWithInput(test.Boot0, []byte(loadBalancer), "kubectl", "create", "-f", "-")
+		_, stderr, err = ExecAtWithInput(boot0, []byte(loadBalancer), "kubectl", "create", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting service are ready")
 		Eventually(func() error {
-			stdout, _, err := test.ExecAt(test.Boot0, "kubectl", "get", "service/testhttpd", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "service/testhttpd", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -168,13 +127,13 @@ spec:
 
 		By("access service from boot-0")
 		Eventually(func() error {
-			_, _, err := test.ExecAt(test.Boot0, "curl", targetIP, "-m", "5")
+			_, _, err := ExecAt(boot0, "curl", targetIP, "-m", "5")
 			return err
 		}).Should(Succeed())
 
 		By("access service from external")
 		Eventually(func() error {
-			cmd := exec.Command("sudo", "nsenter", "-n", "-t", test.ExternalPid, "curl", targetIP, "-m", "5")
+			cmd := exec.Command("sudo", "nsenter", "-n", "-t", externalPID, "curl", targetIP, "-m", "5")
 			return cmd.Run()
 		}).Should(Succeed())
 	})

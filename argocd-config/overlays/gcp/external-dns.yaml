@@ -6,4 +6,3 @@ metadata:
 spec:
   source:
     path: external-dns/overlays/gcp
-  syncPolicy: null

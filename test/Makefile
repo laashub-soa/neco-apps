@@ -1,9 +1,9 @@
 BOOT0 = 10.72.48.0
 GINKGO = env GO111MODULE=on GOFLAGS=-mod=vendor $(GOPATH)/bin/ginkgo --failFast -v
 SSH_PRIVKEY = $(realpath ./dctest_key)
-TEST_ID = $(shell basename $(dir $(GOPATH)))
-COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
-KUSTOMIZATION_DIRS = $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
+TEST_ID := $(shell basename $(dir $(GOPATH)))
+COMMIT_ID := $(shell git rev-parse --abbrev-ref HEAD)
+KUSTOMIZATION_DIRS := $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
 export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS
 
 ### for Go
@@ -13,15 +13,6 @@ export GOFLAGS
 # Follow Argo CD installed kustomize version
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L32
 KUSTOMIZE_VERSION = 2.0.3
-
-# Individual tests; these are called from "test-all" in this order.
-# Monitoring test is always last step for checking all deployed metrics.
-TESTS = \
-	test-metallb \
-	test-ingress \
-	test-external-dns \
-	test-monitoring
-
 
 install.yaml: $(shell find ../argocd/base)
 	kustomize build ../argocd/base/ > install.yaml
@@ -45,17 +36,7 @@ setup:
 save:
 	./save.sh
 
-# this target expects to be executed after `test` target
-$(TESTS): test-%: install.yaml
-	./test.sh ../$*/test
-
-test-all:
-	$(MAKE) test
-	for target in $(TESTS); do \
-		$(MAKE) $${target} || exit 1; \
-	done
-
 clean:
 	rm -f install.yaml
 
-.PHONY:	test kustomize-check setup save $(TESTS) test-all clean
+.PHONY:	test kustomize-check setup save clean

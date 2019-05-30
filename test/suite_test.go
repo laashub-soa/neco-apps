@@ -23,4 +23,13 @@ var _ = BeforeSuite(RunBeforeSuite)
 // Other tests and test containers must be listed in this.
 var _ = Describe("GitOps Test", func() {
 	Context("setup", testSetup)
+	Context("metallb", testMetalLB)
+	Context("external-dns", testExternalDNS)
+	//Context("cert-manager", testCertManager)
+	Context("contour", testContour)
+	Context("machines-endpoints", testMachinesEndpoints)
+	Context("kube-state-metrics", testKubeStateMetrics)
+	Context("prometheus", testPrometheus)
+	Context("alertmanager", testAlertmanager)
+	Context("metrics", testMetrics)
 })

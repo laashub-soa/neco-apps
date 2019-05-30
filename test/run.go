@@ -22,8 +22,6 @@ const (
 
 	// DefaultRunTimeout is the timeout value for Agent.Run().
 	DefaultRunTimeout = 10 * time.Minute
-
-	proxy = "http://10.0.49.3:3128"
 )
 
 var (
@@ -93,7 +91,7 @@ func parsePrivateKey(keyPath string) (ssh.Signer, error) {
 }
 
 func prepareSSHClients(addresses ...string) error {
-	sshKey, err := parsePrivateKey(SSHKeyFile)
+	sshKey, err := parsePrivateKey(sshKeyFile)
 	if err != nil {
 		return err
 	}
