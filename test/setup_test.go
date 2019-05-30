@@ -102,7 +102,7 @@ func testSetup() {
 		data, err := ioutil.ReadFile("install.yaml")
 		Expect(err).ShouldNot(HaveOccurred())
 		Eventually(func() error {
-			stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "apply", "-n", argoCDNamespace, "-f", "-")
+			stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "apply", "-n", "argocd", "-f", "-")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -115,7 +115,7 @@ func testSetup() {
 		// admin password is same as pod name
 		var podList corev1.PodList
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n", argoCDNamespace,
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n", "argocd",
 				"-l", "app.kubernetes.io/name=argocd-server", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
@@ -154,7 +154,7 @@ func testSetup() {
 
 		By("getting node port")
 		var svc corev1.Service
-		data = ExecSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", argoCDNamespace, "-o", "json")
+		data = ExecSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", "argocd", "-o", "json")
 		err = json.Unmarshal(data, &svc)
 		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 		Expect(svc.Spec.Ports).ShouldNot(BeEmpty())
@@ -193,7 +193,7 @@ func testSetup() {
 		Eventually(func() error {
 			apps := []string{"argocd", "external-dns", "ingress", "metallb", "monitoring"}
 			for _, a := range apps {
-				stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "app", a, "-n", argoCDNamespace, "-o", "json")
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "app", a, "-n", "argocd", "-o", "json")
 				if err != nil {
 					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}

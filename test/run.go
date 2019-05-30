@@ -22,8 +22,6 @@ const (
 
 	// DefaultRunTimeout is the timeout value for Agent.Run().
 	DefaultRunTimeout = 10 * time.Minute
-
-	argoCDNamespace = "argocd"
 )
 
 var (
