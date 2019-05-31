@@ -74,11 +74,14 @@ spec:
           volumeMounts:
           - name: certs
             mountPath: /certs
+          - name: tmp
+            mountPath: /tmp
       volumes:
       - name: certs
         secret:
           secretName: cert-manager-webhook-webhook-tls
-
+      - name: tmp
+        emptyDir: {}
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
