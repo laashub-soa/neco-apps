@@ -24,8 +24,9 @@ spec:
         - name: cainjector
           image: quay.io/cybozu/cert-manager:0.8.0.1
           imagePullPolicy: IfNotPresent
-          args:
+          command:
           - cainjector
+          args:
           - --v=2
           - --leader-election-namespace=$(POD_NAMESPACE)
           env:
@@ -60,8 +61,9 @@ spec:
         - name: webhook
           image: quay.io/cybozu/cert-manager:0.8.0.1
           imagePullPolicy: IfNotPresent
-          args:
+          command:
           - webhook
+          args:
           - --v=2
           - --secure-port=6443
           - --tls-cert-file=/certs/tls.crt
@@ -112,8 +114,9 @@ spec:
         - name: cert-manager
           image: quay.io/cybozu/cert-manager:0.8.0.1
           imagePullPolicy: IfNotPresent
-          args:
+          command:
           - controller
+          args:
           - --v=2
           - --cluster-resource-namespace=$(POD_NAMESPACE)
           - --leader-election-namespace=$(POD_NAMESPACE)

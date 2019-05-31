@@ -8,3 +8,6 @@ spec:
     - dns01:
         clouddns:
           project: neco-test
+          serviceAccountSecretRef:
+            name: external-dns
+            key: account.json

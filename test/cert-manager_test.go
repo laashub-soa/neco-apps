@@ -48,6 +48,7 @@ metadata:
 spec:
   secretName: example-com-tls
   issuerRef:
+    kind: ClusterIssuer
     name: clouddns
   commonName: gcp0.dev-ne.co
   dnsNames:
