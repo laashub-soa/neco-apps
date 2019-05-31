@@ -106,7 +106,7 @@ rules:
   - apiGroups:
       - certmanager.k8s.io
     resources:
-      - certificate
+      - certificates
     verbs:
       - get
       - list
@@ -167,3 +167,9 @@ rules:
       - get
       - update
       - patch
+  - apiGroups:
+    - ""
+    resources:
+    - events
+    verbs:
+    - create
