@@ -56,9 +56,37 @@ spec:
 		_, stderr, err := ExecAtWithInput(boot0, []byte(certificate), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
+		By("checking CloudDNS ClusterIssuer has registered")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=external-dns", "clusterissuers", "clouddns", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			var ci certmanagerv1alpha1.ClusterIssuer
+			err = json.Unmarshal(stdout, &ci)
+			if err != nil {
+				return err
+			}
+
+			if len(ci.Status.Conditions) == 0 {
+				return errors.New("status not found")
+			}
+
+			status := ci.Status.Conditions[0]
+			if status.Status != certmanagerv1alpha1.ConditionTrue {
+				return fmt.Errorf("Certificate status is not True: %s", status.Status)
+			}
+			if status.Reason != "ACMEAccountRegistered" {
+				return fmt.Errorf("ClusterIssuer reason not ACMEAccountRegistered: %s", status.Reason)
+			}
+
+			return nil
+		}).Should(Succeed())
+
 		By("checking certificate is issued for xxx.gcp0.dev-ne.co")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=external-dns", "certificate", "-o", "json")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=external-dns", "certificate", "test-certificate", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
