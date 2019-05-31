@@ -76,6 +76,7 @@ spec:
           volumeMounts:
           - name: certs
             mountPath: /certs
+            readOnly: true
           - name: tmp
             mountPath: /tmp
       volumes:
