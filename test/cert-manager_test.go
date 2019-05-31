@@ -100,15 +100,19 @@ spec:
 				return errors.New("status not found")
 			}
 
-			status := cert.Status.Conditions[0]
-			if status.Status != certmanagerv1alpha1.ConditionTrue {
-				return fmt.Errorf("Certificate status is not True: %s", status.Status)
+			for _, st := range cert.Status.Conditions {
+				if st.Type != certmanagerv1alpha1.CertificateConditionReady {
+					continue
+				}
+				if st.Status == certmanagerv1alpha1.ConditionTrue {
+					return nil
+				}
 			}
-			if status.Reason != "CertIssued" {
-				return fmt.Errorf("Certificate reason not CertIssued: %s", status.Reason)
-			}
-
-			return nil
+			return errors.New("certificate is not ready")
 		}).Should(Succeed())
+
+		By("checking certificate is issued for xxx.gcp0.dev-ne.co")
+		_, _, err = ExecAt(boot0, "kubectl", "get", "-n=external-dns", "secrets/example-com-tls")
+		Expect(err).NotTo(HaveOccurred())
 	})
 }
