@@ -22,7 +22,7 @@ metadata:
   labels:
     app: cert-manager
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: cert-manager-cainjector
@@ -45,7 +45,7 @@ rules:
     resources: ["apiservices"]
     verbs: ["*"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cert-manager-cainjector
@@ -60,7 +60,7 @@ subjects:
     namespace: external-dns
     kind: ServiceAccount
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: cert-manager
@@ -73,11 +73,11 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps", "secrets", "events", "services","pods"]
     verbs: ["*"]
-  - apiGroups: ["extensions"]
+  - apiGroups: ["networking.k8s.io/v1beta1"]
     resources: ["ingresses", "ingresses/finalizers"]
     verbs: ["*"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cert-manager
@@ -91,80 +91,3 @@ subjects:
   - name: cert-manager
     namespace: external-dns
     kind: ServiceAccount
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: cert-manager-view
-  labels:
-    app: cert-manager
-    rbac.authorization.k8s.io/aggregate-to-view: "true"
-    rbac.authorization.k8s.io/aggregate-to-edit: "true"
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
-rules:
-  - apiGroups: ["certmanager.k8s.io"]
-    resources: ["certificates", "issuers"]
-    verbs: ["get", "list", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: cert-manager-edit
-  labels:
-    app: cert-manager
-    rbac.authorization.k8s.io/aggregate-to-edit: "true"
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
-rules:
-  - apiGroups: ["certmanager.k8s.io"]
-    resources: ["certificates", "issuers"]
-    verbs: ["create", "delete", "deletecollection", "patch", "update"]
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: cert-manager-webhook:auth-delegator
-  labels:
-    app: webhook
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: system:auth-delegator
-subjects:
-- apiGroup: ""
-  kind: ServiceAccount
-  name: cert-manager-webhook
-  namespace: external-dns
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  name: cert-manager-webhook:webhook-authentication-reader
-  namespace: kube-system
-  labels:
-    app: webhook
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: extension-apiserver-authentication-reader
-subjects:
-- apiGroup: ""
-  kind: ServiceAccount
-  name: cert-manager-webhook
-  namespace: external-dns
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: cert-manager-webhook:webhook-requester
-  labels:
-    app: webhook
-rules:
-- apiGroups:
-  - admission.certmanager.k8s.io
-  resources:
-  - certificates
-  - issuers
-  - clusterissuers
-  verbs:
-  - create

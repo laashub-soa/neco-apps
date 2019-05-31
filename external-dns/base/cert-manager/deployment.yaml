@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cert-manager-cainjector
@@ -34,7 +34,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cert-manager-webhook
@@ -83,7 +83,7 @@ spec:
       - name: tmp
         emptyDir: {}
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cert-manager

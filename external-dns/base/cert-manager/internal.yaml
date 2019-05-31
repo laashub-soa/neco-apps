@@ -47,9 +47,6 @@ metadata:
   namespace: external-dns
   labels:
     app: webhook
-    chart: webhook-v0.8.0
-    release: cert-manager
-    heritage: Tiller
 spec:
   secretName: cert-manager-webhook-webhook-tls
   duration: 8760h # 1y
@@ -57,5 +54,5 @@ spec:
     name: cert-manager-webhook-ca
   dnsNames:
   - cert-manager-webhook
-  - cert-manager-webhook.cert-manager
-  - cert-manager-webhook.cert-manager.svc
+  - cert-manager-webhook.external-dns
+  - cert-manager-webhook.external-dns.svc
