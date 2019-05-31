@@ -50,9 +50,7 @@ spec:
   issuerRef:
     kind: ClusterIssuer
     name: clouddns
-  commonName: gcp0.dev-ne.co
-  dnsNames:
-  - %s
+  commonName: %s
 `, domainName)
 		_, stderr, err := ExecAtWithInput(boot0, []byte(certificate), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
