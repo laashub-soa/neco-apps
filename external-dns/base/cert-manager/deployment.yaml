@@ -121,6 +121,8 @@ spec:
           - --v=2
           - --cluster-resource-namespace=$(POD_NAMESPACE)
           - --leader-election-namespace=$(POD_NAMESPACE)
+          - --dns01-recursive-nameservers-only
+          - --enable-certificate-owner-ref
           ports:
           - containerPort: 9402
           env:

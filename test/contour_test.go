@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/kubernetes-incubator/external-dns/endpoint"
 	. "github.com/onsi/ginkgo"
@@ -98,8 +99,32 @@ spec:
 		}).Should(Succeed())
 
 		By("creating IngressRoute")
-		fqdn := "root.test-ingress.gcp0.dev-ne.co"
+		fqdnHttp := "http.test-ingress.gcp0.dev-ne.co"
+		fqdnHttps := "https.test-ingress.gcp0.dev-ne.co"
 		ingressRoute := fmt.Sprintf(`
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: tls
+  namespace: test-ingress
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  virtualhost:
+    fqdn: %s
+  tls:
+    secretName: testsecret
+  routes:
+    - match: /
+      services:
+        - name: testhttpd
+          port: 80
+    - match: /insecure
+      services:
+        - name: testhttpd
+          port: 80
+          permitInsecure: true
+---
 apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute
 metadata:
@@ -113,7 +138,7 @@ spec:
       services:
         - name: testhttpd
           port: 80
-`, fqdn)
+`, fqdnHttps, fqdnHttp)
 		_, stderr, err = ExecAtWithInput(boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
@@ -163,11 +188,56 @@ spec:
 			return nil
 		}).Should(Succeed())
 
-		By("accessing with curl")
+		By("accessing with curl: http")
 		Eventually(func() error {
-			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdn+":80:"+targetIP,
-				"http://"+fqdn+"/testhttpd", "-m", "5", "--fail")
+			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHttp+":80:"+targetIP,
+				"http://"+fqdnHttp+"/testhttpd", "-m", "5", "--fail")
 			return err
+		}).Should(Succeed())
+
+		By("accessing with curl: https")
+		Eventually(func() error {
+			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHttps+":443:"+targetIP,
+				"https://"+fqdnHttps+"/", "-m", "5", "--fail")
+			return err
+		}).Should(Succeed())
+
+		By("redirecting to https")
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHttps+":443:"+targetIP,
+				"http://"+fqdnHttps+"/",
+				"-m", "5",
+				"--fail",
+				"-o", "/dev/null/",
+				"-w", "'%{http_code}\n'",
+				"-s",
+			)
+			if err != nil {
+				return err
+			}
+			if strings.TrimSpace(string(stdout)) != "301" {
+				return errors.New("unexpected status: " + string(stdout))
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("permitting insecure access")
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHttps+":443:"+targetIP,
+				"http://"+fqdnHttps+"/insecure",
+				"-m", "5",
+				"--fail",
+				"-o", "/dev/null/",
+				"-w", "'%{http_code}\n'",
+				"-s",
+			)
+			if err != nil {
+				return err
+			}
+			if strings.TrimSpace(string(stdout)) != "200" {
+				return errors.New("unexpected status: " + string(stdout))
+			}
+			return nil
 		}).Should(Succeed())
 	})
 }
