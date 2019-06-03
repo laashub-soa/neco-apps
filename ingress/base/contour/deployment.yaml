@@ -21,7 +21,7 @@ spec:
         prometheus.io/format: "prometheus"
     spec:
       containers:
-      - image: quay.io/cybozu/contour:0.11.0.1
+      - image: quay.io/cybozu/contour:0.12.0.1
         name: contour
         command: ["contour"]
         args: ["serve", "--incluster"]
@@ -35,7 +35,7 @@ spec:
               fieldPath: metadata.namespace
         - name: CP_SERVICE_NAME
           value: ingress/contour-global
-      - image: quay.io/cybozu/envoy:1.9.1.1
+      - image: quay.io/cybozu/envoy:1.10.0.1
         name: envoy
         ports:
         - containerPort: 8080
@@ -62,7 +62,7 @@ spec:
             exec:
               command: ["wget", "-qO-", "http://localhost:9001/healthcheck/fail"]
       initContainers:
-      - image: quay.io/cybozu/contour:0.11.0.1
+      - image: quay.io/cybozu/contour:0.12.0.1
         imagePullPolicy: Always
         name: envoy-initconfig
         command: ["contour"]
