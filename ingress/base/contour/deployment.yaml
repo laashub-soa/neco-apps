@@ -25,7 +25,7 @@ spec:
         name: contour
         command: ["contour"]
         args: ["serve", "--incluster"]
-      - image: quay.io/cybozu/contour-plus:0.2.3
+      - image: quay.io/cybozu/contour-plus:0.2.4
         name: contour-plus
         env:
         - name: POD_NAMESPACE
@@ -34,13 +34,9 @@ spec:
               fieldPath: metadata.namespace
         - name: CP_SERVICE_NAME
           value: ingress/contour-global
-<<<<<<< HEAD
-      - image: quay.io/cybozu/envoy:1.10.0.1
-=======
         - name: CP_DEFAULT_ISSUER_NAME
           value: clouddns
-      - image: quay.io/cybozu/envoy:1.9.1.1
->>>>>>> [contour] enable cert-manager support
+      - image: quay.io/cybozu/envoy:1.10.0.1
         name: envoy
         ports:
         - containerPort: 8080

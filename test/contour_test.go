@@ -112,8 +112,8 @@ metadata:
 spec:
   virtualhost:
     fqdn: %s
-  tls:
-    secretName: testsecret
+    tls:
+      secretName: testsecret
   routes:
     - match: /
       services:
