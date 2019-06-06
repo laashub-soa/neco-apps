@@ -25,13 +25,9 @@ spec:
         name: contour
         command: ["contour"]
         args: ["serve", "--incluster"]
-      - image: quay.io/cybozu/contour-plus:0.2.4
+      - image: quay.io/cybozu/contour-plus:0.2.5
         name: contour-plus
         env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
         - name: CP_SERVICE_NAME
           value: ingress/contour-global
         - name: CP_DEFAULT_ISSUER_NAME
