@@ -196,9 +196,16 @@ spec:
 		}).Should(Succeed())
 
 		By("accessing with curl: https")
+		ExecSafeAt(boot0, "HTTPS_PROXY=http://10.0.49.3:3128",
+			"curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
+
 		Eventually(func() error {
 			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHttps+":443:"+targetIP,
-				"https://"+fqdnHttps+"/", "-m", "5", "--fail")
+				"https://"+fqdnHttps+"/",
+				"-m", "5",
+				"--fail",
+				"--cacert", "lets.crt",
+			)
 			return err
 		}).Should(Succeed())
 
@@ -211,6 +218,7 @@ spec:
 				"-o", "/dev/null/",
 				"-w", "'%{http_code}\n'",
 				"-s",
+				"--cacert", "lets.crt",
 			)
 			if err != nil {
 				return err
