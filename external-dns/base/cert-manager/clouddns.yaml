@@ -5,9 +5,9 @@ metadata:
 spec:
   acme:
     email: neco@cybozu.com
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-      name: letsencrypt-staging
+      name: letsencrypt-prod
     solvers:
     - dns01:
         clouddns:
