@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/kubernetes-incubator/external-dns/endpoint"
 	. "github.com/onsi/ginkgo"
@@ -120,10 +119,10 @@ spec:
         - name: testhttpd
           port: 80
     - match: /insecure
+      permitInsecure: true
       services:
         - name: testhttpd
           port: 80
-          permitInsecure: true
 ---
 apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute
@@ -211,19 +210,19 @@ spec:
 
 		By("redirecting to https")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHttps+":443:"+targetIP,
+			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHttps+":80:"+targetIP,
 				"http://"+fqdnHttps+"/",
 				"-m", "5",
 				"--fail",
-				"-o", "/dev/null/",
-				"-w", "'%{http_code}\n'",
+				"-o", "/dev/null",
+				"-w", "'%{http_code}'",
 				"-s",
 				"--cacert", "lets.crt",
 			)
 			if err != nil {
 				return err
 			}
-			if strings.TrimSpace(string(stdout)) != "301" {
+			if string(stdout) != "301" {
 				return errors.New("unexpected status: " + string(stdout))
 			}
 			return nil
@@ -231,18 +230,18 @@ spec:
 
 		By("permitting insecure access")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHttps+":443:"+targetIP,
+			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHttps+":80:"+targetIP,
 				"http://"+fqdnHttps+"/insecure",
 				"-m", "5",
 				"--fail",
-				"-o", "/dev/null/",
-				"-w", "'%{http_code}\n'",
+				"-o", "/dev/null",
+				"-w", "'%{http_code}'",
 				"-s",
 			)
 			if err != nil {
 				return err
 			}
-			if strings.TrimSpace(string(stdout)) != "200" {
+			if string(stdout) != "200" {
 				return errors.New("unexpected status: " + string(stdout))
 			}
 			return nil
