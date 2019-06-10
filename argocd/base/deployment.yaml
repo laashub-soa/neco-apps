@@ -17,8 +17,6 @@ spec:
       labels:
         app.kubernetes.io/name: argocd-application-controller
     spec:
-      securityContext:
-        runAsUser: 999
       containers:
         - command:
             - argocd-application-controller
@@ -26,8 +24,7 @@ spec:
             - "20"
             - --operation-processors
             - "10"
-          image: argoproj/argocd:v1.0.1
-          imagePullPolicy: Always
+          image: quay.io/cybozu/argocd:1.0.1.1
           name: argocd-application-controller
           ports:
             - containerPort: 8082
@@ -69,7 +66,6 @@ spec:
             - --appendonly
             - "no"
           image: quay.io/cybozu/redis:5.0.4.2
-          imagePullPolicy: Always
           name: redis
           ports:
             - containerPort: 6379
@@ -91,16 +87,18 @@ spec:
       labels:
         app.kubernetes.io/name: argocd-repo-server
     spec:
-      securityContext:
-        runAsUser: 999
       automountServiceAccountToken: false
       containers:
         - command:
             - argocd-repo-server
             - --redis
             - argocd-redis:6379
-          image: argoproj/argocd:v1.0.1
-          imagePullPolicy: Always
+          image: quay.io/cybozu/argocd:1.0.1.1
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 8081
           name: argocd-repo-server
           ports:
             - containerPort: 8081
@@ -141,13 +139,16 @@ spec:
       labels:
         app.kubernetes.io/name: argocd-server
     spec:
-      securityContext:
-        runAsUser: 999
       containers:
         - command:
             - argocd-server
-          image: argoproj/argocd:v1.0.1
-          imagePullPolicy: Always
+          image: quay.io/cybozu/argocd:1.0.1.1
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 30
           name: argocd-server
           ports:
             - containerPort: 8080
