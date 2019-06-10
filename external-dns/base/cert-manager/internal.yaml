@@ -21,7 +21,7 @@ metadata:
     app: webhook
 spec:
   secretName: cert-manager-webhook-ca
-  duration: 87600h # 10y
+  duration: 87600h0m0s # 10y
   issuerRef:
     name: cert-manager-webhook-selfsign
   commonName: "ca.webhook.cert-manager"
@@ -49,7 +49,7 @@ metadata:
     app: webhook
 spec:
   secretName: cert-manager-webhook-webhook-tls
-  duration: 8760h # 1y
+  duration: 8760h0m0s # 1y
   issuerRef:
     name: cert-manager-webhook-ca
   dnsNames:
