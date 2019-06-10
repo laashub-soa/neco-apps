@@ -3,4 +3,4 @@ kind: Kustomization
 bases:
   - ../../base
 patchesStrategicMerge:
-  - deployment.yaml
+  - external-dns/deployment.yaml

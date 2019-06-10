@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-cainjector
+  namespace: external-dns
+  labels:
+    app: cainjector
+    component: cert-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cainjector
+      component: cert-manager
+  template:
+    metadata:
+      labels:
+        app: cainjector
+        component: cert-manager
+      annotations:
+    spec:
+      serviceAccountName: cert-manager-cainjector
+      containers:
+        - name: cainjector
+          image: quay.io/cybozu/cert-manager:0.8.0.1
+          imagePullPolicy: IfNotPresent
+          command:
+          - cainjector
+          args:
+          - --v=2
+          - --leader-election-namespace=$(POD_NAMESPACE)
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager-webhook
+  namespace: external-dns
+  labels:
+    app: webhook
+    component: cert-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook
+      component: cert-manager
+  template:
+    metadata:
+      labels:
+        app: webhook
+        component: cert-manager
+      annotations:
+    spec:
+      serviceAccountName: cert-manager-webhook
+      containers:
+        - name: webhook
+          image: quay.io/cybozu/cert-manager:0.8.0.1
+          imagePullPolicy: IfNotPresent
+          command:
+          - webhook
+          args:
+          - --v=2
+          - --secure-port=6443
+          - --tls-cert-file=/certs/tls.crt
+          - --tls-private-key-file=/certs/tls.key
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          volumeMounts:
+          - name: certs
+            mountPath: /certs
+            readOnly: true
+          - name: tmp
+            mountPath: /tmp
+      volumes:
+      - name: certs
+        secret:
+          secretName: cert-manager-webhook-webhook-tls
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: external-dns
+  labels:
+    app: cert-manager
+    component: cert-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cert-manager
+      component: cert-manager
+  template:
+    metadata:
+      labels:
+        app: cert-manager
+        component: cert-manager
+      annotations:
+        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9402'
+    spec:
+      serviceAccountName: cert-manager
+      containers:
+        - name: cert-manager
+          image: quay.io/cybozu/cert-manager:0.8.0.1
+          imagePullPolicy: IfNotPresent
+          command:
+          - controller
+          args:
+          - --v=2
+          - --cluster-resource-namespace=$(POD_NAMESPACE)
+          - --leader-election-namespace=$(POD_NAMESPACE)
+          - --dns01-recursive-nameservers-only
+          - --enable-certificate-owner-ref
+          ports:
+          - containerPort: 9402
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: HTTP_PROXY
+            value: http://squid.internet-egress.svc.cluster.local:3128
+          - name: HTTPS_PROXY
+            value: http://squid.internet-egress.svc.cluster.local:3128
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi

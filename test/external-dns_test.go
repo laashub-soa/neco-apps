@@ -36,7 +36,7 @@ func testExternalDNS() {
 	})
 
 	It("should create DNS record", func() {
-		domainName := testID + ".gcp0.dev-ne.co"
+		domainName := testID + "-external-dns.gcp0.dev-ne.co"
 		By("deploying DNSEndpoint")
 		dnsEndpoint := fmt.Sprintf(`
 apiVersion: externaldns.k8s.io/v1alpha1

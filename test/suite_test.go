@@ -45,7 +45,7 @@ var _ = Describe("GitOps Test", func() {
 	Context("setup", testSetup)
 	Context("metallb", testMetalLB)
 	Context("external-dns", testExternalDNS)
-	//Context("cert-manager", testCertManager)
+	Context("cert-manager", testCertManager)
 	Context("contour", testContour)
 	Context("machines-endpoints", testMachinesEndpoints)
 	Context("kube-state-metrics", testKubeStateMetrics)
