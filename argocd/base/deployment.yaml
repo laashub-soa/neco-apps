@@ -17,6 +17,8 @@ spec:
       labels:
         app.kubernetes.io/name: argocd-application-controller
     spec:
+      securityContext:
+        runAsUser: 999
       containers:
         - command:
             - argocd-application-controller
@@ -89,6 +91,8 @@ spec:
       labels:
         app.kubernetes.io/name: argocd-repo-server
     spec:
+      securityContext:
+        runAsUser: 999
       automountServiceAccountToken: false
       containers:
         - command:
@@ -137,6 +141,8 @@ spec:
       labels:
         app.kubernetes.io/name: argocd-server
     spec:
+      securityContext:
+        runAsUser: 999
       containers:
         - command:
             - argocd-server
