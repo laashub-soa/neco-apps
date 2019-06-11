@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calico-typha
+  namespace: kube-system
+  labels:
+    k8s-app: calico-typha
+spec:
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        k8s-app: calico-typha
+      annotations:
+        cluster-autoscaler.kuberentes.io/safe-to-evict: 'true'
+    spec:
+      tolerations:
+        # Mark the pod as a critical add-on for rescheduling.
+        - key: CriticalAddonsOnly
+          operator: Exists
+      hostNetwork: true
+      serviceAccountName: calico-node
+      priorityClassName: system-node-critical
+      containers:
+        - image: quay.io/cybozu/calico:3.7.2.1
+          name: calico-typha
+          ports:
+            - containerPort: 5473
+              name: calico-typha
+              protocol: TCP
+          command:
+            - tini
+            - --
+            - calico-typha
+          env:
+            # Use veth not cali for interface prefix
+            - name: FELIX_INTERFACEPREFIX
+              value: "veth"
+            - name: TYPHA_LOGFILEPATH
+              value: "none"
+            - name: TYPHA_LOGSEVERITYSYS
+              value: "none"
+            - name: TYPHA_LOGSEVERITYSCREEN
+              value: "info"
+            - name: TYPHA_PROMETHEUSMETRICSENABLED
+              value: "true"
+            - name: TYPHA_CONNECTIONREBALANCINGMODE
+              value: "kubernetes"
+            - name: TYPHA_PROMETHEUSMETRICSPORT
+              value: "9093"
+            - name: TYPHA_DATASTORETYPE
+              value: "kubernetes"
+            - name: TYPHA_MAXCONNECTIONSLOWERLIMIT
+              value: "1"
+            - name: TYPHA_HEALTHENABLED
+              value: "true"
+          livenessProbe:
+            exec:
+              command:
+                - calico-typha
+                - check
+                - liveness
+            periodSeconds: 30
+            initialDelaySeconds: 30
+          readinessProbe:
+            exec:
+              command:
+                - calico-typha
+                - check
+                - readiness
+            periodSeconds: 10
