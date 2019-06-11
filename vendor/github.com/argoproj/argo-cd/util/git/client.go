@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
-	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
@@ -47,9 +47,14 @@ func NewFactory() ClientFactory {
 	return &factory{}
 }
 
-func (f *factory) NewClient(repoURL, path, username, password, sshPrivateKey string, insecureIgnoreHostKey bool) (Client, error) {
+func (f *factory) NewClient(rawRepoURL, path, username, password, sshPrivateKey string, insecureIgnoreHostKey bool) (Client, error) {
+	var sshUser string
+	if isSSH, user := IsSSHURL(rawRepoURL); isSSH {
+		sshUser = user
+	}
+
 	clnt := nativeGitClient{
-		repoURL: repoURL,
+		repoURL: rawRepoURL,
 		root:    path,
 	}
 	if sshPrivateKey != "" {
@@ -57,7 +62,7 @@ func (f *factory) NewClient(repoURL, path, username, password, sshPrivateKey str
 		if err != nil {
 			return nil, err
 		}
-		auth := &ssh2.PublicKeys{User: "git", Signer: signer}
+		auth := &ssh2.PublicKeys{User: sshUser, Signer: signer}
 		if insecureIgnoreHostKey {
 			auth.HostKeyCallback = ssh.InsecureIgnoreHostKey()
 		}

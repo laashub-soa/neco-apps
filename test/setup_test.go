@@ -215,7 +215,7 @@ func testSetup() {
 					if r.Status != argoappv1.SyncStatusCodeSynced {
 						return fmt.Errorf("%s is not yet Synced: %s", a, r.Status)
 					}
-					if r.Health.Status != argoappv1.HealthStatusHealthy {
+					if r.Health != nil && r.Health.Status != argoappv1.HealthStatusHealthy {
 						return fmt.Errorf("%s is not yet Healthy: %s", a, r.Health.Status)
 					}
 				}

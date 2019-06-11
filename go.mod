@@ -10,7 +10,7 @@ replace (
 )
 
 require (
-	github.com/argoproj/argo-cd v0.12.1
+	github.com/argoproj/argo-cd v1.0.1
 	github.com/cybozu-go/log v1.5.0
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
@@ -34,7 +34,8 @@ require (
 	gopkg.in/src-d/go-git.v4 v4.11.0 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/api v0.0.0-20190528154508-67ef80593b24
-	k8s.io/apiextensions-apiserver v0.0.0-20190528080216-be227facef18 // indirect
+	k8s.io/apiextensions-apiserver v0.0.0-20190528080216-be227facef18
+	k8s.io/apimachinery v0.0.0-20190528154326-e59c2fb0a8e5
 	k8s.io/client-go v11.0.0+incompatible // indirect
 	k8s.io/klog v0.3.2 // indirect
 	k8s.io/utils v0.0.0-20190529001817-6999998975a7 // indirect
