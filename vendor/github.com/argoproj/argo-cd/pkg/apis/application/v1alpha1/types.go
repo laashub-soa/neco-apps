@@ -8,6 +8,9 @@ import (
 	"reflect"
 	"strings"
 
+	"gopkg.in/yaml.v2"
+
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -65,9 +68,6 @@ type ApplicationSource struct {
 	// TargetRevision defines the commit, tag, or branch in which to sync the application to.
 	// If omitted, will sync to HEAD
 	TargetRevision string `json:"targetRevision,omitempty" protobuf:"bytes,4,opt,name=targetRevision"`
-	// ComponentParameterOverrides are a list of parameter override values
-	// DEPRECATED: use app source specific config instead
-	ComponentParameterOverrides []ComponentParameter `json:"componentParameterOverrides,omitempty" protobuf:"bytes,5,opt,name=componentParameterOverrides"`
 	// Helm holds helm specific options
 	Helm *ApplicationSourceHelm `json:"helm,omitempty" protobuf:"bytes,7,opt,name=helm"`
 	// Kustomize holds kustomize specific options
@@ -84,7 +84,6 @@ func (a ApplicationSource) IsZero() bool {
 	return a.RepoURL == "" &&
 		a.Path == "" &&
 		a.TargetRevision == "" &&
-		len(a.ComponentParameterOverrides) == 0 &&
 		a.Helm.IsZero() &&
 		a.Kustomize.IsZero() &&
 		a.Ksonnet.IsZero() &&
@@ -132,11 +131,11 @@ func (h *ApplicationSourceHelm) IsZero() bool {
 // ApplicationSourceKustomize holds kustomize specific options
 type ApplicationSourceKustomize struct {
 	// NamePrefix is a prefix appended to resources for kustomize apps
-	NamePrefix string `json:"namePrefix" protobuf:"bytes,1,opt,name=namePrefix"`
+	NamePrefix string `json:"namePrefix,omitempty" protobuf:"bytes,1,opt,name=namePrefix"`
 	// ImageTags are kustomize 1.0 image tag overrides
-	ImageTags []KustomizeImageTag `json:"imageTags" protobuf:"bytes,2,opt,name=imageTags"`
+	ImageTags []KustomizeImageTag `json:"imageTags,omitempty" protobuf:"bytes,2,opt,name=imageTags"`
 	// Images are kustomize 2.0 image overrides
-	Images []string `json:"images" protobuf:"bytes,3,opt,name=images"`
+	Images []string `json:"images,omitempty" protobuf:"bytes,3,opt,name=images"`
 }
 
 // KustomizeImageTag is a kustomize image tag
@@ -226,6 +225,7 @@ type ApplicationStatus struct {
 	OperationState *OperationState        `json:"operationState,omitempty" protobuf:"bytes,7,opt,name=operationState"`
 	ObservedAt     metav1.Time            `json:"observedAt,omitempty" protobuf:"bytes,8,opt,name=observedAt"`
 	SourceType     ApplicationSourceType  `json:"sourceType,omitempty" protobuf:"bytes,9,opt,name=sourceType"`
+	Summary        ApplicationSummary     `json:"summary,omitempty" protobuf:"bytes,10,opt,name=summary"`
 }
 
 // Operation contains requested operation parameters.
@@ -301,7 +301,7 @@ type OperationState struct {
 	// StartedAt contains time of operation start
 	StartedAt metav1.Time `json:"startedAt" protobuf:"bytes,6,opt,name=startedAt"`
 	// FinishedAt contains time of operation completion
-	FinishedAt *metav1.Time `json:"finishedAt" protobuf:"bytes,7,opt,name=finishedAt"`
+	FinishedAt *metav1.Time `json:"finishedAt,omitempty" protobuf:"bytes,7,opt,name=finishedAt"`
 }
 
 // SyncPolicy controls when a sync will be performed in response to updates in git
@@ -336,6 +336,7 @@ type SyncStrategyApply struct {
 // If no hook annotation is specified falls back to `kubectl apply`.
 type SyncStrategyHook struct {
 	// Embed SyncStrategyApply type to inherit any `apply` options
+	// +optional
 	SyncStrategyApply `protobuf:"bytes,1,opt,name=syncStrategyApply"`
 }
 
@@ -521,29 +522,79 @@ type InfoItem struct {
 	Value string `json:"value,omitempty" protobuf:"bytes,2,opt,name=value"`
 }
 
-// ResourceNode contains information about live resource and its children
-type ResourceNode struct {
-	Group           string         `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
-	Version         string         `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
-	Kind            string         `json:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
-	Namespace       string         `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
-	Name            string         `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
-	Info            []InfoItem     `json:"info,omitempty" protobuf:"bytes,6,opt,name=info"`
-	Children        []ResourceNode `json:"children,omitempty" protobuf:"bytes,7,opt,name=children"`
-	ResourceVersion string         `json:"resourceVersion,omitempty" protobuf:"bytes,8,opt,name=resourceVersion"`
+// ResourceNetworkingInfo holds networking resource related information
+type ResourceNetworkingInfo struct {
+	TargetLabels map[string]string        `json:"targetLabels,omitempty" protobuf:"bytes,1,opt,name=targetLabels"`
+	TargetRefs   []ResourceRef            `json:"targetRefs,omitempty" protobuf:"bytes,2,opt,name=targetRefs"`
+	Labels       map[string]string        `json:"labels,omitempty" protobuf:"bytes,3,opt,name=labels"`
+	Ingress      []v1.LoadBalancerIngress `json:"ingress,omitempty" protobuf:"bytes,4,opt,name=ingress"`
+	// ExternalURLs holds list of URLs which should be available externally. List is populated for ingress resources using rules hostnames.
+	ExternalURLs []string `json:"externalURLs,omitempty" protobuf:"bytes,5,opt,name=externalURLs"`
 }
 
-func (n *ResourceNode) FindNode(group string, kind string, namespace string, name string) *ResourceNode {
-	if n.Group == group && n.Kind == kind && n.Namespace == namespace && n.Name == name {
-		return n
-	}
-	for i := range n.Children {
-		res := n.Children[i].FindNode(group, kind, namespace, name)
-		if res != nil {
-			return res
+// ApplicationTree holds nodes which belongs to the application
+type ApplicationTree struct {
+	Nodes []ResourceNode `json:"nodes,omitempty" protobuf:"bytes,1,rep,name=nodes"`
+}
+
+type ApplicationSummary struct {
+	// ExternalURLs holds all external URLs of application child resources.
+	ExternalURLs []string `json:"externalURLs,omitempty" protobuf:"bytes,1,opt,name=externalURLs"`
+	// Images holds all images of application child resources.
+	Images []string `json:"images,omitempty" protobuf:"bytes,2,opt,name=images"`
+}
+
+func (t *ApplicationTree) FindNode(group string, kind string, namespace string, name string) *ResourceNode {
+	for _, n := range t.Nodes {
+		if n.Group == group && n.Kind == kind && n.Namespace == namespace && n.Name == name {
+			return &n
 		}
 	}
 	return nil
+}
+
+func (t *ApplicationTree) GetSummary() ApplicationSummary {
+	urlsSet := make(map[string]bool)
+	imagesSet := make(map[string]bool)
+	for _, node := range t.Nodes {
+		if node.NetworkingInfo != nil {
+			for _, url := range node.NetworkingInfo.ExternalURLs {
+				urlsSet[url] = true
+			}
+		}
+		for _, image := range node.Images {
+			imagesSet[image] = true
+		}
+	}
+	urls := make([]string, 0)
+	for url := range urlsSet {
+		urls = append(urls, url)
+	}
+	images := make([]string, 0)
+	for image := range imagesSet {
+		images = append(images, image)
+	}
+	return ApplicationSummary{ExternalURLs: urls, Images: images}
+}
+
+// ResourceRef includes fields which unique identify resource
+type ResourceRef struct {
+	Group     string `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
+	Version   string `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
+	Kind      string `json:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	Name      string `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
+}
+
+// ResourceNode contains information about live resource and its children
+type ResourceNode struct {
+	ResourceRef     `json:",inline" protobuf:"bytes,1,opt,name=resourceRef"`
+	ParentRefs      []ResourceRef           `json:"parentRefs,omitempty" protobuf:"bytes,2,opt,name=parentRefs"`
+	Info            []InfoItem              `json:"info,omitempty" protobuf:"bytes,3,opt,name=info"`
+	NetworkingInfo  *ResourceNetworkingInfo `json:"networkingInfo,omitempty" protobuf:"bytes,4,opt,name=networkingInfo"`
+	ResourceVersion string                  `json:"resourceVersion,omitempty" protobuf:"bytes,5,opt,name=resourceVersion"`
+	Images          []string                `json:"images,omitempty" protobuf:"bytes,6,opt,name=images"`
+	Health          *HealthStatus           `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
 }
 
 func (n *ResourceNode) GroupKindVersion() schema.GroupVersionKind {
@@ -562,7 +613,7 @@ type ResourceStatus struct {
 	Namespace string         `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	Name      string         `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
 	Status    SyncStatusCode `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
-	Health    HealthStatus   `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
+	Health    *HealthStatus  `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
 	Hook      bool           `json:"hook,omitempty" protobuf:"bytes,8,opt,name=hook"`
 }
 
@@ -674,7 +725,39 @@ type HelmRepository struct {
 // ResourceOverride holds configuration to customize resource diffing and health assessment
 type ResourceOverride struct {
 	HealthLua         string `json:"health.lua,omitempty" protobuf:"bytes,1,opt,name=healthLua"`
+	Actions           string `json:"actions,omitempty" protobuf:"bytes,3,opt,name=actions"`
 	IgnoreDifferences string `json:"ignoreDifferences,omitempty" protobuf:"bytes,2,opt,name=ignoreDifferences"`
+}
+
+func (o *ResourceOverride) GetActions() (ResourceActions, error) {
+	var actions ResourceActions
+	err := yaml.Unmarshal([]byte(o.Actions), &actions)
+	if err != nil {
+		return actions, err
+	}
+	return actions, nil
+}
+
+type ResourceActions struct {
+	ActionDiscoveryLua string                     `json:"discovery.lua,omitempty" yaml:"discovery.lua,omitempty" protobuf:"bytes,1,opt,name=actionDiscoveryLua"`
+	Definitions        []ResourceActionDefinition `json:"definitions,omitEmpty" protobuf:"bytes,2,rep,name=definitions"`
+}
+
+type ResourceActionDefinition struct {
+	Name      string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	ActionLua string `json:"action.lua" yaml:"action.lua" protobuf:"bytes,2,opt,name=actionLua"`
+}
+
+type ResourceAction struct {
+	Name   string                `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	Params []ResourceActionParam `json:"params,omitempty" protobuf:"bytes,2,rep,name=params"`
+}
+
+type ResourceActionParam struct {
+	Name    string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	Value   string `json:"value,omitempty" protobuf:"bytes,2,opt,name=value"`
+	Type    string `json:"type,omitempty" protobuf:"bytes,3,opt,name=type"`
+	Default string `json:"default,omitempty" protobuf:"bytes,4,opt,name=default"`
 }
 
 // Repository is a Git repository holding application configurations
@@ -685,6 +768,17 @@ type Repository struct {
 	SSHPrivateKey         string          `json:"sshPrivateKey,omitempty" protobuf:"bytes,4,opt,name=sshPrivateKey"`
 	ConnectionState       ConnectionState `json:"connectionState,omitempty" protobuf:"bytes,5,opt,name=connectionState"`
 	InsecureIgnoreHostKey bool            `json:"insecureIgnoreHostKey,omitempty" protobuf:"bytes,6,opt,name=insecureIgnoreHostKey"`
+}
+
+func (m *Repository) HasCredentials() bool {
+	return m.Username != "" || m.Password != "" || m.SSHPrivateKey != "" || m.InsecureIgnoreHostKey
+}
+
+func (m *Repository) CopyCredentialsFrom(source Repository) {
+	m.Username = source.Username
+	m.Password = source.Password
+	m.SSHPrivateKey = source.SSHPrivateKey
+	m.InsecureIgnoreHostKey = source.InsecureIgnoreHostKey
 }
 
 // RepositoryList is a collection of Repositories.
@@ -719,9 +813,9 @@ type AppProject struct {
 // AppProjectSpec is the specification of an AppProject
 type AppProjectSpec struct {
 	// SourceRepos contains list of git repository URLs which can be used for deployment
-	SourceRepos []string `json:"sourceRepos" protobuf:"bytes,1,name=sourceRepos"`
+	SourceRepos []string `json:"sourceRepos,omitempty" protobuf:"bytes,1,name=sourceRepos"`
 	// Destinations contains list of destinations available for deployment
-	Destinations []ApplicationDestination `json:"destinations" protobuf:"bytes,2,name=destination"`
+	Destinations []ApplicationDestination `json:"destinations,omitempty" protobuf:"bytes,2,name=destination"`
 	// Description contains optional project description
 	Description string `json:"description,omitempty" protobuf:"bytes,3,opt,name=description"`
 	// Roles are user defined RBAC roles associated with this project
@@ -732,14 +826,24 @@ type AppProjectSpec struct {
 	NamespaceResourceBlacklist []metav1.GroupKind `json:"namespaceResourceBlacklist,omitempty" protobuf:"bytes,6,opt,name=namespaceResourceBlacklist"`
 }
 
+func (d AppProjectSpec) DestinationClusters() []string {
+	servers := make([]string, 0)
+
+	for _, d := range d.Destinations {
+		servers = append(servers, d.Server)
+	}
+
+	return servers
+}
+
 // ProjectRole represents a role that has access to a project
 type ProjectRole struct {
 	// Name is a name for this role
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 	// Description is a description of the role
-	Description string `json:"description" protobuf:"bytes,2,opt,name=description"`
+	Description string `json:"description,omitempty" protobuf:"bytes,2,opt,name=description"`
 	// Policies Stores a list of casbin formated strings that define access policies for the role in the project
-	Policies []string `json:"policies" protobuf:"bytes,3,rep,name=policies"`
+	Policies []string `json:"policies,omitempty" protobuf:"bytes,3,rep,name=policies"`
 	// JWTTokens are a list of generated JWT tokens bound to this role
 	JWTTokens []JWTToken `json:"jwtTokens,omitempty" protobuf:"bytes,4,rep,name=jwtTokens"`
 	// Groups are a list of OIDC group claims bound to this role
@@ -748,21 +852,21 @@ type ProjectRole struct {
 
 // JWTToken holds the issuedAt and expiresAt values of a token
 type JWTToken struct {
-	IssuedAt  int64 `json:"iat,omitempty" protobuf:"int64,1,opt,name=iat"`
+	IssuedAt  int64 `json:"iat" protobuf:"int64,1,opt,name=iat"`
 	ExpiresAt int64 `json:"exp,omitempty" protobuf:"int64,2,opt,name=exp"`
 }
 
 // Command holds binary path and arguments list
 type Command struct {
-	Command []string `json:"command,omitempty" yaml:"command,omitempty" protobuf:"bytes,1,name=command"`
-	Args    []string `json:"args,omitempty" yaml:"args,omitempty" protobuf:"bytes,2,rep,name=args"`
+	Command []string `json:"command,omitempty" protobuf:"bytes,1,name=command"`
+	Args    []string `json:"args,omitempty" protobuf:"bytes,2,rep,name=args"`
 }
 
 // ConfigManagementPlugin contains config management plugin configuration
 type ConfigManagementPlugin struct {
-	Name     string   `json:"name,omitempty" yaml:"name,omitempty" protobuf:"bytes,1,name=name"`
-	Init     *Command `json:"init,omitempty" yaml:"init,omitempty" protobuf:"bytes,2,name=init"`
-	Generate Command  `json:"generate,omitempty" yaml:"generate,omitempty" protobuf:"bytes,3,name=generate"`
+	Name     string   `json:"name" protobuf:"bytes,1,name=name"`
+	Init     *Command `json:"init,omitempty" protobuf:"bytes,2,name=init"`
+	Generate Command  `json:"generate" protobuf:"bytes,3,name=generate"`
 }
 
 // ProjectPoliciesString returns Casbin formated string of a project's policies for each role

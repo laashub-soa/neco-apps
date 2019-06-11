@@ -17,7 +17,10 @@ KUSTOMIZE_VERSION = 2.0.3
 install.yaml: $(shell find ../argocd/base)
 	kustomize build ../argocd/base/ > install.yaml
 
-test: install.yaml
+validation:
+	go test -v ./validation_test.go
+
+test: install.yaml validation
 	./test.sh
 
 kustomize-check:
@@ -39,4 +42,4 @@ save:
 clean:
 	rm -f install.yaml
 
-.PHONY:	test kustomize-check setup save clean
+.PHONY:	validation test kustomize-check setup save clean

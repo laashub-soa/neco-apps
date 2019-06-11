@@ -207,11 +207,15 @@ func testSetup() {
 					return err
 				}
 
+				if len(app.Status.Resources) == 0 {
+					return errors.New("resource is not yet fetched")
+				}
+
 				for _, r := range app.Status.Resources {
 					if r.Status != argoappv1.SyncStatusCodeSynced {
 						return fmt.Errorf("%s is not yet Synced: %s", a, r.Status)
 					}
-					if r.Health.Status != argoappv1.HealthStatusHealthy {
+					if r.Health != nil && r.Health.Status != argoappv1.HealthStatusHealthy {
 						return fmt.Errorf("%s is not yet Healthy: %s", a, r.Health.Status)
 					}
 				}
