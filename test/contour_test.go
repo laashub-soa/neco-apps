@@ -98,8 +98,8 @@ spec:
 		}).Should(Succeed())
 
 		By("creating IngressRoute")
-		fqdnHttp := "http.test-ingress.gcp0.dev-ne.co"
-		fqdnHttps := "https.test-ingress.gcp0.dev-ne.co"
+		fqdnHTTP := "http.test-ingress.gcp0.dev-ne.co"
+		fqdnHTTPS := "https.test-ingress.gcp0.dev-ne.co"
 		ingressRoute := fmt.Sprintf(`
 apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute
@@ -137,7 +137,7 @@ spec:
       services:
         - name: testhttpd
           port: 80
-`, fqdnHttps, fqdnHttp)
+`, fqdnHTTPS, fqdnHTTP)
 		_, stderr, err = ExecAtWithInput(boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
@@ -189,8 +189,8 @@ spec:
 
 		By("accessing with curl: http")
 		Eventually(func() error {
-			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHttp+":80:"+targetIP,
-				"http://"+fqdnHttp+"/testhttpd", "-m", "5", "--fail")
+			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTP+":80:"+targetIP,
+				"http://"+fqdnHTTP+"/testhttpd", "-m", "5", "--fail")
 			return err
 		}).Should(Succeed())
 
@@ -199,8 +199,8 @@ spec:
 			"curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
 
 		Eventually(func() error {
-			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHttps+":443:"+targetIP,
-				"https://"+fqdnHttps+"/",
+			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTPS+":443:"+targetIP,
+				"https://"+fqdnHTTPS+"/",
 				"-m", "5",
 				"--fail",
 				"--cacert", "lets.crt",
@@ -210,8 +210,8 @@ spec:
 
 		By("redirecting to https")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHttps+":80:"+targetIP,
-				"http://"+fqdnHttps+"/",
+			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHTTPS+":80:"+targetIP,
+				"http://"+fqdnHTTPS+"/",
 				"-m", "5",
 				"--fail",
 				"-o", "/dev/null",
@@ -230,8 +230,8 @@ spec:
 
 		By("permitting insecure access")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHttps+":80:"+targetIP,
-				"http://"+fqdnHttps+"/insecure",
+			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnHTTPS+":80:"+targetIP,
+				"http://"+fqdnHTTPS+"/insecure",
 				"-m", "5",
 				"--fail",
 				"-o", "/dev/null",
