@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: external-dns
   labels:
-    certmanager.k8s.io/disable-validation: true
+    certmanager.k8s.io/disable-validation: "true"
