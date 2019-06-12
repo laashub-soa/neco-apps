@@ -7,4 +7,5 @@ resources:
   - poddisruptionbudget.yaml
   - podsecuritypolicy.yaml
   - rbac.yaml
+  - service.yaml
   - serviceaccount.yaml
