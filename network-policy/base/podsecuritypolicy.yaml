@@ -12,6 +12,7 @@ spec:
   volumes:
     - 'emptyDir'
     - 'hostPath'
+    - 'secret'
   allowedHostPaths:
   - pathPrefix: /lib/modules
     readOnly: true
@@ -22,6 +23,9 @@ spec:
   - pathPrefix: /var/lib/calico
     readOnly: false
   hostNetwork: true
+  hostPorts:
+  - min: 5473
+    max: 5473
   runAsUser:
     rule: 'RunAsAny'
   seLinux:
