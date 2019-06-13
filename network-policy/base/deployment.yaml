@@ -16,6 +16,9 @@ spec:
   # production, we recommend running at least 3 replicas to reduce the impact of rolling upgrade.
   replicas: 1
   revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      k8s-app: calico-typha
   template:
     metadata:
       labels:
@@ -27,7 +30,7 @@ spec:
         cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
       hostNetwork: true
       tolerations:
         # Mark the pod as a critical add-on for rescheduling.
@@ -38,42 +41,46 @@ spec:
       serviceAccountName: calico-node
       priorityClassName: system-node-critical
       containers:
-      - image: quay.io/cybozu/calico:3.7.2.1
-        name: calico-typha
-        ports:
-        - containerPort: 5473
+        - image: quay.io/cybozu/calico:3.7.2.1
           name: calico-typha
-          protocol: TCP
-        env:
-          # Use veth not cali for interface prefix
-          - name: FELIX_INTERFACEPREFIX
-            value: "veth"
-          - name: TYPHA_LOGFILEPATH
-            value: "none"
-          - name: TYPHA_LOGSEVERITYSYS
-            value: "none"
-          - name: TYPHA_LOGSEVERITYSCREEN
-            value: "info"
-          - name: TYPHA_PROMETHEUSMETRICSENABLED
-            value: "true"
-          - name: TYPHA_CONNECTIONREBALANCINGMODE
-            value: "kubernetes"
-          - name: TYPHA_PROMETHEUSMETRICSPORT
-            value: "9093"
-          - name: TYPHA_DATASTORETYPE
-            value: "kubernetes"
-          - name: TYPHA_HEALTHENABLED
-            value: "true"
-        livenessProbe:
-          httpGet:
-            path: /liveness
-            port: 9098
-            host: localhost
-          periodSeconds: 30
-          initialDelaySeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /readiness
-            port: 9098
-            host: localhost
-          periodSeconds: 10
+          ports:
+            - containerPort: 5473
+              name: calico-typha
+              protocol: TCP
+          command:
+            - tini
+            - --
+            - calico-typha
+          env:
+            # Use veth not cali for interface prefix
+            - name: FELIX_INTERFACEPREFIX
+              value: "veth"
+            - name: TYPHA_LOGFILEPATH
+              value: "none"
+            - name: TYPHA_LOGSEVERITYSYS
+              value: "none"
+            - name: TYPHA_LOGSEVERITYSCREEN
+              value: "info"
+            - name: TYPHA_PROMETHEUSMETRICSENABLED
+              value: "true"
+            - name: TYPHA_CONNECTIONREBALANCINGMODE
+              value: "kubernetes"
+            - name: TYPHA_PROMETHEUSMETRICSPORT
+              value: "9093"
+            - name: TYPHA_DATASTORETYPE
+              value: "kubernetes"
+            - name: TYPHA_HEALTHENABLED
+              value: "true"
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 9098
+              host: localhost
+            periodSeconds: 30
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 9098
+              host: localhost
+            periodSeconds: 10

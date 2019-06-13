@@ -23,7 +23,7 @@ spec:
         k8s-app: calico-node
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
       hostNetwork: true
       tolerations:
         # Make sure calico-node gets scheduled on all nodes.
@@ -68,12 +68,17 @@ spec:
       #         name: cni-bin-dir
       #       - mountPath: /host/etc/cni/net.d
       #         name: cni-net-dir
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
       containers:
         # Runs calico-node container on each Kubernetes node.  This
         # container programs network policy and routes on each
         # host.
         - name: calico-node
           image: quay.io/cybozu/calico:3.7.2.1
+          command:
+            - start_runit
           env:
             # Use Kubernetes API as the backing datastore.
             - name: DATASTORE_TYPE
@@ -130,8 +135,8 @@ spec:
           readinessProbe:
             exec:
               command:
-              - calico-node
-              - -felix-ready
+                - calico-node
+                - -felix-ready
             periodSeconds: 10
           volumeMounts:
             - mountPath: /lib/modules
@@ -164,12 +169,5 @@ spec:
           hostPath:
             path: /run/xtables.lock
             type: FileOrCreate
-        # Used to install CNI.
-        - name: cni-bin-dir
-          hostPath:
-            path: /opt/cni/bin
-        - name: cni-net-dir
-          hostPath:
-            path: /etc/cni/net.d
         - name: etc-service-enabled
           emptyDir: {}
