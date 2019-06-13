@@ -1,0 +1,19 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-external-dns
+  namespace: external-dns
+spec:
+  order: 1000.0
+  selector: app.kubernetes.io/name == 'external-dns'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 7979
+  egress:
+    - action: Allow

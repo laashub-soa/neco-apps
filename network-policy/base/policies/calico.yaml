@@ -1,0 +1,42 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-calico-typha
+  namespace: kube-system
+spec:
+  order: 1000.0
+  selector: k8s-app == 'calico-typha'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 5473
+          - 9098
+  egress:
+    - action: Allow
+
+---
+
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-calico-node
+  namespace: kube-system
+spec:
+  order: 1000.0
+  selector: k8s-app == 'calico-node'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 9099
+  egress:
+    - action: Allow

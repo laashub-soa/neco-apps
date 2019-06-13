@@ -1,0 +1,13 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: all-deny
+spec:
+  order: 10000.0
+  types:
+  - Ingress
+  - Egress
+  ingress:
+  - action: Deny
+  egress:
+  - action: Allow

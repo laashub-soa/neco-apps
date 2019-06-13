@@ -1,0 +1,19 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-coil-node
+  namespace: kube-system
+spec:
+  order: 1000.0
+  selector: k8s-app == 'coil-node'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 9383
+  egress:
+    - action: Allow

@@ -1,0 +1,25 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-cluster-dns
+  namespace: kube-system
+spec:
+  order: 1000.0
+  selector: cke.cybozu.com/appname == 'cluster-dns'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 1053
+          - 8080
+    - action: Allow
+      protocol: UDP
+      destination:
+        ports:
+          - 1053
+  egress:
+    - action: Allow

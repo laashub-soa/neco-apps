@@ -1,0 +1,52 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-squid
+  namespace: internet-egress
+spec:
+  order: 1000.0
+  selector: k8s-app == 'squid'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 3128
+          - 53
+    - action: Allow
+      protocol: UDP
+      destination:
+        ports:
+          - 53
+  egress:
+    - action: Allow
+
+---
+
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-unbound
+  namespace: internet-egress
+spec:
+  order: 1000.0
+  selector: k8s-app == 'unbound'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 53
+    - action: Allow
+      protocol: UDP
+      destination:
+        ports:
+          - 53
+  egress:
+    - action: Allow

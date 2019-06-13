@@ -1,0 +1,21 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-ingress
+  namespace: ingress
+spec:
+  order: 1000.0
+  selector: app == 'contour'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 8080
+          - 8443
+          - 8002
+  egress:
+    - action: Allow

@@ -16,6 +16,9 @@ spec:
         ingress-8000: "true"
         ingress-8001: "true"
     spec:
+      securityContext:
+        runAsUser: 10000
+        runAsGroup: 10000
       containers:
       - name: port8000
         image: busybox

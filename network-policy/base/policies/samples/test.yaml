@@ -16,6 +16,9 @@ spec:
         egress-8000: "true"
         egress-8002: "true"
     spec:
+      securityContext:
+        runAsUser: 10000
+        runAsGroup: 10000
       containers:
       - name: busybox
         image: busybox

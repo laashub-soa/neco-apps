@@ -1,0 +1,19 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-metallb
+  namespace: metallb-system
+spec:
+  order: 1000.0
+  selector: app == 'metallb'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 7472
+  egress:
+    - action: Allow

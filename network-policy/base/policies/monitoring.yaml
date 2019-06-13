@@ -1,0 +1,64 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-alertmanager
+  namespace: monitoring
+spec:
+  order: 1000.0
+  selector: app == 'alertmanager'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 9093
+  egress:
+    - action: Allow
+
+---
+
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-kube-state-metrics
+  namespace: kube-system
+spec:
+  order: 1000.0
+  selector: k8s-app == 'kube-state-metrics'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 8080
+          - 8081
+  egress:
+    - action: Allow
+
+---
+
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-prometheus
+  namespace: monitoring
+spec:
+  order: 1000.0
+  selector: app == 'prometheus'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 9090
+  egress:
+    - action: Allow
