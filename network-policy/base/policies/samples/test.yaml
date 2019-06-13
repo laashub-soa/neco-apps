@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+  labels:
+    app: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+        egress-8000: "true"
+        egress-8002: "true"
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        command: ["sleep", "10000"]

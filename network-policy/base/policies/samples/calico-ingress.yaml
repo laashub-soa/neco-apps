@@ -1,0 +1,34 @@
+kind: NetworkPolicy
+apiVersion: crd.projectcalico.org/v1
+metadata:
+  name: all-deny
+  namespace: ns-test
+spec:
+  order: 11.0
+  types:
+  - Ingress
+  - Egress
+  ingress:
+  - action: Deny
+
+---
+
+kind: NetworkPolicy
+apiVersion: crd.projectcalico.org/v1
+metadata:
+  name: ingress-8000
+  namespace: ns-test
+spec:
+  order: 10.0
+  selector: app == 'web'
+  types:
+  - Ingress
+  - Egress
+  ingress:
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 8000
+  egress:
+  - action: Allow
