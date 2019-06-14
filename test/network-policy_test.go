@@ -2,7 +2,10 @@ package test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
+	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,7 +14,13 @@ import (
 )
 
 func testNetworkPolicy() {
+	It("should create test-netpol namespace", func() {
+		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-netpol", "--ignore-not-found=true")
+		ExecSafeAt(boot0, "kubectl", "create", "namespace", "test-netpol")
+	})
+
 	It("should accept and deny packets according to the registered network policies", func() {
+
 		By("deployment Pods")
 		deployYAML := `
 apiVersion: extensions/v1beta1
@@ -95,10 +104,12 @@ spec:
 			Expect(stats.PacketsRecv).To(Equal(0))
 		}
 
-		By("checking connect to open ports")
+		By("checking connect to open tcp ports")
+		const portShouldBeDenied = 65535
+
 		testcase := []struct {
-			prefix string
-			ports  []int
+			podNamePrefix string
+			ports         []int
 		}{
 			{"argocd-application-controller", []int{8082}},
 			{"argocd-redis", []int{6379}},
@@ -116,11 +127,40 @@ spec:
 			{"speaker", []int{7472}},
 			{"alertmanager", []int{9093}},
 			{"prometheus", []int{9090}},
-    }
-    
-    for _, tc := range testcase {
-      for _, pod := range podList.Items {
-      }
-    }
+		}
+
+		dialer := &net.Dialer{
+			Timeout:   10 * time.Second,
+			KeepAlive: defaultKeepAlive,
+		}
+
+		for _, tc := range testcase {
+			By("getting pod list: " + tc.podNamePrefix)
+			var addrList []string
+			for _, pod := range podList.Items {
+				if strings.HasPrefix(pod.GetName(), tc.podNamePrefix) {
+					addrList = append(addrList, pod.Status.PodIP)
+				}
+			}
+			Expect(len(addrList)).NotTo(Equal(0), "pod is not found: %s", tc.podNamePrefix)
+
+			for _, addr := range addrList {
+				By("checking pod: " + addr)
+				for _, port := range tc.ports {
+					By(fmt.Sprintf("dialing to allowed port: %d", port))
+					_, err := dialer.Dial("tcp", fmt.Sprintf("%s:%d", addr, port))
+					Expect(err).NotTo(HaveOccurred())
+				}
+
+				By(fmt.Sprintf("dialing to denied port: %d", portShouldBeDenied))
+				_, err = dialer.Dial("tcp", fmt.Sprintf("%s:%d", addr, portShouldBeDenied))
+				switch t := err.(type) {
+				case net.Error:
+					Expect(t.Timeout()).To(Equal(true))
+				default:
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}
+		}
 	})
 }
