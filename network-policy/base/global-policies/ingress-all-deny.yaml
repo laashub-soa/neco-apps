@@ -4,6 +4,7 @@ metadata:
   name: ingress-all-deny
 spec:
   order: 10000.0
+  selector: app.kubernetes.io/name not in {'argocd-application-controller','argocd-redis','argocd-repo-server','argocd-server'}
   types:
     - Ingress
     - Egress
@@ -11,18 +12,3 @@ spec:
     - action: Deny
   egress:
     - action: Allow
-
----
-
-apiVersion: crd.projectcalico.org/v1
-kind: GlobalNetworkPolicy
-metadata:
-  name: argocd-settings
-spec:
-  order: 9999.0
-  types:
-    - Ingress
-  ingress:
-    - action: Allow
-      source:
-        selector: namespace == 'argocd'
