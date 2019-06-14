@@ -74,6 +74,26 @@ spec:
     targetPort: 8000
   selector:
     run: testhttpd
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-httpdtest
+  namespace: test-ingress
+spec:
+  order: 1000.0
+  selector: run == 'testhttpd'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 8000
+  egress:
+    - action: Allow
 `
 		_, stderr, err := ExecAtWithInput(boot0, []byte(deployYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
