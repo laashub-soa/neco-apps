@@ -11,3 +11,18 @@ spec:
     - action: Deny
   egress:
     - action: Allow
+
+---
+
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: argocd-settings
+spec:
+  order: 9999.0
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      source:
+        selector: namespace == 'argocd'

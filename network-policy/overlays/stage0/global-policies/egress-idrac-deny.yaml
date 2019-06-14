@@ -2,8 +2,6 @@ apiVersion: crd.projectcalico.org/v1
 kind: GlobalNetworkPolicy
 metadata:
   name: egress-idrac-deny
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 9999.0
   types:

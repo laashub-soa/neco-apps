@@ -3,8 +3,6 @@ kind: NetworkPolicy
 metadata:
   name: ingress-argocd-application-controller
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   order: 1000.0
   selector: app.kubernetes.io/name == 'argocd-application-controller'
@@ -27,8 +25,6 @@ kind: NetworkPolicy
 metadata:
   name: ingress-argocd-redis
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   order: 1000.0
   selector: app.kubernetes.io/name == 'argocd-redis'
@@ -51,8 +47,6 @@ kind: NetworkPolicy
 metadata:
   name: ingress-argocd-repo-server
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   order: 1000.0
   selector: app.kubernetes.io/name == 'argocd-repo-server'
@@ -76,8 +70,6 @@ kind: NetworkPolicy
 metadata:
   name: ingress-argocd-server
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   order: 1000.0
   selector: app.kubernetes.io/name == 'argocd-server'

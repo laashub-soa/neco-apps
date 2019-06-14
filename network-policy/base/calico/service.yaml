@@ -9,8 +9,6 @@ metadata:
   namespace: kube-system
   labels:
     k8s-app: calico-typha
-  annotations:
-    argocd.argoproj.io/sync-wave: "-2"
 spec:
   ports:
     - port: 5473
