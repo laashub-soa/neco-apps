@@ -17,4 +17,4 @@ resources:
   - policies/internet-egress.yaml
   - policies/metallb.yaml
   - policies/monitoring.yaml
-  - global-policies/cluster.yaml
+  - global-policies/ingress-all-deny.yaml

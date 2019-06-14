@@ -1,7 +1,7 @@
 apiVersion: crd.projectcalico.org/v1
 kind: GlobalNetworkPolicy
 metadata:
-  name: all-deny
+  name: ingress-all-deny
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
