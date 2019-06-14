@@ -2,12 +2,14 @@ apiVersion: crd.projectcalico.org/v1
 kind: GlobalNetworkPolicy
 metadata:
   name: all-deny
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 10000.0
   types:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - action: Deny
+    - action: Deny
   egress:
-  - action: Allow
+    - action: Allow
