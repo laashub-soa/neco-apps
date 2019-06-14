@@ -9,6 +9,8 @@ metadata:
   namespace: kube-system
   labels:
     k8s-app: calico-node
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   selector:
     matchLabels:

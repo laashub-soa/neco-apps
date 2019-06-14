@@ -7,6 +7,8 @@ metadata:
   namespace: kube-system
   labels:
     k8s-app: calico-typha
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   # Number of Typha replicas.  To enable Typha, set this to a non-zero value *and* set the
   # typha_service_name variable in the calico-config ConfigMap above.

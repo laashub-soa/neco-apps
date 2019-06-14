@@ -6,6 +6,7 @@ metadata:
   annotations:
     seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default'
     seccomp.security.alpha.kubernetes.io/defaultProfileName:  'docker/default'
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   privileged: true
   allowPrivilegeEscalation: true
