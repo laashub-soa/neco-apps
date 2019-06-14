@@ -25,6 +25,7 @@ require (
 	github.com/prometheus/common v0.4.1
 	github.com/prometheus/tsdb v0.8.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
+	github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c
 	github.com/spf13/pflag v1.0.3 // indirect
 	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect

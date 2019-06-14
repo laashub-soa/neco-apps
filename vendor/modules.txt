@@ -127,6 +127,8 @@ github.com/prometheus/common/model
 github.com/sergi/go-diff/diffmatchpatch
 # github.com/sirupsen/logrus v1.4.2
 github.com/sirupsen/logrus
+# github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c
+github.com/sparrc/go-ping
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
 # github.com/src-d/gcfg v1.4.0
@@ -155,8 +157,14 @@ golang.org/x/crypto/ssh/agent
 golang.org/x/crypto/cast5
 golang.org/x/crypto/openpgp/elgamal
 # golang.org/x/net v0.0.0-20190522155817-f3200d17e092
+golang.org/x/net/icmp
+golang.org/x/net/ipv4
+golang.org/x/net/ipv6
 golang.org/x/net/http2
 golang.org/x/net/html/charset
+golang.org/x/net/internal/iana
+golang.org/x/net/internal/socket
+golang.org/x/net/bpf
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
