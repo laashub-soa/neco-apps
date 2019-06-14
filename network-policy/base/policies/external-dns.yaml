@@ -17,3 +17,25 @@ spec:
           - 7979
   egress:
     - action: Allow
+
+---
+
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-cert-manager
+  namespace: external-dns
+spec:
+  order: 1000.0
+  selector: app == 'cert-manager'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 9402
+  egress:
+    - action: Allow

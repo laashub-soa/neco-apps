@@ -14,8 +14,8 @@ spec:
       protocol: TCP
       destination:
         ports:
+          - 8002
           - 8080
           - 8443
-          - 8002
   egress:
     - action: Allow

@@ -14,8 +14,8 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - 3128
           - 53
+          - 3128
     - action: Allow
       protocol: UDP
       destination:

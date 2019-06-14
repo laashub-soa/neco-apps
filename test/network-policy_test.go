@@ -70,7 +70,7 @@ spec:
 		_, stderr, err := ExecAtWithInput(boot0, []byte(deployYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		By("checking hostname is resolved")
+		By("checking hostname is resolved by cluster-dns")
 		ips, err := net.LookupIP("testhttpd.test-netpol")
 		Expect(len(ips)).To(Equal(2))
 
@@ -94,5 +94,33 @@ spec:
 			stats := pinger.Statistics()
 			Expect(stats.PacketsRecv).To(Equal(0))
 		}
+
+		By("checking connect to open ports")
+		testcase := []struct {
+			prefix string
+			ports  []int
+		}{
+			{"argocd-application-controller", []int{8082}},
+			{"argocd-redis", []int{6379}},
+			{"argocd-repo-server", []int{8081, 8084}},
+			{"argocd-server", []int{8080, 8083}},
+			{"cert-manager", []int{9402}},
+			{"external-dns", []int{7979}},
+			{"contour", []int{8002, 8080, 8443}},
+			{"squid", []int{53, 3128}},
+			{"unbound", []int{53}},
+			{"cluster-dns", []int{1053, 8080}},
+			{"coil-node", []int{9383}},
+			{"kube-state-metrics ", []int{8080, 8081}},
+			{"controller", []int{7472}},
+			{"speaker", []int{7472}},
+			{"alertmanager", []int{9093}},
+			{"prometheus", []int{9090}},
+    }
+    
+    for _, tc := range testcase {
+      for _, pod := range podList.Items {
+      }
+    }
 	})
 }
