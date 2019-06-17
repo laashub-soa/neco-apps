@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	ping "github.com/sparrc/go-ping"
@@ -127,7 +128,7 @@ spec:
 			Expect(stats.PacketsRecv).To(Equal(0))
 		}
 
-		By("checking connect to open tcp ports")
+		By("checking connection to open tcp ports")
 		const portShouldBeDenied = 65535
 
 		testcase := []struct {
@@ -184,6 +185,19 @@ spec:
 					Expect(err).NotTo(HaveOccurred())
 				}
 			}
+		}
+
+		By("checking ping to the idrac subnet is dropped by network policy")
+		stdout, stderr, err = ExecAt(boot0, "sabactl", "machines", "get")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		var machines []sabakan.Machine
+		err = json.Unmarshal(stdout, &machines)
+		Expect(err).ShouldNot(HaveOccurred())
+		for _, m := range machines {
+			By("sending: " + m.Spec.BMC.IPv4)
+			stdout, _, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-W", "3", "-c", "1", m.Spec.BMC.IPv4)
+			Expect(err).To(HaveOccurred(), "stdout: %s", stdout)
 		}
 	})
 }

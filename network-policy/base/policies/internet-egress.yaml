@@ -12,20 +12,21 @@ spec:
   ingress:
     - action: Allow
       protocol: TCP
+      source:
+        nets:
+          - 10.0.0.0/8
       destination:
         ports:
-          - 53
           - 3128
-    - action: Allow
-      protocol: UDP
-      destination:
-        ports:
-          - 53
   egress:
     - action: Allow
+      destination:
+        notNets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
 
 ---
-
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
@@ -40,13 +41,24 @@ spec:
   ingress:
     - action: Allow
       protocol: TCP
+      source:
+        nets:
+          - 10.0.0.0/8
       destination:
         ports:
           - 53
     - action: Allow
       protocol: UDP
+      source:
+        nets:
+          - 10.0.0.0/8
       destination:
         ports:
           - 53
   egress:
     - action: Allow
+      destination:
+        notNets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
