@@ -39,3 +39,25 @@ spec:
           - 9402
   egress:
     - action: Allow
+
+---
+
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-cert-manager-webhook
+  namespace: external-dns
+spec:
+  order: 1000.0
+  selector: app == 'webhook'
+  types:
+    - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 6443
+  egress:
+    - action: Allow
