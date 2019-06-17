@@ -3,6 +3,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-external-dns
   namespace: external-dns
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: app.kubernetes.io/name == 'external-dns'
@@ -25,6 +27,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-cert-manager
   namespace: external-dns
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: app == 'cert-manager'
@@ -47,6 +51,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-cert-manager-webhook
   namespace: external-dns
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: app == 'webhook'

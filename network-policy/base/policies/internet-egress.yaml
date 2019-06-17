@@ -3,6 +3,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-squid
   namespace: internet-egress
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: k8s-app == 'squid'
@@ -32,6 +34,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-unbound
   namespace: internet-egress
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: k8s-app == 'unbound'

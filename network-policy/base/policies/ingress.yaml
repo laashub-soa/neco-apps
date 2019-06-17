@@ -3,6 +3,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-ingress
   namespace: ingress
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: app == 'contour'

@@ -3,6 +3,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-cluster-dns
   namespace: kube-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: cke.cybozu.com/appname == 'cluster-dns'

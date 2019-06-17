@@ -3,6 +3,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-alertmanager
   namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: app == 'alertmanager'
@@ -25,6 +27,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-kube-state-metrics
   namespace: kube-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: k8s-app == 'kube-state-metrics'
@@ -48,6 +52,8 @@ kind: NetworkPolicy
 metadata:
   name: ingress-prometheus
   namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
   selector: app == 'prometheus'
