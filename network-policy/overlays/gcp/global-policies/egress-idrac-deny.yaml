@@ -1,0 +1,12 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: egress-idrac-deny
+spec:
+  order: 9999.0
+  types:
+    - Egress
+  egress:
+    - action: Deny
+      destination:
+        nets: ["10.72.16.0/20"]

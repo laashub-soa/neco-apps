@@ -2,9 +2,10 @@ apiVersion: crd.projectcalico.org/v1
 kind: GlobalNetworkPolicy
 metadata:
   name: ingress-all-deny
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 10000.0
-  selector: app.kubernetes.io/name not in {'argocd-application-controller','argocd-redis','argocd-repo-server','argocd-server'}
   types:
     - Ingress
     - Egress
