@@ -9,6 +9,6 @@ spec:
   types:
     - Egress
   egress:
-    - action: Deny
+    - action: Allow
       destination:
-        nets: ["10.72.16.0/20"]
+        notNets: ["10.72.16.0/20"]
