@@ -71,6 +71,7 @@ rules:
       - networksets
       - clusterinformations
       - hostendpoints
+      - blockaffinity
     verbs:
       - get
       - list
