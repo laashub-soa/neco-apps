@@ -10,7 +10,6 @@ spec:
   selector: app == 'contour'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
@@ -19,5 +18,3 @@ spec:
           - 8002
           - 8080
           - 8443
-  egress:
-    - action: Allow

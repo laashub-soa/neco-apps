@@ -8,9 +8,6 @@ spec:
   order: 10000.0
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Log
     - action: Deny
-  egress:
-    - action: Allow

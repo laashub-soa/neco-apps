@@ -10,12 +10,9 @@ spec:
   selector: app == 'metallb'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 7472
-  egress:
-    - action: Allow

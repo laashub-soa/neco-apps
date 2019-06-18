@@ -10,15 +10,12 @@ spec:
   selector: app.kubernetes.io/name == 'external-dns'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 7979
-  egress:
-    - action: Allow
 
 ---
 
@@ -34,15 +31,12 @@ spec:
   selector: app == 'cert-manager'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 9402
-  egress:
-    - action: Allow
 
 ---
 
@@ -58,12 +52,9 @@ spec:
   selector: app == 'webhook'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 6443
-  egress:
-    - action: Allow

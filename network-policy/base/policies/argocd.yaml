@@ -10,15 +10,12 @@ spec:
   selector: app.kubernetes.io/name == 'argocd-application-controller'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 8082
-  egress:
-    - action: Allow
 
 ---
 
@@ -34,15 +31,12 @@ spec:
   selector: app.kubernetes.io/name == 'argocd-redis'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 6379
-  egress:
-    - action: Allow
 
 ---
 
@@ -58,7 +52,6 @@ spec:
   selector: app.kubernetes.io/name == 'argocd-repo-server'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
@@ -66,8 +59,6 @@ spec:
         ports:
           - 8081
           - 8084
-  egress:
-    - action: Allow
 
 ---
 
@@ -83,7 +74,6 @@ spec:
   selector: app.kubernetes.io/name == 'argocd-server'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
@@ -91,5 +81,3 @@ spec:
         ports:
           - 8080
           - 8083
-  egress:
-    - action: Allow

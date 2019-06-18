@@ -10,12 +10,9 @@ spec:
   selector: k8s-app == 'coil-node'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 9383
-  egress:
-    - action: Allow

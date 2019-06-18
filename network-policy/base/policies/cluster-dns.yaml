@@ -10,7 +10,6 @@ spec:
   selector: cke.cybozu.com/appname == 'cluster-dns'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
@@ -23,5 +22,3 @@ spec:
       destination:
         ports:
           - 1053
-  egress:
-    - action: Allow
