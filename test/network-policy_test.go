@@ -127,6 +127,7 @@ spec:
 
 		for _, pod := range podList.Items {
 			pinger, err := ping.NewPinger(pod.Status.PodIP)
+			pinger.Timeout = 10 * time.Second
 			if err != nil {
 				Expect(err).NotTo(HaveOccurred())
 			}
@@ -172,7 +173,7 @@ spec:
 			By("getting pod list: " + tc.podNamePrefix)
 			var addrList []string
 			for _, pod := range podList.Items {
-				if strings.HasPrefix(pod.GetName(), tc.podNamePrefix) {
+				if strings.HasPrefix(pod.ObjectMeta.Name, tc.podNamePrefix) {
 					addrList = append(addrList, pod.Status.PodIP)
 				}
 			}
