@@ -9,6 +9,9 @@ spec:
   types:
     - Egress
   egress:
+    - action: Log
+      destination:
+        nets: ["10.72.16.0/20"]
     - action: Allow
       destination:
         notNets: ["10.72.16.0/20"]

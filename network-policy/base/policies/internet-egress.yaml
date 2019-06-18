@@ -21,6 +21,12 @@ spec:
         ports:
           - 3128
   egress:
+    - action: Log
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
     - action: Allow
       destination:
         notNets:
@@ -60,6 +66,12 @@ spec:
         ports:
           - 53
   egress:
+    - action: Log
+      destination:
+        nets:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
     - action: Allow
       destination:
         notNets:
