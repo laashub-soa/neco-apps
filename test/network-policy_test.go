@@ -118,7 +118,7 @@ spec:
 		}).Should(Succeed())
 
 		By("checking ping is dropped")
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=kube-system", "get", "pods", "--selector=k8s-app=coil-controllers", "-o=json")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-A", "-o=json")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		podList := new(corev1.PodList)
@@ -127,7 +127,7 @@ spec:
 
 		for _, pod := range podList.Items {
 			pinger, err := ping.NewPinger(pod.Status.PodIP)
-			pinger.Timeout = 10 * time.Second
+			pinger.Timeout = 3 * time.Second
 			if err != nil {
 				Expect(err).NotTo(HaveOccurred())
 			}

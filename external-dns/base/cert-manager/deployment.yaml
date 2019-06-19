@@ -6,8 +6,6 @@ metadata:
   labels:
     app: cainjector
     component: cert-manager
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 spec:
   replicas: 1
   selector:
@@ -45,8 +43,6 @@ metadata:
   labels:
     app: webhook
     component: cert-manager
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 spec:
   replicas: 1
   selector:
