@@ -7,7 +7,6 @@ metadata:
     app: webhook
   annotations:
     certmanager.k8s.io/inject-apiserver-ca: "true"
-    argocd.argoproj.io/sync-wave: "1"
 webhooks:
   - name: certificates.admission.certmanager.k8s.io
     namespaceSelector:
@@ -64,16 +63,6 @@ webhooks:
         namespace: default
         path: /apis/admission.certmanager.k8s.io/v1beta1/issuers
   - name: clusterissuers.admission.certmanager.k8s.io
-    namespaceSelector:
-      matchExpressions:
-      - key: "certmanager.k8s.io/disable-validation"
-        operator: "NotIn"
-        values:
-        - "true"
-      - key: "name"
-        operator: "NotIn"
-        values:
-        - external-dns
     rules:
       - apiGroups:
           - "certmanager.k8s.io"
