@@ -69,15 +69,12 @@ spec:
   selector: run == 'testhttpd'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 8000
-  egress:
-    - action: Allow
 `
 		_, stderr, err := ExecAtWithInput(boot0, []byte(netpol), "kubectl", "create", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)

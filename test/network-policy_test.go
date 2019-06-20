@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +11,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/sparrc/go-ping"
+	"golang.org/x/crypto/ssh"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -68,15 +68,12 @@ spec:
   selector: run == 'testhttpd'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       destination:
         ports:
           - 8000
-  egress:
-    - action: Allow
 `
 		_, stderr, err := ExecAtWithInput(boot0, []byte(deployYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
@@ -128,7 +125,7 @@ spec:
 
 		for _, pod := range podList.Items {
 			pinger, err := ping.NewPinger(pod.Status.PodIP)
-			pinger.Timeout = 3 * time.Second
+			pinger.Timeout = 2 * time.Second
 			if err != nil {
 				Expect(err).NotTo(HaveOccurred())
 			}
@@ -144,53 +141,67 @@ spec:
 		const portShouldBeDenied = 65535
 
 		testcase := []struct {
-			podNamePrefix string
-			ports         []int
+			podNamePrefix  string
+			ports          []int
+			internetEgress bool
 		}{
-			{"argocd-application-controller", []int{8082}},
-			{"argocd-redis", []int{6379}},
-			{"argocd-repo-server", []int{8081, 8084}},
-			{"argocd-server", []int{8080, 8083}},
-			{"cert-manager", []int{9402}},
-			{"external-dns", []int{7979}},
-			{"contour", []int{8002, 8080, 8443}},
-			{"squid", []int{53, 3128}},
-			{"unbound", []int{53}},
-			{"cluster-dns", []int{1053, 8080}},
-			{"coil-node", []int{9383}},
-			{"kube-state-metrics ", []int{8080, 8081}},
-			{"controller", []int{7472}},
-			{"speaker", []int{7472}},
-			{"alertmanager", []int{9093}},
-			{"prometheus", []int{9090}},
+			{"argocd-application-controller", []int{8082}, false},
+			{"argocd-redis", []int{6379}, false},
+			{"argocd-repo-server", []int{8081, 8084}, false},
+			{"argocd-server", []int{8080, 8083}, false},
+			{"cert-manager", []int{9402}, false},
+			{"external-dns", []int{7979}, false},
+			{"contour", []int{8002, 8080, 8443}, false},
+			{"squid", []int{53, 3128}, true},
+			{"unbound", []int{53}, true},
+			{"cluster-dns", []int{1053, 8080}, false},
+			{"coil-node", []int{9383}, false},
+			{"kube-state-metrics ", []int{8080, 8081}, false},
+			{"controller", []int{7472}, false},
+			{"speaker", []int{7472}, false},
+			{"alertmanager", []int{9093}, false},
+			{"prometheus", []int{9090}, false},
 		}
 
 		for _, tc := range testcase {
 			By("getting pod list: " + tc.podNamePrefix)
-			var addrList []string
+			var targetPods []*corev1.Pod
 			for _, pod := range podList.Items {
 				if strings.HasPrefix(pod.ObjectMeta.Name, tc.podNamePrefix) {
-					addrList = append(addrList, pod.Status.PodIP)
+					targetPods = append(targetPods, &pod)
 				}
 			}
-			Expect(len(addrList)).NotTo(Equal(0), "pod is not found: %s", tc.podNamePrefix)
+			Expect(len(targetPods)).NotTo(Equal(0), "pod is not found: %s", tc.podNamePrefix)
 
-			for _, addr := range addrList {
-				By("checking pod: " + addr)
+			for _, pod := range targetPods {
+				By("checking pod: " + pod.Status.PodIP)
 				for _, port := range tc.ports {
 					By(fmt.Sprintf("dialing to allowed port: %d", port))
-					stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", addr, strconv.Itoa(port), "-e", "X")
+					stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(port), "-e", "X")
 					Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 				}
 
 				By(fmt.Sprintf("dialing to denied port: %d", portShouldBeDenied))
-				stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", addr, strconv.Itoa(portShouldBeDenied), "-e", "X")
+				stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(portShouldBeDenied), "-e", "X")
 				switch t := err.(type) {
-				case *exec.ExitError:
+				case *ssh.ExitError:
 					// telnet command returns 124 when it times out
-					Expect(t.ExitCode()).To(Equal(124))
+					Expect(t.ExitStatus).To(Equal(124))
 				default:
 					Expect(err).NotTo(HaveOccurred())
+				}
+
+				if tc.internetEgress {
+					By("access to local IP")
+					stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n", "test-netpol", "pod")
+					Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+					var testhttpPodList corev1.PodList
+					err = json.Unmarshal(stdout, testhttpPodList)
+					Expect(err).NotTo(HaveOccurred())
+
+					testhttpdIP := testhttpPodList.Items[0].Status.PodIP
+					stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", pod.Namespace, pod.Name, "--", "curl", testhttpdIP, "-m", "5")
+					Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 				}
 			}
 		}
