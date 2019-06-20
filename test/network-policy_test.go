@@ -3,14 +3,15 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"net"
+	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	ping "github.com/sparrc/go-ping"
+	"github.com/sparrc/go-ping"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -164,11 +165,6 @@ spec:
 			{"prometheus", []int{9090}},
 		}
 
-		dialer := &net.Dialer{
-			Timeout:   10 * time.Second,
-			KeepAlive: defaultKeepAlive,
-		}
-
 		for _, tc := range testcase {
 			By("getting pod list: " + tc.podNamePrefix)
 			var addrList []string
@@ -183,15 +179,16 @@ spec:
 				By("checking pod: " + addr)
 				for _, port := range tc.ports {
 					By(fmt.Sprintf("dialing to allowed port: %d", port))
-					_, err := dialer.Dial("tcp", fmt.Sprintf("%s:%d", addr, port))
-					Expect(err).NotTo(HaveOccurred())
+					stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", addr, strconv.Itoa(port), "-e", "X")
+					Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 				}
 
 				By(fmt.Sprintf("dialing to denied port: %d", portShouldBeDenied))
-				_, err = dialer.Dial("tcp", fmt.Sprintf("%s:%d", addr, portShouldBeDenied))
+				stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", addr, strconv.Itoa(portShouldBeDenied), "-e", "X")
 				switch t := err.(type) {
-				case net.Error:
-					Expect(t.Timeout()).To(Equal(true))
+				case *exec.ExitError:
+					// telnet command returns 124 when it times out
+					Expect(t.ExitCode()).To(Equal(124))
 				default:
 					Expect(err).NotTo(HaveOccurred())
 				}
