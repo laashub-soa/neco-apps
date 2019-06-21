@@ -115,21 +115,30 @@ spec:
 			return nil
 		}).Should(Succeed())
 
-		By("checking ping is dropped")
+		By("getting pod list")
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-A", "-o=json")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		podList := new(corev1.PodList)
 		err = json.Unmarshal(stdout, podList)
 		Expect(err).NotTo(HaveOccurred())
 
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "-n", "test-netpol", "-o=json")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		testhttpdPodList := new(corev1.PodList)
+		err = json.Unmarshal(stdout, testhttpdPodList)
+		Expect(err).NotTo(HaveOccurred())
+
+		By("checking ping is dropped")
 		for _, pod := range podList.Items {
+			By(fmt.Sprintf("checking pod: %s[%s]", pod.GetName(), pod.Status.PodIP))
 			pinger, err := ping.NewPinger(pod.Status.PodIP)
-			pinger.Timeout = 2 * time.Second
 			if err != nil {
 				Expect(err).NotTo(HaveOccurred())
 			}
 
+			pinger.Timeout = 2 * time.Second
 			pinger.Count = 1
 			pinger.SetPrivileged(true)
 			pinger.Run()
@@ -137,7 +146,7 @@ spec:
 			Expect(stats.PacketsRecv).To(Equal(0))
 		}
 
-		By("checking connection to open tcp ports")
+		By("checking connection")
 		const portShouldBeDenied = 65535
 
 		testcase := []struct {
@@ -167,14 +176,14 @@ spec:
 			By("getting pod list: " + tc.podNamePrefix)
 			var targetPods []*corev1.Pod
 			for _, pod := range podList.Items {
-				if strings.HasPrefix(pod.ObjectMeta.Name, tc.podNamePrefix) {
+				if strings.HasPrefix(pod.GetName(), tc.podNamePrefix) {
 					targetPods = append(targetPods, &pod)
 				}
 			}
 			Expect(len(targetPods)).NotTo(Equal(0), "pod is not found: %s", tc.podNamePrefix)
 
 			for _, pod := range targetPods {
-				By("checking pod: " + pod.Status.PodIP)
+				By(fmt.Sprintf("checking pod: %s[%s]", pod.GetName(), pod.Status.PodIP))
 				for _, port := range tc.ports {
 					By(fmt.Sprintf("dialing to allowed port: %d", port))
 					stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(port), "-e", "X")
@@ -193,13 +202,7 @@ spec:
 
 				if tc.internetEgress {
 					By("access to local IP")
-					stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n", "test-netpol", "pod")
-					Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-					var testhttpPodList corev1.PodList
-					err = json.Unmarshal(stdout, testhttpPodList)
-					Expect(err).NotTo(HaveOccurred())
-
-					testhttpdIP := testhttpPodList.Items[0].Status.PodIP
+					testhttpdIP := testhttpdPodList.Items[0].Status.PodIP
 					stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", pod.Namespace, pod.Name, "--", "curl", testhttpdIP, "-m", "5")
 					Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 				}
