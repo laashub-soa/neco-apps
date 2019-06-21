@@ -15,6 +15,7 @@ git checkout -qf ${CIRCLE_SHA1}
 cd test
 cp \$HOME/${TEST_DIR}/account.json ./
 export GO111MODULE=on
+sudo chown -R cybozu:cybozu \$HOME/.cache
 make setup
 make kustomize-check
 make test COMMIT_ID=${CIRCLE_SHA1}
