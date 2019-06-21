@@ -82,6 +82,12 @@ jobs:
                 --boot-disk-size ${DISK_SIZE} \
                 --local-ssd interface=scsi \
                 --scopes https://www.googleapis.com/auth/devstorage.read_write
+            for i in $(seq 300); do
+                if gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} --command=date 2>/dev/null; then
+                    break
+                fi
+                sleep 1
+            done
             gcloud compute scp ./bin/run.sh cybozu@${INSTANCE_NAME}: --quiet --project ${PROJECT} --zone ${ZONE}
             gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} \
                 --command="sudo /home/cybozu/run.sh"
