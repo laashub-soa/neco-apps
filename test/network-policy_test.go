@@ -132,7 +132,7 @@ spec:
 
 		By("checking ping is dropped")
 		for _, pod := range podList.Items {
-			By(fmt.Sprintf("checking pod: %s[%s]", pod.GetName(), pod.Status.PodIP))
+			By(fmt.Sprintf("sending ping to pod: %s[%s]", pod.GetName(), pod.Status.PodIP))
 			pinger, err := ping.NewPinger(pod.Status.PodIP)
 			if err != nil {
 				Expect(err).NotTo(HaveOccurred())
@@ -174,10 +174,10 @@ spec:
 
 		for _, tc := range testcase {
 			By("getting pod list: " + tc.podNamePrefix)
-			var targetPods []*corev1.Pod
+			var targetPods []corev1.Pod
 			for _, pod := range podList.Items {
 				if strings.HasPrefix(pod.GetName(), tc.podNamePrefix) {
-					targetPods = append(targetPods, &pod)
+					targetPods = append(targetPods, pod)
 				}
 			}
 			Expect(len(targetPods)).NotTo(Equal(0), "pod is not found: %s", tc.podNamePrefix)
