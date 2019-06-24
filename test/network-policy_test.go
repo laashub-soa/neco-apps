@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cybozu-go/sabakan/v2"
@@ -150,39 +149,38 @@ spec:
 		const portShouldBeDenied = 65535
 
 		testcase := []struct {
-			podNamePrefix  string
-			ports          []int
-			internetEgress bool
+			namespace string
+			selector  string
+			ports     []int
 		}{
-			{"argocd-application-controller", []int{8082}, false},
-			{"argocd-redis", []int{6379}, false},
-			{"argocd-repo-server", []int{8081, 8084}, false},
-			{"argocd-server", []int{8080, 8083}, false},
-			{"cert-manager", []int{9402}, false},
-			{"external-dns", []int{7979}, false},
-			{"contour", []int{8002, 8080, 8443}, false},
-			{"squid", []int{53, 3128}, true},
-			{"unbound", []int{53}, true},
-			{"cluster-dns", []int{1053, 8080}, false},
-			{"coil-node", []int{9383}, false},
-			{"kube-state-metrics ", []int{8080, 8081}, false},
-			{"controller", []int{7472}, false},
-			{"speaker", []int{7472}, false},
-			{"alertmanager", []int{9093}, false},
-			{"prometheus", []int{9090}, false},
+			{"argocd", "app.kubernetes.io/name=argocd-application-controller", []int{8082}},
+			{"argocd", "app.kubernetes.io/name=argocd-redis", []int{6379}},
+			{"argocd", "app.kubernetes.io/name=argocd-repo-server", []int{8081, 8084}},
+			{"argocd", "app.kubernetes.io/name=argocd-server", []int{8080, 8083}},
+			{"external-dns", "app=cert-manager", []int{9402}},
+			{"external-dns", "app.kubernetes.io/name=external-dns", []int{7979}},
+			{"ingress", "app=contour", []int{8002, 8080, 8443}},
+			{"internet-egress", "k8s-app=squid", []int{53, 3128}},
+			{"internet-egress", "k8s-app=unbound", []int{53}},
+			{"kube-system", "cke.cybozu.com/appname=cluster-dns", []int{1053, 8080}},
+			{"kube-system", "k8s-app=kube-state-metrics", []int{8080, 8081}},
+			{"kube-system", "k8s-app=coil-node", []int{9383}},
+			{"metallb-system", "component=controller", []int{7472}},
+			{"metallb-system", "component=speaker", []int{7472}},
+			{"monitoring", "app=alertmanager", []int{9093}},
+			{"monitoring", "app=prometheus", []int{9090}},
 		}
 
 		for _, tc := range testcase {
-			By("getting pod list: " + tc.podNamePrefix)
-			var targetPods []corev1.Pod
-			for _, pod := range podList.Items {
-				if strings.HasPrefix(pod.GetName(), tc.podNamePrefix) {
-					targetPods = append(targetPods, pod)
-				}
-			}
-			Expect(len(targetPods)).NotTo(Equal(0), "pod is not found: %s", tc.podNamePrefix)
+			By(fmt.Sprintf("getting pod list: ns=%s, selector=%s", tc.namespace, tc.selector))
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", tc.namespace, "-l", tc.selector, "get", "pods", "-o=json")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-			for _, pod := range targetPods {
+			podList := new(corev1.PodList)
+			err = json.Unmarshal(stdout, podList)
+			Expect(err).NotTo(HaveOccurred())
+
+			for _, pod := range podList.Items {
 				By(fmt.Sprintf("checking pod: %s[%s]", pod.GetName(), pod.Status.PodIP))
 				for _, port := range tc.ports {
 					By(fmt.Sprintf("dialing to allowed port: %d", port))
@@ -195,12 +193,12 @@ spec:
 				switch t := err.(type) {
 				case *ssh.ExitError:
 					// telnet command returns 124 when it times out
-					Expect(t.ExitStatus).To(Equal(124))
+					Expect(t.ExitStatus()).To(Equal(124))
 				default:
 					Expect(err).NotTo(HaveOccurred())
 				}
 
-				if tc.internetEgress {
+				if tc.namespace == "internet-egress" {
 					By("access to local IP")
 					testhttpdIP := testhttpdPodList.Items[0].Status.PodIP
 					stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", pod.Namespace, pod.Name, "--", "curl", testhttpdIP, "-m", "5")

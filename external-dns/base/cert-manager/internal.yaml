@@ -8,6 +8,8 @@ metadata:
   namespace: external-dns
   labels:
     app: webhook
+    annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   selfSigned: {}
 ---
@@ -20,7 +22,7 @@ metadata:
   labels:
     app: webhook
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   secretName: cert-manager-webhook-ca
   duration: 87600h0m0s # 10y
@@ -38,7 +40,7 @@ metadata:
   labels:
     app: webhook
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   ca:
     secretName: cert-manager-webhook-ca
@@ -52,7 +54,7 @@ metadata:
   labels:
     app: webhook
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   secretName: cert-manager-webhook-webhook-tls
   duration: 8760h0m0s # 1y
