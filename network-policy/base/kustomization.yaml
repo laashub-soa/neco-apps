@@ -11,7 +11,6 @@ resources:
   - calico/serviceaccount.yaml
   - policies/argocd.yaml
   - policies/cluster-dns.yaml
-  - policies/coil.yaml
   - policies/external-dns.yaml
   - policies/ingress.yaml
   - policies/internet-egress.yaml

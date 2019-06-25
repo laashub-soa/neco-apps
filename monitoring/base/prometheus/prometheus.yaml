@@ -146,7 +146,7 @@ scrape_configs:
     kubernetes_sd_configs:
       - role: service
         namespaces:
-          names: ["ingress"]
+          names: ["external-dns"]
     relabel_configs:
       - source_labels: [__meta_kubernetes_service_name]
         action: keep
