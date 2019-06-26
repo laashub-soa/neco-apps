@@ -13,4 +13,4 @@ groups:
         for: 20m
         annotations:
           summary: Some application is out-of-sync.
-          runbook: "See https://github.com/cybozu-go/neco-ops/blob/master/DEVELOPMENT.md#out-of-sync"
+          runbook: "See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync"

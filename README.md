@@ -1,7 +1,7 @@
-Neco Ops
-========
+Neco Apps
+=========
 
-[![CircleCI](https://circleci.com/gh/cybozu-go/neco-ops.svg?style=svg)](https://circleci.com/gh/cybozu-go/neco-ops)
+[![CircleCI](https://circleci.com/gh/cybozu-go/neco-apps.svg?style=svg)](https://circleci.com/gh/cybozu-go/neco-apps)
 
 This repository contains GitOps resources for Neco. It mostly contains Kubernetes deployment resources.
 
