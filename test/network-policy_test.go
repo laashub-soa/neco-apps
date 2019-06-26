@@ -18,9 +18,8 @@ func testNetworkPolicy() {
 		ExecSafeAt(boot0, "kubectl", "create", "namespace", "test-netpol")
 	})
 
-	It("should accept and deny packets according to the registered network policies", func() {
-
-		By("deployment Pods")
+	It("should create test pods with network policies", func() {
+		By("deploying testhttpd pods")
 		deployYAML := `
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -75,7 +74,7 @@ spec:
 		_, stderr, err := ExecAtWithInput(boot0, []byte(deployYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		By("deploy ubuntu for network commands")
+		By("deploying ubuntu for network commands")
 		debugYAML := `
 apiVersion: v1
 kind: Pod
@@ -94,7 +93,36 @@ spec:
 		_, stderr, err = ExecAtWithInput(boot0, []byte(debugYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		By("checking hostname is resolved by cluster-dns")
+		By("waiting for ubuntu pod to start")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "date")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+	})
+
+	podList := new(corev1.PodList)
+	testhttpdPodList := new(corev1.PodList)
+
+	It("should get pod list", func() {
+		By("getting all pod list")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-A", "-o=json")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		err = json.Unmarshal(stdout, podList)
+		Expect(err).NotTo(HaveOccurred())
+
+		By("getting httpd pod list")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "-n", "test-netpol", "-o=json")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		err = json.Unmarshal(stdout, testhttpdPodList)
+		Expect(err).NotTo(HaveOccurred())
+
+	})
+
+	It("should resolve hostname with DNS", func() {
+		By("resolving hostname inside of cluster (by cluster-dns)")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "nslookup", "-timeout=10", "testhttpd.test-netpol")
 			if err != nil {
@@ -103,7 +131,7 @@ spec:
 			return nil
 		}).Should(Succeed())
 
-		By("checking hostname out of cluster can be resolved")
+		By("resolving hostname outside of cluster (by unbound)")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "nslookup", "-timeout=10", "cybozu.com")
 			if err != nil {
@@ -111,33 +139,20 @@ spec:
 			}
 			return nil
 		}).Should(Succeed())
+	})
 
-		By("getting pod list")
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-A", "-o=json")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
-		podList := new(corev1.PodList)
-		err = json.Unmarshal(stdout, podList)
-		Expect(err).NotTo(HaveOccurred())
-
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "-n", "test-netpol", "-o=json")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
-		testhttpdPodList := new(corev1.PodList)
-		err = json.Unmarshal(stdout, testhttpdPodList)
-		Expect(err).NotTo(HaveOccurred())
-
-		By("checking ping is dropped")
+	It("should filter icmp packets to pods", func() {
 		for _, pod := range podList.Items {
 			if pod.Spec.HostNetwork {
 				continue
 			}
-			By(fmt.Sprintf("  -> ping to %s[%s]", pod.GetName(), pod.Status.PodIP))
-			stdout, stderr, err := ExecAt(boot0, "ping", "-c", "1", "-W", "2", pod.Status.PodIP)
+			By("ping to " + pod.GetName())
+			stdout, stderr, err := ExecAt(boot0, "ping", "-c", "1", "-W", "3", pod.Status.PodIP)
 			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
+	})
 
-		By("checking connection")
+	It("should accept and deny TCP packets according to the registered network policies", func() {
 		const portShouldBeDenied = 65535
 
 		testcase := []struct {
@@ -163,7 +178,7 @@ spec:
 		}
 
 		for _, tc := range testcase {
-			By(fmt.Sprintf("getting pod list: ns=%s, selector=%s", tc.namespace, tc.selector))
+			By("getting target pod list: ns=" + tc.namespace + ", selector=" + tc.selector)
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", tc.namespace, "-l", tc.selector, "get", "pods", "-o=json")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
@@ -172,9 +187,9 @@ spec:
 			Expect(err).NotTo(HaveOccurred())
 
 			for _, pod := range podList.Items {
-				By(fmt.Sprintf("checking pod: %s[%s]", pod.GetName(), pod.Status.PodIP))
+				By("connecting to pod: " + pod.GetName())
 				for _, port := range tc.ports {
-					By(fmt.Sprintf("  -> allowed port: %d", port))
+					By("  -> port: " + strconv.Itoa(port) + " (allowed)")
 					stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(port), "-e", "X")
 					switch t := err.(type) {
 					case *ssh.ExitError:
@@ -185,7 +200,7 @@ spec:
 					}
 				}
 
-				By(fmt.Sprintf("  -> denied port: %d", portShouldBeDenied))
+				By("  -> port: " + strconv.Itoa(portShouldBeDenied) + " (denied)")
 				stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(portShouldBeDenied), "-e", "X")
 				switch t := err.(type) {
 				case *ssh.ExitError:
@@ -196,24 +211,25 @@ spec:
 				}
 
 				if tc.namespace == "internet-egress" {
-					By("access to local IP")
+					By("accessing to local IP")
 					testhttpdIP := testhttpdPodList.Items[0].Status.PodIP
 					stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", pod.Namespace, pod.Name, "--", "curl", testhttpdIP, "-m", "5")
 					Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 				}
 			}
 		}
+	})
 
-		By("checking ping to the idrac subnet is dropped by network policy")
-		stdout, stderr, err = ExecAt(boot0, "sabactl", "machines", "get")
+	It("should filter icmp packets to the idrac subnet", func() {
+		stdout, stderr, err := ExecAt(boot0, "sabactl", "machines", "get")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		var machines []sabakan.Machine
 		err = json.Unmarshal(stdout, &machines)
 		Expect(err).ShouldNot(HaveOccurred())
 		for _, m := range machines {
-			By("  -> ping to " + m.Spec.BMC.IPv4)
-			stdout, _, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-W", "3", "-c", "1", m.Spec.BMC.IPv4)
+			By("ping to " + m.Spec.BMC.IPv4)
+			stdout, _, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", m.Spec.BMC.IPv4)
 			Expect(err).To(HaveOccurred(), "stdout: %s", stdout)
 		}
 	})
