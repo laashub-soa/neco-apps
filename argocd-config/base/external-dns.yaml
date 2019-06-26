@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/cybozu-go/neco-ops.git
+    repoURL: https://github.com/cybozu-go/neco-apps.git
     targetRevision: release
     path: external-dns/base
   destination:

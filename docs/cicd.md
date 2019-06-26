@@ -4,9 +4,9 @@ CI/CD
 Overview
 --------
 
-![overview](http://www.plantuml.com/plantuml/png/dPJVQzim4CVVzLSSVceWCJJPZyuFWv5ktHZTIblOIw78yiNHR4j6aXl2wFy--P0zBHYQvibdt-VklYVTcGkd3IIN-FIpjO2gb0hH9C3_lR30tEAJn5rmcl32HAsx0f8hwRvsUG9_601uht1SbJL2eb3eXMxjWpgxtye-iDLM-eJx6INg_O_UpvvP56KTBv7yP8MqeTRtBaUZqA7rNphhWgJgmZx6z86GJwRKiBuab7jR54JZo9xD-dDeQxrlK3axVr1hhJQolERj7D29b48B8ivFYbgU5BMQweRNQ5p35Iz3z_47DaR4ZSAYq3kr-3YqaC7xDDZ7yCjNygj3_ld_AswDBaXvRnnzmGGVURy4JvNEAwBowkYoX1vLrADJ9Vr-z0jsZzP9LHBllFsI0ByrOO6SB-32ElMH2LojR_gp--sBp4QX8Uc4WhKqmZ_NtuWLz2RaiBztDHSLUMnlnO6V6ovhSc5lCJRy6COB7tOOCZXFuPfN23UtSn2wQQHZetTXPBbrdX-AUtwPqfc0qwqKa1kkn1OQhkJ6VxLi94CfEhGCLZxAx7rGc2yGMoyMOxx6ZOkaPV0cXRkjte51szME3J-ma3act_eUq9GuAX-PUDmpU9V2B-wytfOR9qLNSnCwc4FRrVMewY3FOin44tfweZXJNhqYp-JQnd-G32vI-ABDZfi2fDfeqt0djM8nD4RIo6Jm8OKVsiaDNGmDr3HEOtI0qv2nlm00)
+![overview](http://www.plantuml.com/plantuml/svg/fPJVQzim4CVVzLSSUMeXCRJTZyuFeoFTkZ6wbRQmbq9Hv8kZMPQCT6u8e__xv9ljQY6mj7loMVfyxuTqfxD0qbDR6o4LEG-JStputWH0MsgBw2SWdtu6vXeVDAxxJT__26LSMy3aGjFdTZ61Nm80uguYQKk3CB6et4msJRYp1xShtIaR5tJqk3baJnrmtm7YKIIwc6693B3LE-wZVMqNw2qIXhZI1kgJgax3VKflfVB1bmxcvupAQAlY3pso1uVTIJJ6RMgq5APtTkxiKfUNifa2aifOMZ1nz2BLyOjK9xkgaGOzrTBAigy-NH2Z8YqKPeLRszdxeOGStcQzlGz__4p-P9j__FkA6-yAphmpzhvWXlUyNuPtXLvKJ2sglSCokbVGYEuA6IUa6x5R3AHjoJn5-ry9nB7X4N8DnG3K3rIddC35_AexkvynoE6OQE9qAuEvzYf-vr-OLVodz331DqQgYdT2PwN2ZxNKXhUmiuGOdeRnmiSXXXoEChYK5SBLzHIKgsjDucbxvdMvegWOmaV1SSQd0kGQhM3XfLKhY8sibt4rY94SWdKLvd0ILNuJHNs7WLh5T37b3IufJIw7LndShDmQF8RMa1XUiT5rWhwEPQ0lCKb-eDAUp-5D1ZyanPGRwKchraZV5p65fZLcJ6pRqOnTZNtwFvuILulg6OvsJc_waEHmci4dvzVI5w3jqlbQadPMfD2evCx9uLq6tnpf9TyEzzLkdBjf2-TU4sTeYxOslm40)
 
-- Template based or plain K8s manifests is stored in the neco-ops repository.
+- Template based or plain K8s manifests is stored in the neco-apps repository.
 - To verify changed manifests deploy, CI runs deployment to the `neco-ops` instance in the GCP. See details in `neco-ops` section in this file.
 - [Argo CD][] watches changes of this repository, then synchronize(deploy) automatically when new commit detected.
 - After the deployment process finished, [Argo CD][] sends alert to the [Alertmanager][] where is running on the same cluster. Then it notifies to Slack channel and/or Email address.

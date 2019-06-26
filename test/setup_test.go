@@ -179,15 +179,15 @@ func testSetup() {
 		}).Should(Succeed())
 	})
 
-	It("should checkout neco-ops repository", func() {
-		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-ops")
-		ExecSafeAt(boot0, "cd", "neco-ops", ";", "git", "checkout", commitID)
-		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-ops/argocd-config/base/*.yaml")
+	It("should checkout neco-apps repository", func() {
+		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-apps")
+		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
+		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 	})
 
 	It("should setup Argo CD application as Argo CD app", func() {
 		By("creating Argo CD app")
-		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-ops/argocd-config/overlays/gcp")
+		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
 
 		By("checking app status")
 		Eventually(func() error {

@@ -48,7 +48,7 @@ patches:
 spec:
   project: default
   source:
-    repoURL: https://github.com/cybozu-go/neco-ops.git
+    repoURL: https://github.com/cybozu-go/neco-apps.git
     targetRevision: release         # branch name
     path: monitoring/overlays/stage # Path to Kustomize based app path
     kustomize:
@@ -87,7 +87,7 @@ The typical test step is:
     4. Initialize Argo CD client with `argocd login SERVER --name admin --password xxxxx`.
     5. Deploy Argo CD configuration `argocd-config` by:
         ```console
-        argocd app create argocd-config -f https://github.com/cybozu-go/neco-ops --path argocd-config/overlays/gcp --dest-namespace=argocd ...
+        argocd app create argocd-config -f https://github.com/cybozu-go/neco-apps --path argocd-config/overlays/gcp --dest-namespace=argocd ...
         ```
     6. Deploy `argocd-config` and other apps through Argo CD by `argocd app sync APPNAME`.
     7. Check some status.
@@ -101,10 +101,10 @@ How to debug CI result
 gcloud compute --project=neco-test ssh cybozu@neco-ops
 ```
 
-2. You can find cloned `neco-ops` repository in `$HOME/${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}/go/src/github.com/cybozu-go/neco-ops`.
+2. You can find cloned `neco-apps` repository in `$HOME/${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}/go/src/github.com/cybozu-go/neco-apps`.
 3. ssh to the boot server.
 ```console
-cd ${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}/go/src/github.com/cybozu-go/neco-ops/test
+cd ${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}/go/src/github.com/cybozu-go/neco-apps/test
 ./dcssh boot-0
 ```
 

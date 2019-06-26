@@ -1,4 +1,4 @@
-module github.com/cybozu-go/neco-ops
+module github.com/cybozu-go/neco-apps
 
 go 1.12
 
