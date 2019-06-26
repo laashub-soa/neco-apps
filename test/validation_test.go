@@ -56,6 +56,7 @@ func TestValidation(t *testing.T) {
 		if err != nil {
 			return err
 		}
+		defer f.Close()
 
 		y := k8sYaml.NewYAMLReader(bufio.NewReader(f))
 		for {

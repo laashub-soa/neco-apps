@@ -6,3 +6,4 @@ resources:
 - ingress.yaml
 - metallb.yaml
 - monitoring.yaml
+- network-policy.yaml

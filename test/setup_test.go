@@ -191,7 +191,7 @@ func testSetup() {
 
 		By("checking app status")
 		Eventually(func() error {
-			apps := []string{"argocd", "external-dns", "ingress", "metallb", "monitoring"}
+			apps := []string{"argocd", "external-dns", "ingress", "metallb", "monitoring", "network-policy"}
 			for _, a := range apps {
 				stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "app", a, "-n", "argocd", "-o", "json")
 				if err != nil {

@@ -12,7 +12,7 @@ replace (
 require (
 	github.com/argoproj/argo-cd v1.0.1
 	github.com/cybozu-go/log v1.5.0
-	github.com/gogo/protobuf v1.2.1 // indirect
+	github.com/cybozu-go/sabakan/v2 v2.4.2
 	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/jetstack/cert-manager v0.8.0
@@ -25,7 +25,7 @@ require (
 	github.com/prometheus/common v0.4.1
 	github.com/prometheus/tsdb v0.8.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
-	github.com/spf13/pflag v1.0.3 // indirect
+	github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c
 	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
 	golang.org/x/oauth2 v0.0.0-20190523182746-aaccbc9213b0 // indirect

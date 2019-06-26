@@ -79,6 +79,14 @@ spec:
             readOnly: true
           - name: tmp
             mountPath: /tmp
+          livenessProbe:
+            tcpSocket:
+              port: 6443
+            initialDelaySeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6443
+            initialDelaySeconds: 10
       volumes:
       - name: certs
         secret:
