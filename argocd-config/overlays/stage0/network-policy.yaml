@@ -6,4 +6,4 @@ metadata:
 spec:
   source:
     targetRevision: HEAD
-    path: network-policy/overlays/gcp
+    path: network-policy/overlays/stage0

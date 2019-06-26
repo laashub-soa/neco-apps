@@ -57,7 +57,6 @@ func testMetalLB() {
 
 	It("should deploy load balancer type service", func() {
 		By("deployment Pods")
-
 		netpol := `
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
