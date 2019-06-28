@@ -1,0 +1,6 @@
+network-policy
+argocd
+external-dns
+ingress
+metallb
+monitoring
