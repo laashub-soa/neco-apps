@@ -10,7 +10,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 subjects:
   - kind: Group
-    name: system:serviceaccounts:opa
+    name: system:serviceaccounts:open-policy-agent
     apiGroup: rbac.authorization.k8s.io
 ---
 # Define role for OPA/kube-mgmt to update configmaps with policy status.
@@ -36,5 +36,5 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 subjects:
   - kind: Group
-    name: system:serviceaccounts:opa
+    name: system:serviceaccounts:open-policy-agent
     apiGroup: rbac.authorization.k8s.io
