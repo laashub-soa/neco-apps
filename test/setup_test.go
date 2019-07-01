@@ -5,15 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
+	"sort"
 	"strconv"
+	"strings"
 
 	argoappv1 "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 )
 
-const alertmanagerSecret = `
+const (
+	appSyncOrderFile   = "../app-sync-order.txt"
+	alertmanagerSecret = `
 route:
   receiver: slack
   group_wait: 5s # Send a notification after 5 seconds
@@ -31,9 +37,30 @@ receivers:
     http_config:
       proxy_url: http://squid.internet-egress.svc.cluster.local:3128
 `
+)
 
 // testSetup tests setup of Argo CD
 func testSetup() {
+	It("should list all apps in app-sync-order.txt", func() {
+		appList := loadSyncOrder()
+		kustomFile, err := filepath.Abs("../argocd-config/base/kustomization.yaml")
+		Expect(err).ShouldNot(HaveOccurred())
+		stdout, err := ioutil.ReadFile(kustomFile)
+		Expect(err).ShouldNot(HaveOccurred())
+		k := struct {
+			Resources []string `yaml:"resources"`
+		}{}
+		Expect(yaml.Unmarshal(stdout, &k)).ShouldNot(HaveOccurred())
+		var resources []string
+		for _, r := range k.Resources {
+			r = r[:len(r)-len(filepath.Ext(r))]
+			resources = append(resources, r)
+		}
+		sort.Strings(appList)
+		sort.Strings(resources)
+		Expect(appList).Should(Equal(resources))
+	})
+
 	It("should be ready K8s cluster after loading snapshot", func() {
 		By("re-issuing kubeconfig")
 		Eventually(func() error {
@@ -190,9 +217,10 @@ func testSetup() {
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
 
 		By("checking app status")
+		syncOrder := loadSyncOrder()
+		var hasSyncError bool
 		Eventually(func() error {
-			apps := []string{"argocd", "external-dns", "ingress", "metallb", "monitoring", "network-policy"}
-			for _, a := range apps {
+			for _, a := range syncOrder {
 				stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "app", a, "-n", "argocd", "-o", "json")
 				if err != nil {
 					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
@@ -207,6 +235,13 @@ func testSetup() {
 					return errors.New("resource is not yet fetched")
 				}
 
+				for _, cond := range app.Status.Conditions {
+					if cond.Type == argoappv1.ApplicationConditionSyncError {
+						hasSyncError = true
+						return nil
+					}
+				}
+
 				for _, r := range app.Status.Resources {
 					if r.Status != argoappv1.SyncStatusCodeSynced {
 						return fmt.Errorf("%s is not yet Synced: %s", a, r.Status)
@@ -218,5 +253,29 @@ func testSetup() {
 			}
 			return nil
 		}).Should(Succeed())
+
+		if hasSyncError {
+			By("syncing manually according to the given order")
+			for _, appName := range syncOrder {
+				ExecSafeAt(boot0, "argocd", "app", "sync", appName)
+			}
+		}
 	})
+}
+
+func loadSyncOrder() []string {
+	orderFileAbs, err := filepath.Abs(appSyncOrderFile)
+	Expect(err).ShouldNot(HaveOccurred())
+	stdout, err := ioutil.ReadFile(orderFileAbs)
+	Expect(err).ShouldNot(HaveOccurred())
+	lines := strings.Split(string(stdout), "\n")
+	var results []string
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		results = append(results, line)
+	}
+
+	return results
 }
