@@ -7,3 +7,4 @@ resources:
   - namespace.yaml
   - rbac.yaml
   - service.yaml
+  - validatingwebhookconfiguration.yaml

@@ -2,6 +2,8 @@ kind: ValidatingWebhookConfiguration
 apiVersion: admissionregistration.k8s.io/v1beta1
 metadata:
   name: opa-validating-webhook
+  annotations:
+    certmanager.k8s.io/inject-ca-from: "opa/opa-server-ca"
 webhooks:
   - name: validating-webhook.openpolicyagent.org
     namespaceSelector:
@@ -21,7 +23,6 @@ webhooks:
         apiVersions: ["*"]
         resources: ["*"]
     clientConfig:
-      caBundle: $(cat ca.crt | base64 | tr -d '\n')
       service:
         name: opa
         namespace: opa
