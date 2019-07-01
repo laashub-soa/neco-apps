@@ -11,7 +11,7 @@ spec:
     path: open-policy-agent/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: open-policy-agent
+    namespace: opa
   syncPolicy:
     automated:
       prune: true

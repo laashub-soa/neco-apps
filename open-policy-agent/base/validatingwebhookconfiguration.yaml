@@ -14,7 +14,7 @@ webhooks:
           operator: "NotIn"
           values:
             - kube-system
-            - open-policy-aganet
+            - opa
     rules:
       - operations: ["CREATE", "UPDATE"]
         apiGroups: ["*"]
@@ -24,4 +24,4 @@ webhooks:
       caBundle: $(cat ca.crt | base64 | tr -d '\n')
       service:
         name: opa
-        namespace: open-policy-agent
+        namespace: opa

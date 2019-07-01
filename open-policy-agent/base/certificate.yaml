@@ -3,8 +3,8 @@
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Issuer
 metadata:
-  name: opa-webhook-selfsign
-  namespace: open-policy-agent
+  name: opa-server-selfsign
+  namespace: opa
   labels:
     app: opa
 spec:
@@ -14,15 +14,15 @@ spec:
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
-  name: opa-webhook-ca
-  namespace: open-policy-agent
+  name: opa-server-ca
+  namespace: opa
   labels:
     app: opa
 spec:
-  secretName: opa-webhook-ca
+  secretName: opa-server-ca
   duration: 87600h0m0s # 10y
   issuerRef:
-    name: opa-webhook-selfsign
+    name: opa-server-selfsign
   commonName: "ca.webhook.open-policy-agent"
   isCA: true
 ---
@@ -30,28 +30,28 @@ spec:
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Issuer
 metadata:
-  name: opa-webhook-ca
-  namespace: open-policy-agent
+  name: opa-server-ca
+  namespace: opa
   labels:
     app: opa
 spec:
   ca:
-    secretName: opa-webhook-ca
+    secretName: opa-server-ca
 ---
 # Finally, generate a serving certificate for the webhook to use
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
-  name: opa-webhook-tls
-  namespace: open-policy-agent
+  name: opa-server-tls
+  namespace: opa
   labels:
     app: opa
 spec:
-  secretName: opa-webhook-tls
+  secretName: opa-server-tls
   duration: 8760h0m0s # 1y
   issuerRef:
-    name: opa-webhook-ca
+    name: opa-server-ca
   dnsNames:
     - opa
-    - opa.open-policy-agent
-    - opa.open-policy-agent.svc
+    - opa.opa
+    - opa.opa.svc

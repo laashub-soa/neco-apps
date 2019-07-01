@@ -2,7 +2,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: opa
-  namespace: open-policy-agent
+  namespace: opa
 spec:
   selector:
     app: opa
