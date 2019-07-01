@@ -43,6 +43,7 @@ var _ = BeforeSuite(func() {
 // Other tests and test containers must be listed in this.
 var _ = Describe("GitOps Test", func() {
 	Context("setup", testSetup)
+	Context("open-policy-agent", testOpenPolicyAgent)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)
 	Context("external-dns", testExternalDNS)
