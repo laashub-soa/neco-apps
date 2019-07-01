@@ -1,3 +1,4 @@
+open-policy-agent
 network-policy
 argocd
 external-dns
