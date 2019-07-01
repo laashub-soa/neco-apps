@@ -217,11 +217,10 @@ func testSetup() {
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
 
 		By("checking app status")
-
 		syncOrder := loadSyncOrder()
+		var hasSyncError bool
 		Eventually(func() error {
-			apps := []string{"argocd", "external-dns", "ingress", "metallb", "monitoring", "network-policy"}
-			for _, a := range apps {
+			for _, a := range syncOrder {
 				stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "app", a, "-n", "argocd", "-o", "json")
 				if err != nil {
 					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
@@ -237,16 +236,12 @@ func testSetup() {
 				}
 
 				for _, cond := range app.Status.Conditions {
-					if cond.Type != argoappv1.ApplicationConditionSyncError {
-						continue
-					}
-					for _, appName := range syncOrder {
-						stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", appName)
-						if err != nil {
-							return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-						}
+					if cond.Type == argoappv1.ApplicationConditionSyncError {
+						hasSyncError = true
+						return nil
 					}
 				}
+
 				for _, r := range app.Status.Resources {
 					if r.Status != argoappv1.SyncStatusCodeSynced {
 						return fmt.Errorf("%s is not yet Synced: %s", a, r.Status)
@@ -258,6 +253,13 @@ func testSetup() {
 			}
 			return nil
 		}).Should(Succeed())
+
+		if hasSyncError {
+			By("syncing manually according to the given order")
+			for _, appName := range syncOrder {
+				ExecSafeAt(boot0, "argocd", "app", "sync", appName)
+			}
+		}
 	})
 }
 
