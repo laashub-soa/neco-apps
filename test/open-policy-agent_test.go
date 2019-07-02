@@ -102,5 +102,22 @@ spec:
 			}
 			return nil
 		}, "10s", "1s").Should(Succeed())
+
+		By("trying to register policy from outside opa namespace")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "test-opa", "create", "configmap", "service-name", "--from-file=service-name.rego")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "test-opa", "label", "configmap", "service-name", "openpolicyagent.org/policy=rego")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		By("creating/updating formerly-bad Service")
+		Eventually(func() error {
+			counter++
+			bad := fmt.Sprintf(badServiceYAML, counter)
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(bad), "kubectl", "apply", "-f", "-")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}, "10s", "1s").Should(Succeed())
 	})
 }

@@ -3,6 +3,8 @@ apiVersion: v1
 metadata:
   name: opa-default-system-main
   namespace: opa
+  labels:
+    openpolicyagent.org/policy: rego
 data:
   main: |
     package system
