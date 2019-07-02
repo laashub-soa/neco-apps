@@ -8,5 +8,3 @@ resources:
   - rbac.yaml
   - service.yaml
   - validatingwebhookconfiguration.yaml
-patchesStrategicMerge:
-  - kube-system-patch.yaml
