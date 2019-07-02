@@ -15,10 +15,6 @@ webhooks:
         operator: "NotIn"
         values:
         - "true"
-      - key: "name"
-        operator: "NotIn"
-        values:
-        - external-dns
     rules:
       - apiGroups:
           - "certmanager.k8s.io"
@@ -42,10 +38,6 @@ webhooks:
         operator: "NotIn"
         values:
         - "true"
-      - key: "name"
-        operator: "NotIn"
-        values:
-        - external-dns
     rules:
       - apiGroups:
           - "certmanager.k8s.io"

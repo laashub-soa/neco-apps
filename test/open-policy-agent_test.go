@@ -32,9 +32,9 @@ deny[msg] {
 `
 		stdout, stderr, err := ExecAtWithInput(boot0, []byte(policyRego), "dd", "of=service-name.rego")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "test-opa", "create", "configmap", "service-name", "--from-file=service-name.rego")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "opa", "create", "configmap", "service-name", "--from-file=service-name.rego")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "test-opa", "label", "configmap", "service-name", "openpolicyagent.org/policy=rego")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "opa", "label", "configmap", "service-name", "openpolicyagent.org/policy=rego")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("creating/updating bad Service")
@@ -89,7 +89,7 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("unregistering policy")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "test-opa", "delete", "configmap", "service-name")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "opa", "delete", "configmap", "service-name")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("creating/updating formerly-bad Service")

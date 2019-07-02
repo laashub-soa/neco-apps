@@ -12,11 +12,6 @@ webhooks:
           operator: NotIn
           values:
             - ignore
-        - key: "name"
-          operator: "NotIn"
-          values:
-            - kube-system
-            - opa
     rules:
       - operations: ["CREATE", "UPDATE"]
         apiGroups: ["*"]
