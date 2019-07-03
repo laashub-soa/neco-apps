@@ -1,0 +1,16 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-open-policy-agent
+  namespace: opa
+spec:
+  order: 1000.0
+  selector: app == 'opa'
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 8443

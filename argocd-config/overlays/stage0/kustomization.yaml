@@ -9,3 +9,4 @@ patchesStrategicMerge:
 - metallb.yaml
 - monitoring.yaml
 - network-policy.yaml
+- open-policy-agent.yaml
