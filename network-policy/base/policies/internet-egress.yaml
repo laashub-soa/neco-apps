@@ -1,4 +1,28 @@
 apiVersion: crd.projectcalico.org/v1
+kind: NetworkSet
+metadata:
+  name: local-network
+  namespace: internet-egress
+  labels:
+    role: local-network
+spec:
+  nets:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkSet
+metadata:
+  name: cluster-network
+  namespace: internet-egress
+  labels:
+    role: cluster-network
+spec:
+  nets:
+    - 10.0.0.0/8
+---
+apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
   name: ingress-squid
@@ -10,30 +34,34 @@ spec:
   selector: k8s-app == 'squid'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       source:
-        nets:
-          - 10.0.0.0/8
+        selector: role == 'cluster-network'
       destination:
         ports:
           - 3128
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-squid
+  namespace: internet-egress
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  order: 100.0
+  selector: k8s-app == 'squid'
+  types:
+    - Egress
   egress:
     - action: Log
       destination:
-        nets:
-          - 10.0.0.0/8
-          - 172.16.0.0/12
-          - 192.168.0.0/16
+        selector: role == 'local-network'
     - action: Deny
       destination:
-        nets:
-          - 10.0.0.0/8
-          - 172.16.0.0/12
-          - 192.168.0.0/16
-
+        selector: role == 'local-network'
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
@@ -47,34 +75,38 @@ spec:
   selector: k8s-app == 'unbound'
   types:
     - Ingress
-    - Egress
   ingress:
     - action: Allow
       protocol: TCP
       source:
-        nets:
-          - 10.0.0.0/8
+        selector: role == 'cluster-network'
       destination:
         ports:
           - 53
     - action: Allow
       protocol: UDP
       source:
-        nets:
-          - 10.0.0.0/8
+        selector: role == 'cluster-network'
       destination:
         ports:
           - 53
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-unbound
+  namespace: internet-egress
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  order: 100.0
+  selector: k8s-app == 'unbound'
+  types:
+    - Egress
   egress:
     - action: Log
       destination:
-        nets:
-          - 10.0.0.0/8
-          - 172.16.0.0/12
-          - 192.168.0.0/16
+        selector: role == 'local-network'
     - action: Deny
       destination:
-        nets:
-          - 10.0.0.0/8
-          - 172.16.0.0/12
-          - 192.168.0.0/16
+        selector: role == 'local-network'

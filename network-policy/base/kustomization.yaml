@@ -18,4 +18,6 @@ resources:
   - policies/monitoring.yaml
   - policies/open-policy-agent.yaml
   - global-policies/egress-all-allow.yaml
+  - global-policies/egress-backyard-deny.yaml
   - global-policies/ingress-all-deny.yaml
+  - global-policies/network-set.yaml

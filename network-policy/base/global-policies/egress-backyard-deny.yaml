@@ -1,0 +1,53 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: egress-bmc-network-deny
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  order: 1000.0
+  types:
+    - Egress
+  egress:
+    - action: Log
+      destination:
+        selector: role == 'bmc-network'
+    - action: Deny
+      destination:
+        selector: role == 'bmc-network'
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: egress-host-network-deny
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  order: 1000.0
+  types:
+    - Egress
+  egress:
+    - action: Log
+      destination:
+        selector: role == 'host-network'
+    - action: Deny
+      destination:
+        selector: role == 'host-network'
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: egress-netdev-network-deny
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  order: 1000.0
+  types:
+    - Egress
+  egress:
+    - action: Log
+      destination:
+        selector: role == 'netdev-network'
+    - action: Deny
+      destination:
+        selector: role == 'netdev-network'

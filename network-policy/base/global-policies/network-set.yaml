@@ -1,0 +1,55 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkSet
+metadata:
+  name: bmc-network
+  labels:
+    role: bmc-network
+spec:
+  nets:
+    - 10.72.16.0/20
+    - 10.76.16.0/20
+    - 10.78.16.0/20
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkSet
+metadata:
+  name: host-network
+  labels:
+    role: host-network
+spec:
+  nets:
+    - 10.69.0.0/16
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkSet
+metadata:
+  name: netdev-network
+  labels:
+    role: netdev-network
+spec:
+  nets:
+    - 10.72.0.0/20
+    - 10.76.0.0/20
+    - 10.78.0.0/20
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkSet
+metadata:
+  name: local-network
+  labels:
+    role: local-network
+spec:
+  nets:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkSet
+metadata:
+  name: cluster-network
+  labels:
+    role: cluster-network
+spec:
+  nets:
+    - 10.0.0.0/8
