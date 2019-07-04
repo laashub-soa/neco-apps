@@ -19,6 +19,12 @@ metadata:
 spec:
   nets:
     - 10.69.0.0/16
+    - 10.72.48.0/24
+    - 10.72.80.0/24
+    - 10.76.48.0/24
+    - 10.76.80.0/24
+    - 10.78.48.0/24
+    - 10.78.80.0/24
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: GlobalNetworkSet
