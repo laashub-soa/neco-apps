@@ -6,4 +6,3 @@ patchesStrategicMerge:
 - external-dns.yaml
 - monitoring.yaml
 - metallb.yaml
-- network-policy.yaml
