@@ -1,19 +1,13 @@
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkSet
 metadata:
-  name: host-network
+  name: host-node-network
   namespace: monitoring
   labels:
-    role: host-network
+    role: host-node-network
 spec:
   nets:
     - 10.69.0.0/16
-    - 10.72.48.0/24
-    - 10.72.80.0/24
-    - 10.76.48.0/24
-    - 10.76.80.0/24
-    - 10.78.48.0/24
-    - 10.78.80.0/24
 
 ---
 
@@ -97,7 +91,7 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
-        selector: role == 'host-network'
+        selector: role == 'host-node-network'
         ports:
           - 7472
           - 9093

@@ -29,6 +29,31 @@ spec:
 apiVersion: crd.projectcalico.org/v1
 kind: GlobalNetworkSet
 metadata:
+  name: host-node-network
+  labels:
+    role: host-node-network
+spec:
+  nets:
+    - 10.69.0.0/16
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkSet
+metadata:
+  name: host-bastion-network
+  labels:
+    role: host-bastion-network
+spec:
+  nets:
+    - 10.72.48.0/24
+    - 10.72.80.0/24
+    - 10.76.48.0/24
+    - 10.76.80.0/24
+    - 10.78.48.0/24
+    - 10.78.80.0/24
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkSet
+metadata:
   name: netdev-network
   labels:
     role: netdev-network
