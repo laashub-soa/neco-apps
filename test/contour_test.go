@@ -81,7 +81,7 @@ metadata:
   name: ingress-httpdtest
   namespace: test-ingress
 spec:
-  order: 1000.0
+  order: 2000.0
   selector: run == 'testhttpd'
   types:
     - Ingress
