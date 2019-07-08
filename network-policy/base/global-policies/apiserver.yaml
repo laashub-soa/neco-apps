@@ -12,6 +12,6 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
-        selector: role == 'host-node-network'
+        selector: role == 'node'
         ports:
           - 6443

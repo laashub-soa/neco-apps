@@ -1,10 +1,10 @@
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkSet
 metadata:
-  name: local-network
+  name: private
   namespace: internet-egress
   labels:
-    role: local-network
+    role: private
 spec:
   nets:
     - 10.0.0.0/8
@@ -14,10 +14,10 @@ spec:
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkSet
 metadata:
-  name: cluster-network
+  name: cluster
   namespace: internet-egress
   labels:
-    role: cluster-network
+    role: cluster
 spec:
   nets:
     - 10.0.0.0/8
@@ -38,7 +38,7 @@ spec:
     - action: Allow
       protocol: TCP
       source:
-        selector: role == 'cluster-network'
+        selector: role == 'cluster'
       destination:
         ports:
           - 3128
@@ -58,10 +58,10 @@ spec:
   egress:
     - action: Log
       destination:
-        selector: role == 'local-network'
+        selector: role == 'private'
     - action: Deny
       destination:
-        selector: role == 'local-network'
+        selector: role == 'private'
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
@@ -79,14 +79,14 @@ spec:
     - action: Allow
       protocol: TCP
       source:
-        selector: role == 'cluster-network'
+        selector: role == 'cluster'
       destination:
         ports:
           - 53
     - action: Allow
       protocol: UDP
       source:
-        selector: role == 'cluster-network'
+        selector: role == 'cluster'
       destination:
         ports:
           - 53
@@ -106,7 +106,7 @@ spec:
   egress:
     - action: Log
       destination:
-        selector: role == 'local-network'
+        selector: role == 'private'
     - action: Deny
       destination:
-        selector: role == 'local-network'
+        selector: role == 'private'

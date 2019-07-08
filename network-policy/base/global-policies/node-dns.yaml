@@ -12,12 +12,12 @@ spec:
     - action: Allow
       protocol: TCP
       destination:
-        selector: role == 'host-node-network'
+        selector: role == 'node'
         ports:
           - 53
     - action: Allow
       protocol: UDP
       destination:
-        selector: role == 'host-node-network'
+        selector: role == 'node'
         ports:
           - 53

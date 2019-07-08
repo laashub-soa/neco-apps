@@ -1,7 +1,7 @@
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
-  name: ingress-ingress
+  name: ingress-contour
   namespace: ingress
   annotations:
     argocd.argoproj.io/sync-wave: "1"
