@@ -26,10 +26,6 @@ test: install.yaml validation
 kustomize-check:
 	./kustomize-check.sh
 
-# NOTE: Enable this target when Argo CD uses kustomize 2.0.0
-#kustomize-fix:
-#	./kustomize-fix.sh
-
 setup:
 	curl -sSLf -O https://github.com/kubernetes-sigs/kustomize/releases/download/v$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_linux_amd64
 	sudo mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 /usr/local/bin/kustomize
