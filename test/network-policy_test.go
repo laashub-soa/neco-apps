@@ -3,7 +3,9 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
@@ -75,38 +77,16 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("deploying ubuntu for network commands")
-		debugYAML := `
-apiVersion: v1
-kind: Pod
-metadata:
-  name: ubuntu
-  labels:
-    app: ubuntu
-spec:
-  securityContext:
-    runAsUser: 10000
-    runAsGroup: 10000
-  containers:
-  - name: ubuntu
-    image: quay.io/cybozu/ubuntu-debug:18.04
-    command: ["sleep", "infinity"]`
-		_, stderr, err = ExecAtWithInput(boot0, []byte(debugYAML), "kubectl", "apply", "-f", "-")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
-
-		By("waiting for ubuntu pod to start")
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "date")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
+		createUbuntuDebugPod("default")
 	})
 
 	podList := new(corev1.PodList)
 	testhttpdPodList := new(corev1.PodList)
+	nodeList := new(corev1.NodeList)
+	var nodeIP string
+	var apiServerIP string
 
-	It("should get pod list", func() {
+	It("should get pod/node list", func() {
 		By("getting all pod list")
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-A", "-o=json")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
@@ -119,6 +99,30 @@ spec:
 		err = json.Unmarshal(stdout, testhttpdPodList)
 		Expect(err).NotTo(HaveOccurred())
 
+		By("getting all node list")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "node", "-o=json")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		err = json.Unmarshal(stdout, nodeList)
+		Expect(err).NotTo(HaveOccurred())
+
+		By("getting a certain node IP address")
+	OUTER:
+		for _, node := range nodeList.Items {
+			for _, addr := range node.Status.Addresses {
+				if addr.Type == "InternalIP" {
+					nodeIP = addr.Address
+					break OUTER
+				}
+			}
+		}
+		Expect(nodeIP).NotTo(BeEmpty())
+
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "config", "view", "--output=jsonpath={.clusters[0].cluster.server}")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		u, err := url.Parse(string(stdout))
+		Expect(err).NotTo(HaveOccurred(), "server: %s", stdout)
+		apiServerIP = strings.Split(u.Host, ":")[0]
+		Expect(apiServerIP).NotTo(BeEmpty(), "server: %s", stdout)
 	})
 
 	It("should resolve hostname with DNS", func() {
@@ -164,9 +168,9 @@ spec:
 			{"argocd", "app.kubernetes.io/name=argocd-redis", []int{6379}},
 			{"argocd", "app.kubernetes.io/name=argocd-repo-server", []int{8081, 8084}},
 			{"argocd", "app.kubernetes.io/name=argocd-server", []int{8080, 8083}},
+			{"external-dns", "app.kubernetes.io/name=external-dns", []int{7979}},
 			{"external-dns", "app=cert-manager", []int{9402}},
 			{"external-dns", "app=webhook", []int{6443}},
-			{"external-dns", "app.kubernetes.io/name=external-dns", []int{7979}},
 			{"ingress", "app=contour", []int{8002, 8080, 8443}},
 			{"internet-egress", "k8s-app=squid", []int{3128}},
 			{"internet-egress", "k8s-app=unbound", []int{53}},
@@ -175,6 +179,7 @@ spec:
 			{"metallb-system", "component=controller", []int{7472}},
 			{"monitoring", "app=alertmanager", []int{9093}},
 			{"monitoring", "app=prometheus", []int{9090}},
+			{"opa", "app=opa", []int{8443}},
 		}
 
 		for _, tc := range testcase {
@@ -191,13 +196,7 @@ spec:
 				for _, port := range tc.ports {
 					By("  -> port: " + strconv.Itoa(port) + " (allowed)")
 					stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(port), "-e", "X")
-					switch t := err.(type) {
-					case *ssh.ExitError:
-						// telnet command returns 124 when it times out
-						Expect(t.ExitStatus()).NotTo(Equal(124))
-					default:
-						Expect(err).NotTo(HaveOccurred())
-					}
+					Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 				}
 
 				By("  -> port: " + strconv.Itoa(portShouldBeDenied) + " (denied)")
@@ -205,9 +204,9 @@ spec:
 				switch t := err.(type) {
 				case *ssh.ExitError:
 					// telnet command returns 124 when it times out
-					Expect(t.ExitStatus()).To(Equal(124))
+					Expect(t.ExitStatus()).To(Equal(124), "stdout: %s, stderr: %s", stdout, stderr)
 				default:
-					Expect(err).NotTo(HaveOccurred())
+					Fail("telnet should fail with timeout")
 				}
 
 				if tc.namespace == "internet-egress" {
@@ -220,7 +219,73 @@ spec:
 		}
 	})
 
-	It("should filter icmp packets to the idrac subnet", func() {
+	It("should filter packets from squid/unbound to private network", func() {
+		By("deploying ubuntu for network commands in internet-egress NS")
+		createUbuntuDebugPod("internet-egress")
+
+		By("labelling pod as squid")
+		_, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "k8s-app=squid")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+
+		By("accessing DNS port of some node as squid")
+		_, _, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
+		switch t := err.(type) {
+		case *ssh.ExitError:
+			// telnet command returns 124 when it times out
+			Expect(t.ExitStatus()).To(Equal(124))
+		default:
+			Fail("telnet should fail with timeout")
+		}
+
+		By("removing label")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "k8s-app-")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+
+		By("labelling pod as unbound")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "--overwrite", "pod", "ubuntu", "k8s-app=unbound")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+
+		By("accessing DNS port of some node as unbound")
+		_, _, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
+		switch t := err.(type) {
+		case *ssh.ExitError:
+			// telnet command returns 124 when it times out
+			Expect(t.ExitStatus()).To(Equal(124))
+		default:
+			Fail("telnet should fail with timeout")
+		}
+
+		By("removing label")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "k8s-app-")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+	})
+
+	It("should pass packets to node network for system services", func() {
+		By("accessing DNS port of some node")
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		By("accessing API server port of control plane node")
+		stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", apiServerIP, "6443", "-e", "X")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		By("deploying ubuntu for network commands in monitoring NS")
+		createUbuntuDebugPod("monitoring")
+
+		By("labelling pod as prometheus")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "monitoring", "label", "pod", "ubuntu", "app=prometheus")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+
+		By("accessing node exporter port of some node as prometheus")
+		stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "monitoring", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "9100", "-e", "X")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		By("removing label")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "monitoring", "label", "pod", "ubuntu", "app-")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+	})
+
+	It("should filter icmp packets to BMC/Node/Bastion/switch networks", func() {
 		stdout, stderr, err := ExecAt(boot0, "sabactl", "machines", "get")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
@@ -228,9 +293,51 @@ spec:
 		err = json.Unmarshal(stdout, &machines)
 		Expect(err).ShouldNot(HaveOccurred())
 		for _, m := range machines {
+			// BMC
 			By("ping to " + m.Spec.BMC.IPv4)
-			stdout, _, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", m.Spec.BMC.IPv4)
-			Expect(err).To(HaveOccurred(), "stdout: %s", stdout)
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", m.Spec.BMC.IPv4)
+			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+			// Node
+			By("ping to " + m.Spec.IPv4[0])
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", m.Spec.IPv4[0])
+			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
+
+		// Bastion
+		By("ping to " + boot0)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", boot0)
+		Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		// switch -- not tested for now because address range for switches is 10.0.1.0/24 in placemat env, not 10.72.0.0/20.
 	})
+}
+
+func createUbuntuDebugPod(namespace string) {
+	debugYAML := `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu
+  labels:
+    app: ubuntu
+spec:
+  securityContext:
+    runAsUser: 10000
+    runAsGroup: 10000
+  containers:
+  - name: ubuntu
+    image: quay.io/cybozu/ubuntu-debug:18.04
+    command: ["sleep", "infinity"]`
+	_, stderr, err := ExecAtWithInput(boot0, []byte(debugYAML), "kubectl", "apply", "-n", namespace, "-f", "-")
+	Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+
+	By("waiting for ubuntu pod to start")
+	Eventually(func() error {
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", namespace, "exec", "ubuntu", "--", "date")
+		if err != nil {
+			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+		return nil
+	}).Should(Succeed())
 }
