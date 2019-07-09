@@ -364,8 +364,6 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: ubuntu
-  labels:
-    app: ubuntu
 spec:
   securityContext:
     runAsUser: 10000
