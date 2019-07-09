@@ -1,18 +1,17 @@
 apiVersion: crd.projectcalico.org/v1
-kind: NetworkPolicy
+kind: GlobalNetworkPolicy
 metadata:
-  name: ingress-open-policy-agent
-  namespace: opa
+  name: egress-apiserver-allow
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  order: 1000.0
-  selector: app == 'opa'
+  order: 500.0
   types:
-    - Ingress
-  ingress:
+    - Egress
+  egress:
     - action: Allow
       protocol: TCP
       destination:
+        selector: role == 'node'
         ports:
-          - 8443
+          - 6443

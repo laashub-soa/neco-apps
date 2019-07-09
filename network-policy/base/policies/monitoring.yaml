@@ -1,4 +1,17 @@
 apiVersion: crd.projectcalico.org/v1
+kind: NetworkSet
+metadata:
+  name: node
+  namespace: monitoring
+  labels:
+    role: node
+spec:
+  nets:
+    - 10.69.0.0/16
+
+---
+
+apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
   name: ingress-alertmanager
@@ -59,3 +72,28 @@ spec:
       destination:
         ports:
           - 9090
+
+---
+
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-prometheus
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  order: 500.0
+  selector: app == 'prometheus'
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: role == 'node'
+        ports:
+          - 7472
+          - 9093
+          - 9100
+          - 9105
