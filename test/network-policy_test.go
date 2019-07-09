@@ -76,6 +76,51 @@ spec:
 		_, stderr, err := ExecAtWithInput(boot0, []byte(deployYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
+		// connections to 8080 and 8443 of contour are rejected unless we register IngressRoute
+		By("creating IngressRoute")
+		fqdnHTTP := "http.test-netpol.gcp0.dev-ne.co"
+		fqdnHTTPS := "https.test-netpol.gcp0.dev-ne.co"
+		ingressRoute := fmt.Sprintf(`
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: tls
+  namespace: test-netpol
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  virtualhost:
+    fqdn: %s
+    tls:
+      secretName: testsecret
+  routes:
+    - match: /
+      services:
+        - name: testhttpd
+          port: 80
+    - match: /insecure
+      permitInsecure: true
+      services:
+        - name: testhttpd
+          port: 80
+---
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: root
+  namespace: test-netpol
+spec:
+  virtualhost:
+    fqdn: %s
+  routes:
+    - match: /testhttpd
+      services:
+        - name: testhttpd
+          port: 80
+`, fqdnHTTPS, fqdnHTTP)
+		_, stderr, err = ExecAtWithInput(boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+
 		By("deploying ubuntu for network commands")
 		createUbuntuDebugPod("default")
 	})
