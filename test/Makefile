@@ -14,6 +14,7 @@ export GOFLAGS
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L32
 KUSTOMIZE_VERSION = 2.0.3
 OPA_VERSION = 0.12.0
+REGO_FILES = $(shell find .. -path ../vendor -prune -o -name '*.rego' -print)
 
 install.yaml: $(shell find ../argocd/base)
 	kustomize build ../argocd/base/ > install.yaml
@@ -22,7 +23,8 @@ validation:
 	go test -v ./validation_test.go
 
 opa-test:
-	opa test -v ../network-policy/base/validation/
+	test -z "$$(opa fmt -l ../ | grep -v '^vendor' | tee /dev/stderr)"
+	opa test -v $(REGO_FILES)
 
 test: install.yaml validation
 	./test.sh
