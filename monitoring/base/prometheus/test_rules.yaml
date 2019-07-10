@@ -1,0 +1,72 @@
+rule_files:
+  - alert_rules.yaml
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.1"}'
+        values: 0+0x15
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.2"}'
+        values: 0+0x15
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.3"}'
+        values: 0+0x15
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: K8sAPIServersDegraded
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: No kube-apiserver is running.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.1"}'
+        values: 1+0x15
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.2"}'
+        values: 1+0x15
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.3"}'
+        values: 0+0x15
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: K8sAPIServersDegraded
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: The number of kube-apiserver is less than 3.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.1"}'
+        values: 1+0x15
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.2"}'
+        values: 1+0x15
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.3"}'
+        values: 1+0x15
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: K8sAPIServersDegraded
+        exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'up{job="kubernetes-apiservers",instance="10.0.0.1"}'
+        values: 0+0x20
+      - series: 'argocd_app_sync_status{exported_name="monitoring",sync_status="Synced"}'
+        values: 0+0x20
+    #      - series: 'argocd_app_sync_status{exported_name="metallb",sync_status="Synced"}'
+    #        values: 0+0x20
+    #      - series: 'argocd_app_sync_status{exported_name="argocd",sync_status="Synced"}'
+    #        values: '0+0x10+1x10'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: AppOutOfSync
+        exp_alerts:
+          - exp_labels:
+              exported_name: monitoring
+              severity: page
+              sync_status: Synced
+            exp_annotations:
+              summary: monitoring is out-of-sync.
+              runbook: See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync
+#          - exp_annotations:
+#              summary: "metallb is out-of-sync."
+#              runbook: "See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync"
