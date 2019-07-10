@@ -18,6 +18,7 @@ export GO111MODULE=on
 sudo chown -R cybozu:cybozu \$HOME/.cache
 make setup
 make kustomize-check
+make opa-test
 make test COMMIT_ID=${CIRCLE_SHA1}
 EOF
 chmod +x run.sh

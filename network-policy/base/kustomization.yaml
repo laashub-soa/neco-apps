@@ -23,3 +23,11 @@ resources:
   - global-policies/ingress-all-deny.yaml
   - global-policies/network-set.yaml
   - global-policies/node-dns.yaml
+configMapGenerator:
+  - name: network-policy-validator
+    namespace: opa
+    files:
+      - validation/network-policy.rego
+generatorOptions:
+  labels:
+    openpolicyagent.org/policy: rego
