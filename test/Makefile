@@ -4,6 +4,7 @@ SSH_PRIVKEY = $(realpath ./dctest_key)
 TEST_ID := $(shell basename $(dir $(GOPATH)))
 COMMIT_ID := $(shell git rev-parse --abbrev-ref HEAD)
 KUSTOMIZATION_DIRS := $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
+PROMTOOL_VERSION := 2.11.0
 export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS
 
 ### for Go
@@ -40,6 +41,8 @@ setup:
 	sudo mv opa_linux_amd64 /usr/local/bin/opa
 	chmod +x /usr/local/bin/opa
 	go install github.com/onsi/ginkgo/ginkgo
+	curl -sSLf https://github.com/prometheus/prometheus/releases/download/v$(PROMTOOL_VERSION)/prometheus-$(PROMTOOL_VERSION).linux-amd64.tar.gz | tar -xzvf - --strip-components=1 prometheus-$(PROMTOOL_VERSION).linux-amd64/promtool
+	sudo mv promtool /usr/local/bin/promtool
 
 save:
 	./save.sh
