@@ -54,7 +54,7 @@ spec:
     protocol: TCP
     targetPort: 8000
   selector:
-    run: testhttpd
+    app.kubernetes.io/name: testhttpd
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
@@ -63,7 +63,7 @@ metadata:
   namespace: test-netpol
 spec:
   order: 2000.0
-  selector: run == 'testhttpd'
+  selector: app.kubernetes.io/name== 'testhttpd'
   types:
     - Ingress
   ingress:
@@ -214,17 +214,17 @@ spec:
 			{"argocd", "app.kubernetes.io/name=argocd-repo-server", []int{8081, 8084}},
 			{"argocd", "app.kubernetes.io/name=argocd-server", []int{8080, 8083}},
 			{"external-dns", "app.kubernetes.io/name=external-dns", []int{7979}},
-			{"external-dns", "app=cert-manager", []int{9402}},
-			{"external-dns", "app=webhook", []int{6443}},
-			{"ingress", "app=contour", []int{8002, 8080, 8443}},
-			{"internet-egress", "k8s-app=squid", []int{3128}},
-			{"internet-egress", "k8s-app=unbound", []int{53}},
+			{"external-dns", "app.kubernetes.io/name=cert-manager", []int{9402}},
+			{"external-dns", "app.kubernetes.io/name=webhook", []int{6443}},
+			{"ingress", "app.kubernetes.io/name=contour", []int{8002, 8080, 8443}},
+			{"internet-egress", "app.kubernetes.io/name=squid", []int{3128}},
+			{"internet-egress", "app.kubernetes.io/name=unbound", []int{53}},
 			{"kube-system", "cke.cybozu.com/appname=cluster-dns", []int{1053, 8080}},
-			{"kube-system", "k8s-app=kube-state-metrics", []int{8080, 8081}},
-			{"metallb-system", "component=controller", []int{7472}},
-			{"monitoring", "app=alertmanager", []int{9093}},
-			{"monitoring", "app=prometheus", []int{9090}},
-			{"opa", "app=opa", []int{8443}},
+			{"kube-system", "app.kubernetes.io/name=kube-state-metrics", []int{8080, 8081}},
+			{"metallb-system", "app.kubernetes.io/component=controller", []int{7472}},
+			{"monitoring", "app.kubernetes.io/name=alertmanager", []int{9093}},
+			{"monitoring", "app.kubernetes.io/name=prometheus", []int{9090}},
+			{"opa", "app.kubernetes.io/name=opa", []int{8443}},
 		}
 
 		for _, tc := range testcase {
@@ -269,7 +269,7 @@ spec:
 		createUbuntuDebugPod("internet-egress")
 
 		By("labelling pod as squid")
-		_, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "k8s-app=squid")
+		_, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name=squid")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("accessing DNS port of some node as squid")
@@ -283,11 +283,11 @@ spec:
 		}
 
 		By("removing label")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "k8s-app-")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("labelling pod as unbound")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "--overwrite", "pod", "ubuntu", "k8s-app=unbound")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "--overwrite", "pod", "ubuntu", "app.kubernetes.io/name=unbound")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("accessing DNS port of some node as unbound")
@@ -301,7 +301,7 @@ spec:
 		}
 
 		By("removing label")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "k8s-app-")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 
@@ -318,7 +318,7 @@ spec:
 		createUbuntuDebugPod("monitoring")
 
 		By("labelling pod as prometheus")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "monitoring", "label", "pod", "ubuntu", "app=prometheus")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "monitoring", "label", "pod", "ubuntu", "app.kubernetes.io/name=prometheus")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("accessing node exporter port of some node as prometheus")
@@ -326,7 +326,7 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("removing label")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "monitoring", "label", "pod", "ubuntu", "app-")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "monitoring", "label", "pod", "ubuntu", "app.kubernetes.io/name-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 
@@ -367,7 +367,7 @@ metadata:
   namespace: test-netpol
 spec:
   order: 1000.0
-  selector: run == 'testhttpd'
+  selector: app.kubernetes.io/name == 'testhttpd'
   types:
     - Ingress
   ingress:

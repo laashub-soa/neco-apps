@@ -20,7 +20,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
-  selector: app == 'alertmanager'
+  selector: app.kubernetes.io/name == 'alertmanager'
   types:
     - Ingress
   ingress:
@@ -41,7 +41,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
-  selector: k8s-app == 'kube-state-metrics'
+  selector: app.kubernetes.io/name == 'kube-state-metrics'
   types:
     - Ingress
   ingress:
@@ -63,7 +63,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
-  selector: app == 'prometheus'
+  selector: app.kubernetes.io/name == 'prometheus'
   types:
     - Ingress
   ingress:
@@ -84,7 +84,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 500.0
-  selector: app == 'prometheus'
+  selector: app.kubernetes.io/name == 'prometheus'
   types:
     - Egress
   egress:
