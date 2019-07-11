@@ -42,7 +42,7 @@ func testContour() {
 	It("should deploy IngressRoute", func() {
 		By("deployment Pods")
 		deployYAML := `
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: testhttpd
@@ -51,11 +51,11 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      run: testhttpd
+      app.kubernetes.io/name: testhttpd
   template:
     metadata:
       labels:
-        run: testhttpd
+        app.kubernetes.io/name: testhttpd
     spec:
       containers:
       - image: quay.io/cybozu/testhttpd:0
@@ -73,7 +73,7 @@ spec:
     protocol: TCP
     targetPort: 8000
   selector:
-    run: testhttpd
+    app.kubernetes.io/name: testhttpd
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
@@ -82,7 +82,7 @@ metadata:
   namespace: test-ingress
 spec:
   order: 2000.0
-  selector: run == 'testhttpd'
+  selector: app.kubernetes.io/name == 'testhttpd'
   types:
     - Ingress
   ingress:

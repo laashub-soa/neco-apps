@@ -4,7 +4,7 @@ metadata:
   name: cert-manager-webhook
   namespace: external-dns
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 spec:
   type: ClusterIP
   ports:
@@ -12,4 +12,4 @@ spec:
     port: 443
     targetPort: 6443
   selector:
-    app: webhook
+    app.kubernetes.io/name: webhook

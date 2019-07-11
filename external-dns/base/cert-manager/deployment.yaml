@@ -4,19 +4,19 @@ metadata:
   name: cert-manager-cainjector
   namespace: external-dns
   labels:
-    app: cainjector
-    component: cert-manager
+    app.kubernetes.io/name: cainjector
+    app.kubernetes.io/component: cert-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cainjector
-      component: cert-manager
+      app.kubernetes.io/name: cainjector
+      app.kubernetes.io/component: cert-manager
   template:
     metadata:
       labels:
-        app: cainjector
-        component: cert-manager
+        app.kubernetes.io/name: cainjector
+        app.kubernetes.io/component: cert-manager
       annotations:
     spec:
       serviceAccountName: cert-manager-cainjector
@@ -41,19 +41,19 @@ metadata:
   name: cert-manager-webhook
   namespace: external-dns
   labels:
-    app: webhook
-    component: cert-manager
+    app.kubernetes.io/name: webhook
+    app.kubernetes.io/component: cert-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: webhook
-      component: cert-manager
+      app.kubernetes.io/name: webhook
+      app.kubernetes.io/component: cert-manager
   template:
     metadata:
       labels:
-        app: webhook
-        component: cert-manager
+        app.kubernetes.io/name: webhook
+        app.kubernetes.io/component: cert-manager
       annotations:
     spec:
       serviceAccountName: cert-manager-webhook
@@ -100,19 +100,19 @@ metadata:
   name: cert-manager
   namespace: external-dns
   labels:
-    app: cert-manager
-    component: cert-manager
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/component: cert-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cert-manager
-      component: cert-manager
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: cert-manager
   template:
     metadata:
       labels:
-        app: cert-manager
-        component: cert-manager
+        app.kubernetes.io/name: cert-manager
+        app.kubernetes.io/component: cert-manager
       annotations:
         prometheus.io/path: "/metrics"
         prometheus.io/scrape: 'true'

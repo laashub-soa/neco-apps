@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: alertmanager
   labels:
-    app: alertmanager
+    app.kubernetes.io/name: alertmanager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: alertmanager
+      app.kubernetes.io/name: alertmanager
   template:
     metadata:
       labels:
-        app: alertmanager
+        app.kubernetes.io/name: alertmanager
     spec:
       containers:
         - name: alertmanager

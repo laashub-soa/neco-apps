@@ -14,7 +14,7 @@ kind: CustomResourceDefinition
 metadata:
   name: ingressroutes.contour.heptio.com
   labels:
-    component: ingressroute
+    app.kubernetes.io/component: ingressroute
 spec:
   group: contour.heptio.com
   version: v1beta1
@@ -153,7 +153,7 @@ kind: CustomResourceDefinition
 metadata:
   name: tlscertificatedelegations.contour.heptio.com
   labels:
-    component: tlscertificatedelegation
+    app.kubernetes.io/component: tlscertificatedelegation
 spec:
   group: contour.heptio.com
   version: v1beta1

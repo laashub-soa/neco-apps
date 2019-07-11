@@ -32,11 +32,10 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      run: testhttpd
+      app.kubernetes.io/name: testhttpd
   template:
     metadata:
-      labels:
-        run: testhttpd
+        app.kubernetes.io/name: testhttpd
     spec:
       containers:
       - image: quay.io/cybozu/testhttpd:0

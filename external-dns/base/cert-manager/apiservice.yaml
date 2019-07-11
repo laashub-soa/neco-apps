@@ -3,7 +3,7 @@ kind: APIService
 metadata:
   name: v1beta1.admission.certmanager.k8s.io
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
   annotations:
     certmanager.k8s.io/inject-ca-from: "external-dns/cert-manager-webhook-webhook-tls"
 spec:

@@ -4,16 +4,16 @@ metadata:
   name: opa
   namespace: opa
   labels:
-    app: opa
+    app.kubernetes.io/name: opa
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: opa
+      app.kubernetes.io/name: opa
   template:
     metadata:
       labels:
-        app: opa
+        app.kubernetes.io/name: opa
       name: opa
     spec:
       securityContext:

@@ -6,9 +6,9 @@ metadata:
   name: calico-typha
   namespace: kube-system
   labels:
-    k8s-app: calico-typha
+    app.kubernetes.io/name: calico-typha
 spec:
   maxUnavailable: 1
   selector:
     matchLabels:
-      k8s-app: calico-typha
+      app.kubernetes.io/name: calico-typha

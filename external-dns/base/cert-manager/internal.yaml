@@ -6,7 +6,7 @@ metadata:
   name: cert-manager-webhook-selfsign
   namespace: external-dns
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 spec:
   selfSigned: {}
 ---
@@ -17,7 +17,7 @@ metadata:
   name: cert-manager-webhook-ca
   namespace: external-dns
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 spec:
   secretName: cert-manager-webhook-ca
   duration: 87600h0m0s # 10y
@@ -33,7 +33,7 @@ metadata:
   name: cert-manager-webhook-ca
   namespace: external-dns
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 spec:
   ca:
     secretName: cert-manager-webhook-ca
@@ -45,7 +45,7 @@ metadata:
   name: cert-manager-webhook-webhook-tls
   namespace: external-dns
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 spec:
   secretName: cert-manager-webhook-webhook-tls
   duration: 8760h0m0s # 1y

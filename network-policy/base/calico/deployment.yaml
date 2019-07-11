@@ -6,7 +6,7 @@ metadata:
   name: calico-typha
   namespace: kube-system
   labels:
-    k8s-app: calico-typha
+    app.kubernetes.io/name: calico-typha
 spec:
   # Number of Typha replicas.  To enable Typha, set this to a non-zero value *and* set the
   # typha_service_name variable in the calico-config ConfigMap above.
@@ -18,11 +18,11 @@ spec:
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      k8s-app: calico-typha
+      app.kubernetes.io/name: calico-typha
   template:
     metadata:
       labels:
-        k8s-app: calico-typha
+        app.kubernetes.io/name: calico-typha
       annotations:
         # This, along with the CriticalAddonsOnly toleration below, marks the pod as a critical
         # add-on, ensuring it gets priority scheduling and that its resources are reserved

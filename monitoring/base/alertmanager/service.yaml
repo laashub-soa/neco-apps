@@ -4,7 +4,7 @@ metadata:
   name: alertmanager
 spec:
   selector:
-    app: alertmanager
+    app.kubernetes.io/name: alertmanager
   type: ClusterIP
   ports:
     - port: 9093
