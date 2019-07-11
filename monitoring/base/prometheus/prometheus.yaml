@@ -85,6 +85,7 @@ scrape_configs:
         target_label: kubernetes_namespace
       - source_labels: [__meta_kubernetes_service_name]
         action: replace
+        target_label: kubernetes_name
   - job_name: "metallb"
     kubernetes_sd_configs:
       - role: pod
