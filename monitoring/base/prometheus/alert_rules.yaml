@@ -49,5 +49,5 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "{{ $labels.instance }}, {{ $labels.job }} of {{ $labels.__name__ }} increases {{ $value | humanize1024 }}B/h"
+          summary: "{{ $labels.instance }}, {{ $labels.job }} of etcd DB space increases {{ $value | humanize }}B/h"
           runbook: "Please consider to find root causes, and solve the problems"
