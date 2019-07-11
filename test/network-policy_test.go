@@ -35,6 +35,7 @@ spec:
       app.kubernetes.io/name: testhttpd
   template:
     metadata:
+      labels:
         app.kubernetes.io/name: testhttpd
     spec:
       containers:
