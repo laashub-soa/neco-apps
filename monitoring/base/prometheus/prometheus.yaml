@@ -69,6 +69,23 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_service_name]
         action: replace
         target_label: kubernetes_name
+  - job_name: 'bootserver-etcd'
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: ["monitoring"]
+    relabel_configs:
+      - action: keep
+        source_labels: [__meta_kubernetes_endpoints_name]
+        regex: bootserver-etcd-metrics
+      - action: labelmap
+        regex: __meta_kubernetes_endpoint_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        action: replace
+        target_label: kubernetes_name
   - job_name: "metallb"
     kubernetes_sd_configs:
       - role: pod

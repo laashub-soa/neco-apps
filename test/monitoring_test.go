@@ -117,10 +117,10 @@ func testPrometheus() {
 			}
 			podName = podList.Items[0].Name
 
-			_, _, err = ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/alerts")
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to curl :9090/api/v1/alerts, stderr: %s, err: %v", stderr, err)
 			}
 			return nil
 		}).Should(Succeed())
@@ -128,10 +128,10 @@ func testPrometheus() {
 
 	It("should find endpoint", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/targets")
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to curl :9090/api/v1/targets, stderr: %s, err: %v", stderr, err)
 			}
 
 			var response struct {
@@ -192,10 +192,10 @@ func testAlertmanager() {
 			}
 			podName := podList.Items[0].Name
 
-			_, _, err = ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9093/-/healthy")
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to curl :9090/-/halthy, stderr: %s, err: %v", stderr, err)
 			}
 			return nil
 		}).Should(Succeed())
