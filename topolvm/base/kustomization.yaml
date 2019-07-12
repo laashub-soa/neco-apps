@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- certificates.yaml
+- crd.yaml
+- csi-controller.yaml
+- csi-node.yaml
+- lvmetrics.yaml
+- mutatingwebhooks.yaml
+- namespace.yaml
+- provisioner.yaml
+- scheduler.yaml

@@ -4,4 +4,5 @@ open-policy-agent
 metallb
 ingress
 monitoring
+topolvm
 network-policy
