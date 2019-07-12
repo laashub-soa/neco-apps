@@ -31,7 +31,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
-  selector: app.kubernetes.io/name == 'squid'
+  selector: app.kubernetes.io/name == 'squid' || k8s-app == 'squid'
   types:
     - Ingress
   ingress:
@@ -52,7 +52,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
 spec:
   order: 100.0
-  selector: app.kubernetes.io/name == 'squid'
+  selector: app.kubernetes.io/name == 'squid' || k8s-app == 'squid'
   types:
     - Egress
   egress:
@@ -72,7 +72,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
-  selector: app.kubernetes.io/name == 'unbound'
+  selector: app.kubernetes.io/name == 'unbound' || k8s-app == 'unbound'
   types:
     - Ingress
   ingress:
@@ -100,7 +100,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
 spec:
   order: 100.0
-  selector: app.kubernetes.io/name == 'unbound'
+  selector: app.kubernetes.io/name == 'unbound' || k8s-app == 'unbound'
   types:
     - Egress
   egress:
