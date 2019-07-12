@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teleport
+  labels:
+    app.kubernetes.io/name: teleport
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: teleport
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - name: teleport
+        image: "quay.io/gravitational/teleport:3.2.4"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SSL_CERT_FILE
+          value: /var/lib/ca-certs/ca.pem
+        ports:
+        - name: authssh
+          containerPort: 3025
+        - name: nodessh
+          containerPort: 3022
+        - name: proxykube
+          containerPort: 3026
+        - name: proxyssh
+          containerPort: 3023
+        - name: proxytunnel
+          containerPort: 3024
+        - name: proxyweb
+          containerPort: 3080
+        volumeMounts:
+        - mountPath: /var/lib/certs
+          name: teleport-tls-web
+          readOnly: true
+        - mountPath: /etc/teleport
+          name: teleport-config
+          readOnly: true
+        - mountPath: /var/lib/teleport
+          name: teleport-storage
+        - mountPath: /var/lib/ca-certs
+          name: ca-certs
+          readOnly: true
+        
+      volumes:
+      - name: teleport-tls-web
+        secret:
+          secretName: tls-web
+      - name: teleport-config
+        configMap:
+          name: teleport-config
+      - name: teleport-storage
+        emptyDir: {}
+      - configMap:
+          name: ca-certs
+        name: ca-certs
+      
+      serviceAccountName: teleport
+
