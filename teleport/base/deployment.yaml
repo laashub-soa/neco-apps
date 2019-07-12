@@ -1,10 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: default
   name: teleport
   labels:
     app.kubernetes.io/name: teleport
 spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: teleport
   replicas: 1
   strategy:
     type: RollingUpdate
@@ -46,6 +50,9 @@ spec:
         - mountPath: /var/lib/ca-certs
           name: ca-certs
           readOnly: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
         
       volumes:
       - name: teleport-tls-web
@@ -61,4 +68,3 @@ spec:
         name: ca-certs
       
       serviceAccountName: teleport
-
