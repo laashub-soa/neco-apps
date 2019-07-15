@@ -103,7 +103,7 @@ func testPrometheus() {
 	It("should reply successfully", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app=prometheus", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=prometheus", "-o=json")
 			if err != nil {
 				return err
 			}
@@ -178,7 +178,7 @@ func testAlertmanager() {
 	It("should reply successfully", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app=alertmanager", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=alertmanager", "-o=json")
 			if err != nil {
 				return err
 			}
@@ -208,7 +208,7 @@ func testMetrics() {
 		By("retrieving prometheus podName")
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app=prometheus", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=prometheus", "-o=json")
 			if err != nil {
 				return err
 			}

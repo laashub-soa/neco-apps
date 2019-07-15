@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: prometheus
   labels:
-    app: prometheus
+    app.kubernetes.io/name: prometheus
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus
+      app.kubernetes.io/name: prometheus
   template:
     metadata:
       labels:
-        app: prometheus
+        app.kubernetes.io/name: prometheus
     spec:
       serviceAccountName: prometheus
       containers:

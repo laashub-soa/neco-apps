@@ -6,13 +6,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: metallb
-      component: speaker
+      app.kubernetes.io/name: metallb
+      app.kubernetes.io/component: speaker
   template:
     metadata:
       labels:
-        app: metallb
-        component: speaker
+        app.kubernetes.io/name: metallb
+        app.kubernetes.io/component: speaker
       annotations:
         prometheus.io/port: "7472"
     spec:
@@ -50,20 +50,20 @@ metadata:
   namespace: metallb-system
   name: controller
   labels:
-    app: metallb
-    component: controller
+    app.kubernetes.io/name: metallb
+    app.kubernetes.io/component: controller
 spec:
   replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: metallb
-      component: controller
+      app.kubernetes.io/name: metallb
+      app.kubernetes.io/component: controller
   template:
     metadata:
       labels:
-        app: metallb
-        component: controller
+        app.kubernetes.io/name: metallb
+        app.kubernetes.io/component: controller
       annotations:
         prometheus.io/port: "7472"
     spec:

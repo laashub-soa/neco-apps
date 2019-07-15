@@ -4,7 +4,7 @@ metadata:
   name: prometheus
 spec:
   selector:
-    app: prometheus
+    app.kubernetes.io/name: prometheus
   type: ClusterIP
   ports:
     - port: 9090

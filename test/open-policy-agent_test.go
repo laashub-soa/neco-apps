@@ -48,7 +48,7 @@ metadata:
     counter: "%d"
 spec:
   selector:
-    app: opa
+    app.kubernetes.io/name: opa
   ports:
     - name: https
       protocol: TCP
@@ -78,7 +78,7 @@ metadata:
   namespace: test-opa
 spec:
   selector:
-    app: opa
+    app.kubernetes.io/name: opa
   ports:
     - name: https
       protocol: TCP

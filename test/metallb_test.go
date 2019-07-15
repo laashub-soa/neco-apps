@@ -65,7 +65,7 @@ metadata:
   namespace: default
 spec:
   order: 2000.0
-  selector: run == 'testhttpd'
+  selector: app.kubernetes.io/name == 'testhttpd'
   types:
     - Ingress
   ingress:
@@ -78,7 +78,7 @@ spec:
 		_, stderr, err := ExecAtWithInput(boot0, []byte(netpol), "kubectl", "create", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		_, stderr, err = ExecAt(boot0, "kubectl", "run", "testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
+		_, stderr, err = ExecAt(boot0, "kubectl", "run", "testhttpd", "-l=app.kubernetes.io/name=testhttpd", "--image=quay.io/cybozu/testhttpd:0", "--replicas=2")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("waiting pods are ready")
@@ -110,7 +110,7 @@ metadata:
   namespace: default
 spec:
   selector:
-    run: testhttpd
+    app.kubernetes.io/name: testhttpd
   ports:
   - protocol: TCP
     port: 80

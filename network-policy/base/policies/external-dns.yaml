@@ -28,7 +28,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
-  selector: app == 'cert-manager'
+  selector: app.kubernetes.io/name == 'cert-manager'
   types:
     - Ingress
   ingress:
@@ -49,7 +49,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
-  selector: app == 'webhook'
+  selector: app.kubernetes.io/name == 'webhook'
   types:
     - Ingress
   ingress:

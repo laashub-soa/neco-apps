@@ -16,7 +16,7 @@ spec:
     protocol: TCP
     targetPort: 8443
   selector:
-    app: contour
+    app.kubernetes.io/name: contour
   type: LoadBalancer
   externalTrafficPolicy: Local
 ---
@@ -36,7 +36,7 @@ spec:
     protocol: TCP
     targetPort: 8443
   selector:
-    app: contour
+    app.kubernetes.io/name: contour
   type: LoadBalancer
   externalTrafficPolicy: Local
 ---

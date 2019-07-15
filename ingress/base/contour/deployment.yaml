@@ -2,18 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: contour
+    app.kubernetes.io/name: contour
   name: contour
   namespace: ingress
 spec:
   selector:
     matchLabels:
-      app: contour
+      app.kubernetes.io/name: contour
   replicas: 2
   template:
     metadata:
       labels:
-        app: contour
+        app.kubernetes.io/name: contour
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8002"
@@ -89,6 +89,6 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchLabels:
-                  app: contour
+                  app.kubernetes.io/name: contour
               topologyKey: "cke.cybozu.com/rack"
 ---

@@ -6,7 +6,7 @@ metadata:
   name: opa-server-selfsign
   namespace: opa
   labels:
-    app: opa
+    app.kubernetes.io/name: opa
 spec:
   selfSigned: {}
 ---
@@ -17,7 +17,7 @@ metadata:
   name: opa-server-ca
   namespace: opa
   labels:
-    app: opa
+    app.kubernetes.io/name: opa
 spec:
   secretName: opa-server-ca
   duration: 87600h0m0s # 10y
@@ -33,7 +33,7 @@ metadata:
   name: opa-server-ca
   namespace: opa
   labels:
-    app: opa
+    app.kubernetes.io/name: opa
 spec:
   ca:
     secretName: opa-server-ca
@@ -45,7 +45,7 @@ metadata:
   name: opa-server-tls
   namespace: opa
   labels:
-    app: opa
+    app.kubernetes.io/name: opa
 spec:
   secretName: opa-server-tls
   duration: 8760h0m0s # 1y

@@ -4,7 +4,7 @@ metadata:
   name: cert-manager-cainjector
   namespace: external-dns
   labels:
-    app: cainjector
+    app.kubernetes.io/name: cainjector
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -12,7 +12,7 @@ metadata:
   name: cert-manager-webhook
   namespace: external-dns
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -20,14 +20,14 @@ metadata:
   name: cert-manager
   namespace: external-dns
   labels:
-    app: cert-manager
+    app.kubernetes.io/name: cert-manager
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: cert-manager-cainjector
   labels:
-    app: cainjector
+    app.kubernetes.io/name: cainjector
 rules:
   - apiGroups: ["certmanager.k8s.io"]
     resources: ["certificates"]
@@ -53,7 +53,7 @@ kind: ClusterRoleBinding
 metadata:
   name: cert-manager-cainjector
   labels:
-    app: cainjector
+    app.kubernetes.io/name: cainjector
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -68,7 +68,7 @@ kind: ClusterRole
 metadata:
   name: cert-manager
   labels:
-    app: cert-manager
+    app.kubernetes.io/name: cert-manager
 rules:
   - apiGroups: ["certmanager.k8s.io"]
     resources: ["certificates", "certificates/finalizers", "issuers", "clusterissuers", "orders", "orders/finalizers", "challenges",  "challenges/finalizers"]
@@ -85,7 +85,7 @@ kind: ClusterRoleBinding
 metadata:
   name: cert-manager
   labels:
-    app: cert-manager
+    app.kubernetes.io/name: cert-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -100,7 +100,7 @@ kind: ClusterRole
 metadata:
   name: cert-manager-view
   labels:
-    app: cert-manager
+    app.kubernetes.io/name: cert-manager
     rbac.authorization.k8s.io/aggregate-to-view: "true"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
@@ -114,7 +114,7 @@ kind: ClusterRole
 metadata:
   name: cert-manager-edit
   labels:
-    app: cert-manager
+    app.kubernetes.io/name: cert-manager
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
 rules:
@@ -128,7 +128,7 @@ kind: ClusterRoleBinding
 metadata:
   name: cert-manager-webhook:auth-delegator
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -145,7 +145,7 @@ metadata:
   name: cert-manager-webhook:webhook-authentication-reader
   namespace: kube-system
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -161,7 +161,7 @@ kind: ClusterRole
 metadata:
   name: cert-manager-webhook:webhook-requester
   labels:
-    app: webhook
+    app.kubernetes.io/name: webhook
 rules:
 - apiGroups:
   - admission.certmanager.k8s.io
