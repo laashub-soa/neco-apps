@@ -78,3 +78,30 @@ spec:
   - protocol: TCP
     port: 443
     targetPort: 9252
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: topolvm-hook
+  annotations:
+    certmanager.k8s.io/inject-ca-from: topolvm-system/pod-mutatingwebhook
+  labels:
+    app.kubernetes.io/name: topolvm-hook
+webhooks:
+  - name: hook.topolvm.cybozu.com
+    namespaceSelector:
+      matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values: ["topolvm-system"]
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        namespace: topolvm-system
+        name: topolvm-hook
+        path: /mutate
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
