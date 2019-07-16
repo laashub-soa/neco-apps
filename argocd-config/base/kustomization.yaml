@@ -8,3 +8,4 @@ resources:
 - monitoring.yaml
 - network-policy.yaml
 - open-policy-agent.yaml
+- topolvm.yaml
