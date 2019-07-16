@@ -11,7 +11,7 @@ spec:
     path: teleport/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: teleport
+    namespace: bastion
   syncPolicy:
     automated:
       prune: true
