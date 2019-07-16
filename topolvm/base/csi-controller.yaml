@@ -17,7 +17,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: topolvm-system:csi-topolvm-controller
-  namespace: topolvm-system
 rules:
   - apiGroups: ["topolvm.cybozu.com"]
     resources: ["logicalvolumes", "logicalvolumes/status"]
@@ -27,11 +26,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: topolvm-system:csi-topolvm-controller
-  namespace: topolvm-system
 subjects:
   - kind: ServiceAccount
-    name: csi-topolvm-controller
     namespace: topolvm-system
+    name: csi-topolvm-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -73,8 +71,8 @@ metadata:
   name: csi-provisioner-role
 subjects:
   - kind: ServiceAccount
-    name: csi-topolvm-controller
     namespace: topolvm-system
+    name: csi-topolvm-controller
 roleRef:
   kind: ClusterRole
   name: external-provisioner-runner
@@ -96,12 +94,12 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-provisioner-role-cfg
   namespace: topolvm-system
+  name: csi-provisioner-role-cfg
 subjects:
   - kind: ServiceAccount
-    name: csi-topolvm-controller
     namespace: topolvm-system
+    name: csi-topolvm-controller
 roleRef:
   kind: Role
   name: external-provisioner-cfg

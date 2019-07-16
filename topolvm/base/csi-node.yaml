@@ -8,17 +8,22 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: topolvm-system:csi-topolvm-node
-  namespace: topolvm-system
 rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "patch"]
   - apiGroups: ["topolvm.cybozu.com"]
     resources: ["logicalvolumes", "logicalvolumes/status"]
     verbs: ["get", "list", "watch", "create", "update", "delete", "patch"]
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames: ["topolvm-node"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: topolvm-system:csi-topolvm-node
-  namespace: topolvm-system
 subjects:
   - kind: ServiceAccount
     name: csi-topolvm-node
@@ -32,8 +37,8 @@ roleRef:
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: csi-topolvm-node
   namespace: topolvm-system
+  name: csi-topolvm-node
 spec:
   selector:
     matchLabels:
@@ -87,6 +92,7 @@ spec:
               mountPath: /run/topolvm
             - name: registration-dir
               mountPath: /registration
+
         - name: topolvm-node
           image: quay.io/cybozu/topolvm:0.1.0
           command:
@@ -101,6 +107,20 @@ spec:
           volumeMounts:
             - name: lvmd-socket-dir
               mountPath: /run/lvmd
+
+        - name: lvmetrics
+          image: quay.io/cybozu/topolvm:0.1.0
+          command:
+            - /lvmetrics
+            - --socket=/run/topolvm/lvmd.sock
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+          - name: lvmd-socket-dir
+            mountPath: /run/topolvm
 
       volumes:
         - name: registration-dir

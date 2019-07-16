@@ -5,8 +5,8 @@ resources:
 - crd.yaml
 - csi-controller.yaml
 - csi-node.yaml
-- lvmetrics.yaml
 - mutatingwebhooks.yaml
 - namespace.yaml
 - provisioner.yaml
+- psp.yaml
 - scheduler.yaml
