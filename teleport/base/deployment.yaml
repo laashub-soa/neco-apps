@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: default
   name: teleport
+  namespace: bastion
   labels:
     app.kubernetes.io/name: teleport
 spec:
@@ -20,7 +20,7 @@ spec:
       automountServiceAccountToken: true
       containers:
       - name: teleport
-        image: "quay.io/gravitational/teleport:3.2.4"
+        image: "quay.io/cybozu/teleport:4.0.2.1"
         imagePullPolicy: IfNotPresent
         args:
         - --insecure-no-tls

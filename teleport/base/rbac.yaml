@@ -27,4 +27,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: teleport
-    namespace: default
+    namespace: bastion

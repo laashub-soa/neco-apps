@@ -2,7 +2,7 @@ apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute
 metadata:
   name: tls
-  namespace: default
+  namespace: bastion
   annotations:
     kubernetes.io/tls-acme: "true"
 spec:

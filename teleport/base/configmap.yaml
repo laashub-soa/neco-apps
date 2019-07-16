@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: teleport-config
-  namespace: default
+  namespace: bastion
   labels:
     app.kubernetes.io/name: teleport
 data:
