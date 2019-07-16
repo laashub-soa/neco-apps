@@ -192,6 +192,9 @@ spec:
       labels:
         app.kubernetes.io/name: csi-topolvm-controller
     spec:
+      securityContext:
+        runAsUser:  10000
+        runAsGroup: 10000
       serviceAccountName: csi-topolvm-controller
       containers:
         - name: controller

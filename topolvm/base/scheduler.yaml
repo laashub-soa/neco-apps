@@ -44,6 +44,9 @@ spec:
       labels:
         app.kubernetes.io/name: topolvm-scheduler
     spec:
+      securityContext:
+        runAsUser:  10000
+        runAsGroup: 10000
       serviceAccountName: topolvm-scheduler
       containers:
         - name: topolvm-scheduler

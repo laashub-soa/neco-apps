@@ -44,6 +44,9 @@ spec:
       labels:
         app.kubernetes.io/name: topolvm-hook
     spec:
+      securityContext:
+        runAsUser:  10000
+        runAsGroup: 10000
       serviceAccountName: topolvm-hook
       containers:
         - name: topolvm-hook
