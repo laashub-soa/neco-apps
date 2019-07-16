@@ -23,18 +23,21 @@ spec:
         image: "quay.io/cybozu/teleport:4.0.2.1"
         imagePullPolicy: IfNotPresent
         args:
+        - start
+        - -c
+        - /etc/teleport/teleport.yaml
         - --insecure-no-tls
         ports:
-        - name: authssh
-          containerPort: 3025
         - name: nodessh
           containerPort: 3022
-        - name: proxykube
-          containerPort: 3026
         - name: proxyssh
           containerPort: 3023
         - name: proxytunnel
           containerPort: 3024
+        - name: authssh
+          containerPort: 3025
+        - name: proxykube
+          containerPort: 3026
         - name: proxyweb
           containerPort: 3080
         volumeMounts:
