@@ -211,10 +211,13 @@ func testSetup() {
 	})
 
 	It("should setup ArgoCD applications of master HEAD", func() {
+		By("checkout to " + baseBranch)
+		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", baseBranch)
 		applyAndWaitForApplications()
 	})
 
 	It("should update Argo CD applications of feature branch", func() {
+		By("checkout to " + commitID)
 		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications()
