@@ -208,46 +208,16 @@ func testSetup() {
 
 	It("should checkout neco-apps repository", func() {
 		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-apps")
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
-		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 	})
 
-	It("should setup Argo CD application as Argo CD app", func() {
-		By("creating Argo CD app")
-		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
+	It("should setup ArgoCD applications of master HEAD", func() {
+		applyAndWaitForApplications()
+	})
 
-		syncOrder := loadSyncOrder()
-
-		By("waiting initialization")
-		Eventually(func() error {
-		OUTER:
-			for _, appName := range syncOrder {
-				out := ExecSafeAt(boot0, "argocd", "app", "get", "-o", "json", appName)
-				var app argocd.Application
-				err := json.Unmarshal(out, &app)
-				if err != nil {
-					return err
-				}
-				st := app.Status
-				if st.Sync.Status == argocd.SyncStatusCodeSynced &&
-					st.Health.Status == argocd.HealthStatusHealthy &&
-					app.Operation == nil {
-					continue
-				}
-				for _, cond := range st.Conditions {
-					if cond.Type == argocd.ApplicationConditionSyncError {
-						continue OUTER
-					}
-				}
-				return errors.New(appName + " is not initialized")
-			}
-			return nil
-		}).Should(Succeed())
-
-		for _, appName := range syncOrder {
-			By("syncing " + appName + " manually")
-			ExecSafeAt(boot0, "argocd", "app", "sync", appName)
-		}
+	It("should update Argo CD applications of feature branch", func() {
+		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
+		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
+		applyAndWaitForApplications()
 	})
 }
 
@@ -266,4 +236,42 @@ func loadSyncOrder() []string {
 	}
 
 	return results
+}
+
+func applyAndWaitForApplications() {
+	By("creating Argo CD app")
+	ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
+
+	syncOrder := loadSyncOrder()
+
+	By("waiting initialization")
+	Eventually(func() error {
+	OUTER:
+		for _, appName := range syncOrder {
+			out := ExecSafeAt(boot0, "argocd", "app", "get", "-o", "json", appName)
+			var app argocd.Application
+			err := json.Unmarshal(out, &app)
+			if err != nil {
+				return err
+			}
+			st := app.Status
+			if st.Sync.Status == argocd.SyncStatusCodeSynced &&
+				st.Health.Status == argocd.HealthStatusHealthy &&
+				app.Operation == nil {
+				continue
+			}
+			for _, cond := range st.Conditions {
+				if cond.Type == argocd.ApplicationConditionSyncError {
+					continue OUTER
+				}
+			}
+			return errors.New(appName + " is not initialized")
+		}
+		return nil
+	}).Should(Succeed())
+
+	for _, appName := range syncOrder {
+		By("syncing " + appName + " manually")
+		ExecSafeAt(boot0, "argocd", "app", "sync", appName)
+	}
 }
