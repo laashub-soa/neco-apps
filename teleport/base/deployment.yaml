@@ -29,7 +29,6 @@ spec:
         - start
         - -c
         - /etc/teleport/teleport.yaml
-        - --insecure-no-tls
         ports:
         - name: nodessh
           containerPort: 3022
