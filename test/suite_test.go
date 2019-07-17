@@ -57,4 +57,5 @@ var _ = Describe("Test applications", func() {
 	Context("prometheus", testPrometheus)
 	Context("alertmanager", testAlertmanager)
 	Context("metrics", testMetrics)
+	Context("topolvm", testTopoLVM)
 })

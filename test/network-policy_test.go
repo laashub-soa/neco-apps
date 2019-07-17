@@ -225,6 +225,7 @@ spec:
 			{"monitoring", "app.kubernetes.io/name=alertmanager", []int{9093}},
 			{"monitoring", "app.kubernetes.io/name=prometheus", []int{9090}},
 			{"opa", "app.kubernetes.io/name=opa", []int{8443}},
+			{"topolvm-system", "app.kubernetes.io/name==topolvm-hook", []int{9252}},
 		}
 
 		for _, tc := range testcase {
