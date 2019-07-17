@@ -210,9 +210,10 @@ func testSetup() {
 		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-apps")
 	})
 
-	It("should setup ArgoCD applications of master HEAD", func() {
+	It("should setup Argo CD applications of master HEAD", func() {
 		By("checkout to " + baseBranch)
 		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", baseBranch)
+		ExecSafeAt(boot0, "sed", "-i", "s/release/master/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications()
 	})
 
