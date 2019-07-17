@@ -1,0 +1,11 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: teleport-certificate
+  namespace: bastion
+spec:
+  secretName: tls-web
+  issuerRef:
+    kind: ClusterIssuer
+    name: clouddns
+  commonName: teleport.gcp0.dev-ne.co
