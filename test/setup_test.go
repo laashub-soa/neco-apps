@@ -258,8 +258,8 @@ func setupArgoCD() {
 
 	By("getting node address")
 	var nodeList corev1.NodeList
-	data := ExecSafeAt(boot0, "kubectl", "get", "nodes", "-o", "json")
-	err := json.Unmarshal(data, &nodeList)
+	data = ExecSafeAt(boot0, "kubectl", "get", "nodes", "-o", "json")
+	err = json.Unmarshal(data, &nodeList)
 	Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 	Expect(nodeList.Items).ShouldNot(BeEmpty())
 	node := nodeList.Items[0]
