@@ -129,35 +129,14 @@ func testSetup() {
 		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-apps")
 	})
 
-	It("should setup Argo CD applications from master HEAD to "+commitID, func() {
+	It("should setup Argo CD applications from "+baseBranch+" HEAD to "+commitID, func() {
 		setupArgoCD()
 
-		By("checkout master")
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", "master")
-		ExecSafeAt(boot0, "sed", "-i", "s/release/master/", "./neco-apps/argocd-config/base/*.yaml")
+		By("checkout " + baseBranch)
+		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", baseBranch)
+		ExecSafeAt(boot0, "sed", "-i", "s/release/"+baseBranch+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications()
 
-		By("checkout " + commitID)
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "reset", "--hard")
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
-		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
-		applyAndWaitForApplications()
-	})
-
-	It("should delete all Argo CD applications for next test", func() {
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "argocd", "delete", "--all")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-	})
-
-	It("should setup Argo CD applications from release HEAD to "+commitID, func() {
-		setupArgoCD()
-
-		By("checkout release")
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "reset", "--hard")
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", "release")
-		applyAndWaitForApplications()
-
-		By("checkout " + commitID)
 		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "reset", "--hard")
 		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
