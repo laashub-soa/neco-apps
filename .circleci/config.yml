@@ -31,12 +31,9 @@ commands:
                 exit 0
             fi
             gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE}
+
   test-neco-apps:
     description: "test for neco-apps"
-    parameters:
-      base_branch:
-        type: string
-        default: "master"
     steps:
       - run:
           name: Wait for previous builds
@@ -64,13 +61,6 @@ jobs:
       - checkout
       - store-service-account
       - test-neco-apps
-  test-production:
-    executor: gcloud
-    steps:
-      - checkout
-      - store-service-account
-      - test-neco-apps:
-          base_branch: release
 
   start-neco-ops:
     executor: gcloud
@@ -181,16 +171,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /^release-.*/
-
-  release-test:
-    jobs:
-      - start-neco-ops:
-          filters:
-            branches:
-              only: /^op-.*/
-      - test-production:
-          requires:
-            - start-neco-ops
-          filters:
-            branches:
-              only: /^op-.*/

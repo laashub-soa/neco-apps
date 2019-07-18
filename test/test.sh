@@ -63,4 +63,4 @@ done
 EXTERNAL_PID=$(pmctl pod show external | jq .pid)
 export EXTERNAL_PID
 
-sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH BASE_BRANCH=${BASE_BRANCH}; $GINKGO"
+sudo -E nsenter -t $(pmctl pod show operation | jq .pid) -n sh -c "export PATH=$PATH; $GINKGO"

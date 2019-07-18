@@ -9,6 +9,5 @@ var (
 	sshKeyFile  = os.Getenv("SSH_PRIVKEY")
 	testID      = os.Getenv("TEST_ID")
 	commitID    = os.Getenv("COMMIT_ID")
-	baseBranch  = os.Getenv("BASE_BRANCH")
 	externalPID = os.Getenv("EXTERNAL_PID")
 )
