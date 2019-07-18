@@ -77,12 +77,12 @@ resources:   # It includes all K8s objects for monitoring.
 Test Flow
 ---------
 
-CI in this repository expects running deployment test using `neco-ops` instance. Test resources are in `test/` directory of each `appname`.
+CI in this repository expects running deployment test using `neco-apps-master` and `neco-apps-release` instances. Test resources are in `test/` directory of each `appname`.
 The typical test step is:
 
 - Run [Ginkgo][] based deployment test.
     1. Load initialized state of the placemat snapshot by `pmctl snapshot load`.
-    2. Login to `neco-ops` instance.
+    2. Login to `neco-apps-*` instance.
     3. Deploy Argo CD by `kubectl`.
     4. Initialize Argo CD client with `argocd login SERVER --name admin --password xxxxx`.
     5. Deploy Argo CD configuration `argocd-config` by:
@@ -95,11 +95,14 @@ The typical test step is:
 How to debug CI result
 ----------------------
 
-1. Login to `neco-ops` instance.
+1. Login to `neco-apps-mater` or `neco-apps-release` instance.
 
 ```console
-gcloud compute --project=neco-test ssh cybozu@neco-ops
+gcloud compute --project=neco-test ssh cybozu@neco-apps-master
+# or
+gcloud compute --project=neco-test ssh cybozu@neco-apps-release
 ```
+
 
 2. You can find cloned `neco-apps` repository in `$HOME/${CIRCLE_PROJECT_REPONAME}-${CIRCLE_BUILD_NUM}/go/src/github.com/cybozu-go/neco-apps`.
 3. ssh to the boot server.

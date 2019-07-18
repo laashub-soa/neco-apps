@@ -3,6 +3,7 @@
 . $(dirname $0)/env
 
 BASE_BRANCH=$1
+INSTANCE_NAME=neco-apps-${BASE_BRANCH}
 
 cat >run.sh <<EOF
 #!/bin/sh -ex

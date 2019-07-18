@@ -148,6 +148,8 @@ commands:
       - run:
           command: |
             ./bin/watch_podlogs
+          environment:
+            INSTANCE_NAME: neco-apps-master
           background: true
       - run:
           command: |
@@ -173,6 +175,8 @@ commands:
       - run:
           command: |
             ./bin/watch_podlogs
+          environment:
+            INSTANCE_NAME: neco-apps-master
           background: true
       - run:
           command: |
