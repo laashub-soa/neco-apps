@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	argoappv1 "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
+	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"gopkg.in/yaml.v2"
@@ -216,49 +216,35 @@ func testSetup() {
 		By("creating Argo CD app")
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
 
-		By("checking app status")
 		syncOrder := loadSyncOrder()
-		var hasSyncError bool
+
+		By("waiting initialization")
 		Eventually(func() error {
-			for _, a := range syncOrder {
-				stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "app", a, "-n", "argocd", "-o", "json")
-				if err != nil {
-					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-				}
-				var app argoappv1.Application
-				err = json.Unmarshal(stdout, &app)
+		OUTER:
+			for _, appName := range syncOrder {
+				out := ExecSafeAt(boot0, "argocd", "app", "get", "-o", "json", appName)
+				var app argocd.Application
+				err := json.Unmarshal(out, &app)
 				if err != nil {
 					return err
 				}
-
-				if len(app.Status.Resources) == 0 {
-					return errors.New("resource is not yet fetched")
+				st := app.Status
+				if st.Sync.Status == argocd.SyncStatusCodeSynced && st.Health.Status == argocd.HealthStatusHealthy {
+					continue
 				}
-
-				for _, cond := range app.Status.Conditions {
-					if cond.Type == argoappv1.ApplicationConditionSyncError {
-						hasSyncError = true
-						return nil
+				for _, cond := range st.Conditions {
+					if cond.Type == argocd.ApplicationConditionSyncError {
+						continue OUTER
 					}
 				}
-
-				for _, r := range app.Status.Resources {
-					if r.Status != argoappv1.SyncStatusCodeSynced {
-						return fmt.Errorf("%s is not yet Synced: %s", a, r.Status)
-					}
-					if r.Health != nil && r.Health.Status != argoappv1.HealthStatusHealthy {
-						return fmt.Errorf("%s is not yet Healthy: %s", a, r.Health.Status)
-					}
-				}
+				return errors.New(appName + " is not initialized")
 			}
 			return nil
 		}).Should(Succeed())
 
-		if hasSyncError {
-			By("syncing manually according to the given order")
-			for _, appName := range syncOrder {
-				ExecSafeAt(boot0, "argocd", "app", "sync", appName)
-			}
+		for _, appName := range syncOrder {
+			By("syncing " + appName + " manually")
+			ExecSafeAt(boot0, "argocd", "app", "sync", appName)
 		}
 	})
 }
