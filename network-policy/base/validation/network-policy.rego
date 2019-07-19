@@ -2,7 +2,7 @@ package kubernetes.admission
 
 operations = {"CREATE", "UPDATE"}
 
-system_namespaces = {"kube-system", "argocd", "external-dns", "ingress", "internet-egress", "metallb-system", "monitoring", "opa"}
+system_namespaces = {"kube-system", "argocd", "external-dns", "ingress", "internet-egress", "metallb-system", "monitoring", "opa", "topolvm-system"}
 
 deny[msg] {
 	input.request.kind.kind == "NetworkPolicy"
