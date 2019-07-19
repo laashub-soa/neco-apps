@@ -229,7 +229,9 @@ func testSetup() {
 					return err
 				}
 				st := app.Status
-				if st.Sync.Status == argocd.SyncStatusCodeSynced && st.Health.Status == argocd.HealthStatusHealthy {
+				if st.Sync.Status == argocd.SyncStatusCodeSynced &&
+					st.Health.Status == argocd.HealthStatusHealthy &&
+					app.Operation == nil {
 					continue
 				}
 				for _, cond := range st.Conditions {
