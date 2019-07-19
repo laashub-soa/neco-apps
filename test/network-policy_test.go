@@ -78,8 +78,8 @@ spec:
 
 		// connections to 8080 and 8443 of contour are rejected unless we register IngressRoute
 		By("creating IngressRoute")
-		fqdnHTTP := "http.test-netpol.gcp0.dev-ne.co"
-		fqdnHTTPS := "https.test-netpol.gcp0.dev-ne.co"
+		fqdnHTTP := testID + "-http.test-netpol.gcp0.dev-ne.co"
+		fqdnHTTPS := testID + "-https.test-netpol.gcp0.dev-ne.co"
 		ingressRoute := fmt.Sprintf(`
 apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute

@@ -171,9 +171,12 @@ func applyAndWaitForApplications() {
 	Eventually(func() error {
 	OUTER:
 		for _, appName := range syncOrder {
-			out := ExecSafeAt(boot0, "argocd", "app", "get", "-o", "json", appName)
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
 			var app argocd.Application
-			err := json.Unmarshal(out, &app)
+			err = json.Unmarshal(stdout, &app)
 			if err != nil {
 				return err
 			}
