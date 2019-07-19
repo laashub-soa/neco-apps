@@ -125,129 +125,22 @@ func testSetup() {
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 	})
 
-	It("should install Argo CD", func() {
-		data, err := ioutil.ReadFile("install.yaml")
-		Expect(err).ShouldNot(HaveOccurred())
-		Eventually(func() error {
-			stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "apply", "-n", "argocd", "-f", "-")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
-	It("should login to Argo CD", func() {
-		By("getting password")
-		// admin password is same as pod name
-		var podList corev1.PodList
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n", "argocd",
-				"-l", "app.kubernetes.io/name=argocd-server", "-o", "json")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			err = json.Unmarshal(stdout, &podList)
-			if err != nil {
-				return err
-			}
-			if podList.Items == nil {
-				return errors.New("podList.Items is nil")
-			}
-			if len(podList.Items) != 1 {
-				return fmt.Errorf("podList.Items is not 1: %d", len(podList.Items))
-			}
-			return nil
-		}).Should(Succeed())
-
-		password := podList.Items[0].Name
-
-		By("getting node address")
-		var nodeList corev1.NodeList
-		data := ExecSafeAt(boot0, "kubectl", "get", "nodes", "-o", "json")
-		err := json.Unmarshal(data, &nodeList)
-		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
-		Expect(nodeList.Items).ShouldNot(BeEmpty())
-		node := nodeList.Items[0]
-
-		var nodeAddress string
-		for _, addr := range node.Status.Addresses {
-			if addr.Type != corev1.NodeInternalIP {
-				continue
-			}
-			nodeAddress = addr.Address
-		}
-		Expect(nodeAddress).ShouldNot(BeNil())
-
-		By("getting node port")
-		var svc corev1.Service
-		data = ExecSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", "argocd", "-o", "json")
-		err = json.Unmarshal(data, &svc)
-		Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
-		Expect(svc.Spec.Ports).ShouldNot(BeEmpty())
-
-		var nodePort string
-		for _, port := range svc.Spec.Ports {
-			if port.Name != "http" {
-				continue
-			}
-			nodePort = strconv.Itoa(int(port.NodePort))
-		}
-		Expect(nodePort).ShouldNot(BeNil())
-
-		By("logging in to Argo CD")
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "login", nodeAddress+":"+nodePort,
-				"--insecure", "--username", "admin", "--password", password)
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
 	It("should checkout neco-apps repository", func() {
 		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-apps")
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
-		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 	})
 
-	It("should setup Argo CD application as Argo CD app", func() {
-		By("creating Argo CD app")
-		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
+	It("should setup Argo CD applications from "+baseBranch+" HEAD to "+commitID, func() {
+		setupArgoCD()
 
-		syncOrder := loadSyncOrder()
+		By("checkout " + baseBranch)
+		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", baseBranch)
+		ExecSafeAt(boot0, "sed", "-i", "s/release/"+baseBranch+"/", "./neco-apps/argocd-config/base/*.yaml")
+		applyAndWaitForApplications()
 
-		By("waiting initialization")
-		Eventually(func() error {
-		OUTER:
-			for _, appName := range syncOrder {
-				out := ExecSafeAt(boot0, "argocd", "app", "get", "-o", "json", appName)
-				var app argocd.Application
-				err := json.Unmarshal(out, &app)
-				if err != nil {
-					return err
-				}
-				st := app.Status
-				if st.Sync.Status == argocd.SyncStatusCodeSynced &&
-					st.Health.Status == argocd.HealthStatusHealthy &&
-					app.Operation == nil {
-					continue
-				}
-				for _, cond := range st.Conditions {
-					if cond.Type == argocd.ApplicationConditionSyncError {
-						continue OUTER
-					}
-				}
-				return errors.New(appName + " is not initialized")
-			}
-			return nil
-		}).Should(Succeed())
-
-		for _, appName := range syncOrder {
-			By("syncing " + appName + " manually")
-			ExecSafeAt(boot0, "argocd", "app", "sync", appName)
-		}
+		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "reset", "--hard")
+		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
+		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
+		applyAndWaitForApplications()
 	})
 }
 
@@ -266,4 +159,125 @@ func loadSyncOrder() []string {
 	}
 
 	return results
+}
+
+func applyAndWaitForApplications() {
+	By("creating Argo CD app")
+	ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
+
+	syncOrder := loadSyncOrder()
+
+	By("waiting initialization")
+	Eventually(func() error {
+	OUTER:
+		for _, appName := range syncOrder {
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			var app argocd.Application
+			err = json.Unmarshal(stdout, &app)
+			if err != nil {
+				return err
+			}
+			st := app.Status
+			if st.Sync.Status == argocd.SyncStatusCodeSynced &&
+				st.Health.Status == argocd.HealthStatusHealthy &&
+				app.Operation == nil {
+				continue
+			}
+			for _, cond := range st.Conditions {
+				if cond.Type == argocd.ApplicationConditionSyncError {
+					continue OUTER
+				}
+			}
+			return errors.New(appName + " is not initialized")
+		}
+		return nil
+	}).Should(Succeed())
+
+	for _, appName := range syncOrder {
+		By("syncing " + appName + " manually")
+		ExecSafeAt(boot0, "argocd", "app", "sync", appName)
+	}
+}
+
+func setupArgoCD() {
+	By("installing Argo CD")
+	data, err := ioutil.ReadFile("install.yaml")
+	Expect(err).ShouldNot(HaveOccurred())
+	Eventually(func() error {
+		stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "apply", "-n", "argocd", "-f", "-")
+		if err != nil {
+			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+		return nil
+	}).Should(Succeed())
+
+	By("logging in to Argo CD")
+	// admin password is same as pod name
+	var podList corev1.PodList
+	Eventually(func() error {
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n", "argocd",
+			"-l", "app.kubernetes.io/name=argocd-server", "-o", "json")
+		if err != nil {
+			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+		err = json.Unmarshal(stdout, &podList)
+		if err != nil {
+			return err
+		}
+		if podList.Items == nil {
+			return errors.New("podList.Items is nil")
+		}
+		if len(podList.Items) != 1 {
+			return fmt.Errorf("podList.Items is not 1: %d", len(podList.Items))
+		}
+		return nil
+	}).Should(Succeed())
+
+	password := podList.Items[0].Name
+
+	By("getting node address")
+	var nodeList corev1.NodeList
+	data = ExecSafeAt(boot0, "kubectl", "get", "nodes", "-o", "json")
+	err = json.Unmarshal(data, &nodeList)
+	Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
+	Expect(nodeList.Items).ShouldNot(BeEmpty())
+	node := nodeList.Items[0]
+
+	var nodeAddress string
+	for _, addr := range node.Status.Addresses {
+		if addr.Type != corev1.NodeInternalIP {
+			continue
+		}
+		nodeAddress = addr.Address
+	}
+	Expect(nodeAddress).ShouldNot(BeNil())
+
+	By("getting node port")
+	var svc corev1.Service
+	data = ExecSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", "argocd", "-o", "json")
+	err = json.Unmarshal(data, &svc)
+	Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
+	Expect(svc.Spec.Ports).ShouldNot(BeEmpty())
+
+	var nodePort string
+	for _, port := range svc.Spec.Ports {
+		if port.Name != "http" {
+			continue
+		}
+		nodePort = strconv.Itoa(int(port.NodePort))
+	}
+	Expect(nodePort).ShouldNot(BeNil())
+
+	By("logging in to Argo CD")
+	Eventually(func() error {
+		stdout, stderr, err := ExecAt(boot0, "argocd", "login", nodeAddress+":"+nodePort,
+			"--insecure", "--username", "admin", "--password", password)
+		if err != nil {
+			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+		return nil
+	}).Should(Succeed())
 }

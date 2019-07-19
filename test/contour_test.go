@@ -115,8 +115,8 @@ spec:
 		}).Should(Succeed())
 
 		By("creating IngressRoute")
-		fqdnHTTP := "http.test-ingress.gcp0.dev-ne.co"
-		fqdnHTTPS := "https.test-ingress.gcp0.dev-ne.co"
+		fqdnHTTP := testID + "-http.test-ingress.gcp0.dev-ne.co"
+		fqdnHTTPS := testID + "-https.test-ingress.gcp0.dev-ne.co"
 		ingressRoute := fmt.Sprintf(`
 apiVersion: contour.heptio.com/v1beta1
 kind: IngressRoute

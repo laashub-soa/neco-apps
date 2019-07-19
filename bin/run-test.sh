@@ -2,6 +2,9 @@
 
 . $(dirname $0)/env
 
+BASE_BRANCH=$1
+INSTANCE_NAME=neco-apps-${BASE_BRANCH}
+
 cat >run.sh <<EOF
 #!/bin/sh -ex
 # Run test
@@ -19,7 +22,7 @@ sudo chown -R cybozu:cybozu \$HOME/.cache
 make setup
 make kustomize-check
 make opa-test
-make test COMMIT_ID=${CIRCLE_SHA1}
+make test BASE_BRANCH=${BASE_BRANCH} COMMIT_ID=${CIRCLE_SHA1}
 EOF
 chmod +x run.sh
 
