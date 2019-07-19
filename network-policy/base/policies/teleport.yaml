@@ -2,7 +2,7 @@ apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
   name: ingress-teleport
-  namespace: bastion
+  namespace: teleport
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
