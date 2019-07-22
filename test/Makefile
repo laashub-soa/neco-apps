@@ -1,11 +1,12 @@
 BOOT0 = 10.72.48.0
 GINKGO = env GO111MODULE=on GOFLAGS=-mod=vendor $(GOPATH)/bin/ginkgo --failFast -v
-SSH_PRIVKEY = $(realpath ./dctest_key)
-TEST_ID := $(shell basename $(dir $(GOPATH)))
-COMMIT_ID := $(shell git rev-parse --abbrev-ref HEAD)
+SSH_PRIVKEY = $(NECO_DIR)/dctest/dctest_key
+TEST_ID := test$(CIRCLE_BUILD_NUM)
+BASE_BRANCH = master
+COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 KUSTOMIZATION_DIRS := $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
-PROMTOOL_VERSION := 2.9.2
-export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS
+SUDO = sudo
+export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS BOOTSTRAP
 
 ### for Go
 GOFLAGS = -mod=vendor
@@ -15,6 +16,7 @@ export GOFLAGS
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L32
 KUSTOMIZE_VERSION = 2.0.3
 OPA_VERSION = 0.12.0
+PROMTOOL_VERSION := 2.9.2
 REGO_FILES = $(shell find .. -path ../vendor -prune -o -name '*.rego' -print)
 
 install.yaml: $(shell find ../argocd/base)
@@ -30,27 +32,32 @@ opa-test:
 test-alert-rules:
 	cd ../monitoring/base/prometheus && promtool test rules test_rules.yaml
 
-test: install.yaml validation test-alert-rules opa-test
-	./test.sh
-
 kustomize-check:
 	./kustomize-check.sh
 
+test: install.yaml validation opa-test test-alert-rules kustomize-check
+
+test-upgrade:
+	-git worktree remove /tmp/neco-apps
+	git worktree add /tmp/neco-apps $(BASE_BRANCH)
+	cd /tmp/neco-apps; make test-apps BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH)
+	UPGRADE=1 ./test.sh
+
+test-apps: install.yaml
+	./test.sh
+
 setup:
 	curl -sSLf -O https://github.com/kubernetes-sigs/kustomize/releases/download/v$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_linux_amd64
-	sudo mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 /usr/local/bin/kustomize
+	$(SUDO) mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 /usr/local/bin/kustomize
 	chmod +x /usr/local/bin/kustomize
 	curl -sSLf -O https://github.com/open-policy-agent/opa/releases/download/v$(OPA_VERSION)/opa_linux_amd64
-	sudo mv opa_linux_amd64 /usr/local/bin/opa
+	$(SUDO) mv opa_linux_amd64 /usr/local/bin/opa
 	chmod +x /usr/local/bin/opa
 	go install github.com/onsi/ginkgo/ginkgo
 	curl -sSLf https://github.com/prometheus/prometheus/releases/download/v$(PROMTOOL_VERSION)/prometheus-$(PROMTOOL_VERSION).linux-amd64.tar.gz | tar -xzvf - --strip-components=1 prometheus-$(PROMTOOL_VERSION).linux-amd64/promtool
-	sudo mv promtool /usr/local/bin/promtool
-
-save:
-	./save.sh
+	$(SUDO) mv promtool /usr/local/bin/promtool
 
 clean:
 	rm -f install.yaml
 
-.PHONY:	validation opa-test test test-alert-rules kustomize-check setup save clean
+.PHONY:	validation opa-test test-alert-rules kustomize-check test test-apps setup clean

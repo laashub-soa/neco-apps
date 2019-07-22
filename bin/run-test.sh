@@ -1,36 +1,32 @@
 #!/bin/sh
 
-. $(dirname $0)/env
-
-BASE_BRANCH=$1
-INSTANCE_NAME=neco-apps-${BASE_BRANCH}
+. ${NECO_DIR}/bin/env
+TARGET=${TARGET:-test-apps}
+BASE_BRANCH=${BASE_BRANCH:-master}
 
 cat >run.sh <<EOF
 #!/bin/sh -ex
 # Run test
-GOPATH=\$HOME/${TEST_DIR}/go
-export GOPATH
+GOPATH=\$HOME/go
+GO111MODULE=on
+export GOPATH GO111MODULE
 PATH=/usr/local/go/bin:\$GOPATH/bin:\$PATH
 export PATH
-git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \$HOME/${TEST_DIR}/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
-cd \$HOME/${TEST_DIR}/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+NECO_DIR=\$HOME/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/neco
+export NECO_DIR
+git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \$HOME/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+cd \$HOME/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
 git checkout -qf ${CIRCLE_SHA1}
+
 cd test
-cp \$HOME/${TEST_DIR}/account.json ./
-export GO111MODULE=on
-sudo chown -R cybozu:cybozu \$HOME/.cache
+cp /home/cybozu/account.json ./
 make setup
-make kustomize-check
-make opa-test
-make test BASE_BRANCH=${BASE_BRANCH} COMMIT_ID=${CIRCLE_SHA1}
+make $TARGET COMMIT_ID=${CIRCLE_SHA1} BASE_BRANCH=${BASE_BRANCH}
 EOF
 chmod +x run.sh
 
 # Clean old CI files
-$GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="rm -rf /home/cybozu/${CIRCLE_PROJECT_REPONAME}-*"
-
-$GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="mkdir -p /home/cybozu/${TEST_DIR}"
-$GCLOUD compute scp --zone=${ZONE} run.sh account.json cybozu@${INSTANCE_NAME}:${TEST_DIR}
-$GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="/home/cybozu/${TEST_DIR}/run.sh"
+$GCLOUD compute scp --zone=${ZONE} run.sh account.json cybozu@${INSTANCE_NAME}:
+$GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="sudo -H /home/cybozu/run.sh"
 
 exit $?

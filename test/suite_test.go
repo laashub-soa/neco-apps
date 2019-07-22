@@ -41,8 +41,11 @@ var _ = BeforeSuite(func() {
 
 // This must be the only top-level test container.
 // Other tests and test containers must be listed in this.
-var _ = Describe("GitOps Test", func() {
+var _ = Describe("Test applications", func() {
 	Context("setup", testSetup)
+	if doBootstrap {
+		return
+	}
 	Context("open-policy-agent", testOpenPolicyAgent)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)

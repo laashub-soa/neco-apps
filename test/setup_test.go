@@ -61,84 +61,44 @@ func testSetup() {
 		Expect(appList).Should(Equal(resources))
 	})
 
-	It("should be ready K8s cluster after loading snapshot", func() {
-		By("re-issuing kubeconfig")
-		Eventually(func() error {
-			_, _, err := ExecAt(boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
-			if err != nil {
-				return err
-			}
-			return nil
-		}).Should(Succeed())
-
-		By("waiting nodes")
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "get", "nodes", "-o", "json")
-			if err != nil {
-				return err
-			}
-
-			var nl corev1.NodeList
-			err = json.Unmarshal(stdout, &nl)
-			if err != nil {
-				return err
-			}
-
-			if len(nl.Items) != 5 {
-				return fmt.Errorf("too few nodes: %d", len(nl.Items))
-			}
-
-		OUTER:
-			for _, n := range nl.Items {
-				for _, cond := range n.Status.Conditions {
-					if cond.Type != corev1.NodeReady {
-						continue
-					}
-					if cond.Status != corev1.ConditionTrue {
-						return fmt.Errorf("node %s is not ready", n.Name)
-					}
-					continue OUTER
-				}
-
-				return fmt.Errorf("node %s has no readiness status", n.Name)
-			}
-
-			return nil
-		}).Should(Succeed())
+	It("should re-issue kubeconfig", func() {
+		ExecSafeAt(boot0, "ckecli", "kubernetes", "issue", ">", ".kube/config")
 	})
 
-	It("should prepare secrets", func() {
-		By("creating namespace and secrets for external-dns")
-		_, stderr, err := ExecAt(boot0, "kubectl", "create", "namespace", "external-dns")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		_, stderr, err = ExecAt(boot0, "kubectl", "--namespace=external-dns", "create", "secret",
-			"generic", "external-dns", "--from-file=account.json")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+	if !doUpgrade {
+		It("should prepare secrets", func() {
+			By("loading account.json")
+			data, err := ioutil.ReadFile("account.json")
+			Expect(err).ShouldNot(HaveOccurred())
 
-		By("creating namespace and secrets for alertmanager")
-		stdout, stderr, err := ExecAtWithInput(boot0, []byte(alertmanagerSecret), "dd", "of=alertmanager.yaml")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "create", "namespace", "monitoring")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "--namespace=monitoring", "create", "secret",
-			"generic", "alertmanager", "--from-file", "alertmanager.yaml")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			By("creating namespace and secrets for external-dns")
+			_, stderr, err := ExecAt(boot0, "kubectl", "create", "namespace", "external-dns")
+			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+			_, stderr, err = ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
+				"create", "secret", "generic", "external-dns", "--from-file=account.json=/dev/stdin")
+			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+
+			By("creating namespace and secrets for alertmanager")
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(alertmanagerSecret), "dd", "of=alertmanager.yaml")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "create", "namespace", "monitoring")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "--namespace=monitoring", "create", "secret",
+				"generic", "alertmanager", "--from-file", "alertmanager.yaml")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		})
+	}
+
+	It("should checkout neco-apps repository@"+commitID, func() {
+		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128",
+			"git", "clone", "https://github.com/cybozu-go/neco-apps")
+		ExecSafeAt(boot0, "cd neco-apps; git checkout "+commitID)
 	})
 
-	It("should checkout neco-apps repository", func() {
-		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128", "git", "clone", "https://github.com/cybozu-go/neco-apps")
-	})
-
-	It("should setup Argo CD applications from "+baseBranch+" HEAD to "+commitID, func() {
-		setupArgoCD()
-
-		By("checkout " + baseBranch)
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", baseBranch)
-		ExecSafeAt(boot0, "sed", "-i", "s/release/"+baseBranch+"/", "./neco-apps/argocd-config/base/*.yaml")
-		applyAndWaitForApplications()
-
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "reset", "--hard")
-		ExecSafeAt(boot0, "cd", "neco-apps", ";", "git", "checkout", commitID)
+	It("should setup applications", func() {
+		if !doUpgrade {
+			setupArgoCD()
+		}
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications()
 	})

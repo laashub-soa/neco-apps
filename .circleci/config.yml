@@ -1,214 +1,71 @@
 version: 2.1
-executors:
-  gcloud:
-    docker:
-      - image: google/cloud-sdk
-    environment:
-      PROJECT: neco-test
-      ZONE: asia-northeast1-c
-      MACHINE_TYPE: n1-highcpu-64
-      IMAGE: vmx-enabled
-      DISK_SIZE: 20GB
-
 commands:
-  store-service-account:
+  boot-dctest:
+    description: "datacenter test"
     steps:
+      - run:
+          name: Checkout Neco
+          command: |
+            git clone --depth 1 https://github.com/cybozu-go/neco -b release
       - run:
           name: Store Service Account
           command: |
             echo $GCLOUD_SERVICE_ACCOUNT > account.json
             gcloud auth activate-service-account --key-file=account.json
-
-  delete-instance-at-night:
-    parameters:
-      branch:
-        type: string
-    steps:
       - run:
-          name: Delete instance if current time is after 21:00 JST
+          name: Store secrets
           command: |
-            now=$(date +%s)
-            end=$(date --date="12:00" +%s)
-            if [ "$now" -lt "$end" ]; then
-                exit 0
-            fi
-            gcloud compute instances delete neco-apps-<< parameters.branch >> --quiet --project ${PROJECT} --zone ${ZONE}
-
-  start-neco-apps-master:
-    steps:
-      - checkout
-      - store-service-account
+            echo "$QUAY_PASSWORD" > neco/secrets
       - run:
-          name: Wait for previous builds
+          name: Store github-token
           command: |
-            apt-get update
-            apt-get install -y --no-install-recommends jq
-            ./bin/wait-for-previous-builds.sh --job start-neco-apps-master
+            echo "$NECO_GITHUB_TOKEN" > neco/github-token
       - run:
-          name: (Re)Create instance
-          no_output_timeout: 30m
+          name: Watch all pod logs
           command: |
-            INSTANCE_NAME=neco-apps-master
-            if gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} --command="test -f /tmp/setup-done"; then
-                exit 0
-            fi
-            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} || true
-            gcloud compute instances create ${INSTANCE_NAME} \
-                --project ${PROJECT} \
-                --zone ${ZONE} \
-                --machine-type ${MACHINE_TYPE} \
-                --image ${IMAGE} \
-                --boot-disk-type pd-ssd \
-                --boot-disk-size ${DISK_SIZE} \
-                --local-ssd interface=scsi \
-                --scopes https://www.googleapis.com/auth/devstorage.read_write
-            for i in $(seq 300); do
-                if gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} --command=date 2>/dev/null; then
-                    break
-                fi
-                sleep 1
-            done
-            gcloud compute scp ./bin/run.sh cybozu@${INSTANCE_NAME}: --quiet --project ${PROJECT} --zone ${ZONE}
-            gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} \
-                --command="sudo /home/cybozu/run.sh"
-      - run:
-          name: Delete instance
-          command: |
-            INSTANCE_NAME=neco-apps-master
-            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE}
-          when: on_fail
-
-  start-neco-apps-release:
-    steps:
-      - checkout
-      - store-service-account
-      - run:
-          name: Wait for previous builds
-          command: |
-            apt-get update
-            apt-get install -y --no-install-recommends jq
-            ./bin/wait-for-previous-builds.sh --job start-neco-apps-release
-      - run:
-          name: (Re)Create instance
-          no_output_timeout: 30m
-          command: |
-            INSTANCE_NAME=neco-apps-release
-            if gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} --command="test -f /tmp/setup-done"; then
-                exit 0
-            fi
-            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} || true
-            gcloud compute instances create ${INSTANCE_NAME} \
-                --project ${PROJECT} \
-                --zone ${ZONE} \
-                --machine-type ${MACHINE_TYPE} \
-                --image ${IMAGE} \
-                --boot-disk-type pd-ssd \
-                --boot-disk-size ${DISK_SIZE} \
-                --local-ssd interface=scsi \
-                --scopes https://www.googleapis.com/auth/devstorage.read_write
-            for i in $(seq 300); do
-                if gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} --command=date 2>/dev/null; then
-                    break
-                fi
-                sleep 1
-            done
-            gcloud compute scp ./bin/run.sh cybozu@${INSTANCE_NAME}: --quiet --project ${PROJECT} --zone ${ZONE}
-            gcloud compute ssh cybozu@${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE} \
-                --command="sudo /home/cybozu/run.sh"
-      - run:
-          name: Delete instance
-          command: |
-            INSTANCE_NAME=neco-apps-release
-            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE}
-          when: on_fail
-
-  stop-neco-apps:
-    parameters:
-      branch:
-        type: string
-    steps:
-      - checkout
-      - store-service-account
-      - run:
-          name: Delete instance
-          command: |
-            INSTANCE_NAME=neco-apps-<< parameters.branch >>
-            gcloud compute instances delete ${INSTANCE_NAME} --quiet --project ${PROJECT} --zone ${ZONE}
-
-  test-neco-apps-master:
-    steps:
-      - checkout
-      - store-service-account
-      - run:
-          name: Wait for previous builds
-          command: |
-            apt-get update
-            apt-get install -y --no-install-recommends jq
-            ./bin/wait-for-previous-builds.sh --job test-neco-apps-master
-      - run:
-          command: |
+            cd neco
             ./bin/watch_podlogs
-          environment:
-            INSTANCE_NAME: neco-apps-master
           background: true
       - run:
           command: |
-            ./bin/run-test.sh master
-          no_output_timeout: 30m
-      - run:
-          name: Clean up SSH keys generated by `gcloud compute`
-          command: |
-            gcloud --quiet --project ${PROJECT} compute project-info remove-metadata --keys=ssh-keys
-      - delete-instance-at-night:
-          branch: master
-
-  test-neco-apps-release:
-    steps:
-      - checkout
-      - store-service-account
-      - run:
-          name: Wait for previous builds
-          command: |
-            apt-get update
-            apt-get install -y --no-install-recommends jq
-            ./bin/wait-for-previous-builds.sh --job test-neco-apps-release
-      - run:
-          command: |
-            ./bin/watch_podlogs
-          environment:
-            INSTANCE_NAME: neco-apps-master
-          background: true
-      - run:
-          command: |
-            ./bin/run-test.sh release
-          no_output_timeout: 30m
-      - run:
-          name: Clean up SSH keys generated by `gcloud compute`
-          command: |
-            gcloud --quiet --project ${PROJECT} compute project-info remove-metadata --keys=ssh-keys
-      - delete-instance-at-night:
-          branch: release
+            cd neco
+            sed -i 's/^trap/#trap/' bin/run-dctest-release.sh
+            ./bin/run-dctest-release.sh bootstrap
+          no_output_timeout: 20m
 
 jobs:
-  test-master:
-    executor: gcloud
+  test:
+    docker:
+      - image: quay.io/cybozu/golang:1.12-bionic
     steps:
-      - start-neco-apps-master
-      - test-neco-apps-master
+      - checkout
+      - run:
+          name: Setup
+          command: |
+            cd test
+            make setup SUDO=
+      - run: |
+          cd test
+          make test
 
-  test-release:
-    executor: gcloud
+  bootstrap:
+    docker:
+      - image: google/cloud-sdk
     steps:
-      - start-neco-apps-release
-      - test-neco-apps-release
-
-  auto-shutdown:
-    executor: gcloud
-    steps:
-      - stop-neco-apps:
-          branch: master
-      - stop-neco-apps:
-          branch: release
+      - checkout
+      - boot-dctest
+      - run:
+          name: Test neco-apps
+          command: |
+            export NECO_DIR=$(pwd)/neco
+            ./bin/run-test.sh
+          no_output_timeout: 20m
+      - run:
+          name: Remove instance
+          command: |
+            cd neco
+            . bin/env
+            $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
 
   create-pull-request:
     docker:
@@ -243,18 +100,10 @@ workflows:
   version: 2
   main:
     jobs:
-      - test-master
-      - test-release
-
-  auto-shutdown:
-    triggers:
-      - schedule:
-          cron: "0 12 * * 1-5"
-          filters:
-            branches:
-              only: master
-    jobs:
-      - auto-shutdown
+      - test
+      - bootstrap
+      #- upgrade-master
+      #- upgrade-release
 
   production-release:
     jobs:
