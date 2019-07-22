@@ -1,4 +1,6 @@
 BOOT0 = 10.72.48.0
+BOOT1 = 10.72.48.1
+BOOT2 = 10.72.48.2
 GINKGO = env GO111MODULE=on GOFLAGS=-mod=vendor $(GOPATH)/bin/ginkgo --failFast -v
 SSH_PRIVKEY = $(NECO_DIR)/dctest/dctest_key
 TEST_ID := test$(CIRCLE_BUILD_NUM)
@@ -6,7 +8,7 @@ BASE_BRANCH = master
 COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 KUSTOMIZATION_DIRS := $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
 SUDO = sudo
-export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS BOOTSTRAP
+export BOOT0 BOOT1 BOOT2 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS BOOTSTRAP
 
 ### for Go
 GOFLAGS = -mod=vendor

@@ -1,6 +1,7 @@
 package test
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"text/template"
 
 	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	. "github.com/onsi/ginkgo"
@@ -36,6 +38,42 @@ receivers:
     icon_url: https://avatars3.githubusercontent.com/u/3380462 # Prometheus icon
     http_config:
       proxy_url: http://squid.internet-egress.svc.cluster.local:3128
+`
+	teleportSecret = `
+apiVersion: v1
+kind: Secret
+metadata:
+  name: teleport-secret
+  namespace: teleport
+  labels:
+    app.kubernetes.io/name: teleport
+stringData:
+  teleport.yaml: |
+    auth_service:
+      authentication:
+        second_factor: "off"
+        type: local
+      cluster_name: teleport.gcp0.dev-ne.co
+      public_addr: teleport.gcp0.dev-ne.co:3025
+      tokens:
+        - "auth,proxy,node:{{ .Token }}"
+    proxy_service:
+      https_cert_file: /var/lib/certs/tls.crt
+      https_key_file: /var/lib/certs/tls.key
+      kubernetes:
+        enabled: true
+        listen_addr: 0.0.0.0:3026
+      listen_addr: 0.0.0.0:3023
+      public_addr: teleport.gcp0.dev-ne.co
+      web_listen_addr: 0.0.0.0:3080
+    teleport:
+      data_dir: /var/lib/teleport
+      auth_token: {{ .Token }}
+      log:
+        output: stderr
+        severity: DEBUG
+      storage:
+        type: dir
 `
 )
 
@@ -72,19 +110,32 @@ func testSetup() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			By("creating namespace and secrets for external-dns")
-			_, stderr, err := ExecAt(boot0, "kubectl", "create", "namespace", "external-dns")
-			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-			_, stderr, err = ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
+			_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
 				"create", "secret", "generic", "external-dns", "--from-file=account.json=/dev/stdin")
 			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 			By("creating namespace and secrets for alertmanager")
 			stdout, stderr, err := ExecAtWithInput(boot0, []byte(alertmanagerSecret), "dd", "of=alertmanager.yaml")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "create", "namespace", "monitoring")
-			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "--namespace=monitoring", "create", "secret",
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "monitoring")
+			ExecSafeAt(boot0, "kubectl", "--namespace=monitoring", "create", "secret",
 				"generic", "alertmanager", "--from-file", "alertmanager.yaml")
+
+			By("creating namespace and secrets for teleport")
+			stdout, stderr, err = ExecAt(boot0, "env", "ETCDCTL_API=3", "etcdctl", "--cert=/etc/etcd/backup.crt", "--key=/etc/etcd/backup.key",
+				"get", "--print-value-only", "/neco/teleport/auth-token")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			teleportToken := strings.TrimSpace(string(stdout))
+			teleportTmpl := template.Must(template.New("").Parse(teleportSecret))
+			buf := bytes.NewBuffer(nil)
+			err = teleportTmpl.Execute(buf, struct {
+				Token string
+			}{
+				Token: teleportToken,
+			})
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "teleport")
+			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		})
 	}
