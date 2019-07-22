@@ -9,11 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	//	. "github.com/onsi/ginkgo"
-	//	. "github.com/onsi/gomega"
-	"gopkg.in/yaml.v2"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
+	"sigs.k8s.io/yaml"
 )
 
 const (

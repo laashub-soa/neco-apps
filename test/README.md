@@ -2,21 +2,25 @@ How to run tests
 ================
 
 1. Prepare dctest environment using `github.com/cybozu-go/neco/dctest`
-2. Make snapshot of placemat VMs by `make save`
-3. Push the current feature branch to GitHub.
-4. Run following commands to setup Argo CD.
+2. Set `NECO_DIR` environment variable to point the directory for `github.com/cybozu-go/neco`
+3. Place `account.json` file for GCP Cloud DNS in this directory.
+4. Push the current feature branch to GitHub.
+5. Run following commands to setup Argo CD and run tests.
 
     ```console
     cd test
     make setup
     make test
+    make test-apps
     ```
 
-5. Setup and run tests for apps by `make test-metallb`, `make test-monitoring`, ...  
-   If you want to deploy all apps, run `make test-all`.
+`./account.json`
+----------------
 
-Running `make test` initializes VMs at the point of the snapshot.
-Do it carefully!
+External DNS in Argo CD app `external-dns` requires Google Application Credentials in JSON file.
+neco-apps test runs `kubectl create secrets .... --from-file=account.json` to register `Secret` for External DNS.
+To run `external-dns` test, put your account.json of the Google Cloud service account which has a role `roles/dns.admin`.
+See details of the role at https://cloud.google.com/iam/docs/understanding-roles#dns-roles
 
 Using `argocd`
 --------------
@@ -25,46 +29,16 @@ Using `argocd`
 
 Following features are most useful:
 
-* `argocd app list`: list apps and their statuses.
-* `argocd app get NAME`: show detailed information of an app.
-* `argocd app sync NAME`: immediately synchronize an app with Git repository.
-
+- `argocd app list`: list apps and their statuses.
+- `argocd app get NAME`: show detailed information of an app.
+- `argocd app sync NAME`: immediately synchronize an app with Git repository.
 
 Makefile
 --------
 
 You can run test for neco-apps on the running dctest.
 
-* `make setup`
-
-    Install test required components.
-
-* `make clean`
-
-    Delete generated files.
-
-* `make kustomize-check`
-
-     Check syntax of the Kubernetes manifests using `kustomize check`
-
-* `make test`
-
-    Deploy Argo CD as test. It is required other test targets which starts with `test-`.
-
-* `make test-APPNAME`
-
-    Deploy APPNAME as test.
-
-* `make test-all`
-
-    Deploy all applications as test.
-
-Options
--------
-
-### `./account.json` file
-
-External DNS in Argo CD app `external-dns` requires Google Application Credentials in JSON file.
-neco-apps test runs `kubectl create secrets .... --from-file=account.json` to register `Secret` for External DNS.
-To run `external-dns` test, put your account.json of the Google Cloud service account which has a role `roles/dns.admin`.
-See details of the role at https://cloud.google.com/iam/docs/understanding-roles#dns-roles
+- `make setup`: Install test required components.
+- `make clean`: Delete generated files.
+- `make kustomize-check`: Check syntax of the Kubernetes manifests using `kustomize check`
+- `make test`: Deploy Argo CD then run tests for applications.
