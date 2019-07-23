@@ -57,8 +57,9 @@ spec:
             - --divisor=1
           livenessProbe:
             httpGet:
-              path: /status
+              host: localhost
               port: 9251
+              path: /status
       hostNetwork: true
       tolerations:
         - key: CriticalAddonsOnly

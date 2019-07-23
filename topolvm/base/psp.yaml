@@ -29,10 +29,14 @@ spec:
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: topolvm-scheculer
+  name: topolvm-scheduler
 spec:
   privileged: false
   allowPrivilegeEscalation: false
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'secret'
   hostNetwork: true
   runAsUser:
     rule: 'MustRunAsNonRoot'

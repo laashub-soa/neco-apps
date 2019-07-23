@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	. "github.com/onsi/ginkgo"
@@ -12,6 +13,14 @@ import (
 )
 
 func testTopoLVM() {
+	// temporary workaround
+	It("should set scheduler extender policy", func() {
+		data, err := ioutil.ReadFile("cke-template.yml")
+		Expect(err).ShouldNot(HaveOccurred())
+		_, stderr, err := ExecAtWithInput(boot0, data, "ckecli", "sabakan", "set-template", "/dev/stdin")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", string(stderr))
+	})
+
 	ns := "test-topolvm"
 	It("should create test-topolvm namespace", func() {
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
@@ -25,19 +34,19 @@ kind: Pod
 metadata:
   name: ubuntu
   labels:
-	app.kubernetes.io/name: ubuntu
+    app.kubernetes.io/name: ubuntu
 spec:
   containers:
-	- name: ubuntu
-	  image: quay.io/cybozu/ubuntu:18.04
-	  command: ["sleep", "infinity"]
-	  volumeDevices:
-		- devicePath: /test1
-		  name: my-volume
+  - name: ubuntu
+    image: quay.io/cybozu/ubuntu:18.04
+    command: ["sleep", "infinity"]
+    volumeDevices:
+    - devicePath: /test1
+      name: my-volume
   volumes:
-	- name: my-volume
-	  persistentVolumeClaim:
-		claimName: topo-pvc
+  - name: my-volume
+    persistentVolumeClaim:
+      claimName: topo-pvc
 `
 		claimYAML := `apiVersion: v1
 kind: PersistentVolumeClaim
