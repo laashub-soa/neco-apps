@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -40,9 +41,9 @@ spec:
   - name: ubuntu
     image: quay.io/cybozu/ubuntu:18.04
     command: ["sleep", "infinity"]
-    volumeDevices:
-    - devicePath: /test1
-      name: my-volume
+    volumeMounts:
+    - name: my-volume
+      mountPath: /test1
   volumes:
   - name: my-volume
     persistentVolumeClaim:
@@ -87,6 +88,9 @@ spec:
 				return err
 			}
 			fields := strings.Fields(string(stdout))
+			if len(fields) < 3 {
+				return errors.New("invalid mount information: " + string(stdout))
+			}
 			if fields[2] != "xfs" {
 				return errors.New("/test1 is not xfs")
 			}
@@ -95,7 +99,7 @@ spec:
 
 		By("writing file under /test1")
 		writePath := "/test1/bootstrap.log"
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "cp", "/var/log/bootstrap.log", writePath)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "cp", "/etc/passwd", writePath)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "sync")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
@@ -104,85 +108,29 @@ spec:
 		Expect(strings.TrimSpace(string(stdout))).ShouldNot(BeEmpty())
 
 		By("getting node name where pod is placed")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "ubuntu", "-n", ns)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", ns, "get", "pods/ubuntu", "-o", "json")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		var pod corev1.Pod
 		err = json.Unmarshal(stdout, &pod)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", stdout)
 		nodeName := pod.Spec.NodeName
 
-		By("stopping the node")
-		stdout, stderr, err = ExecAt(boot0, "neco", "ipmipower", "stop", nodeName)
+		By("rebooting the node")
+		ExecSafeAt(boot0, "ckecli", "sabakan", "disable")
+		stdout, stderr, err = ExecAt(boot0, "neco", "ipmipower", "restart", nodeName)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		time.Sleep(5 * time.Second)
+
+		By("confirming that the file survives")
 		Eventually(func() error {
-			return checkNodeStatus(nodeName, "off")
-		}).Should(Succeed())
-
-		By("restarting the node")
-		stdout, stderr, err = ExecAt(boot0, "neco", "ipmipower", "start", nodeName)
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-		Eventually(func() error {
-			return checkNodeStatus(nodeName, "on")
-		}).Should(Succeed())
-
-		By("confirming that the file exists")
-		Eventually(func() error {
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pvc", "topo-pvc", "-n", ns)
-			if err != nil {
-				return fmt.Errorf("failed to create PVC. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "ubuntu", "-n", ns)
-			if err != nil {
-				return fmt.Errorf("failed to create Pod. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-
 			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "cat", writePath)
 			if err != nil {
 				return fmt.Errorf("failed to cat. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			if len(strings.TrimSpace(string(stdout))) == 0 {
-				return fmt.Errorf(writePath + " is empty")
-			}
-			return nil
-		}).Should(Succeed())
-
-		By("getting the volume name")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pvc", "-n", ns, "topo-pvc", "-o=template", "--template={{.spec.volumeName}}")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-		volName := strings.TrimSpace(string(stdout))
-
-		By("deleting the Pod and PVC")
-		stdout, stderr, err = ExecAtWithInput(boot0, []byte(podYAML), "kubectl", "delete", "-n", ns, "-f", "-")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-		stdout, stderr, err = ExecAtWithInput(boot0, []byte(claimYAML), "kubectl", "delete", "-n", ns, "-f", "-")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-
-		By("confirming that the PV is deleted")
-		Eventually(func() error {
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pv", volName, "--ignore-not-found")
-			if err != nil {
-				return fmt.Errorf("failed to get pv/%s. stdout: %s, stderr: %s, err: %v", volName, stdout, stderr, err)
-			}
-			if len(strings.TrimSpace(string(stdout))) != 0 {
-				return fmt.Errorf("target pv exists %s", volName)
+				return errors.New(writePath + " is empty")
 			}
 			return nil
 		}).Should(Succeed())
 	})
-}
-
-func checkNodeStatus(nodeName, expected string) error {
-	stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "status", nodeName)
-	if err != nil {
-		return fmt.Errorf("faild to get node status. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-	}
-	// The output format is as follows. Get the status string behind ":".
-	// "10.72.17.100: on"
-	actual := strings.TrimSpace(strings.Split(string(stdout), ":")[1])
-
-	if actual != expected {
-		return fmt.Errorf("node status is not yet %s. actual=%s", expected, actual)
-	}
-	return nil
 }
