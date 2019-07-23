@@ -43,7 +43,7 @@ receivers:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: teleport-secret
+  name: teleport-auth-secret
   namespace: teleport
   labels:
     app.kubernetes.io/name: teleport
@@ -53,10 +53,28 @@ stringData:
       authentication:
         second_factor: "off"
         type: local
-      cluster_name: teleport.gcp0.dev-ne.co
-      public_addr: teleport.gcp0.dev-ne.co:3025
+      cluster_name: gcp0
+      public_addr: teleport-auth:3025
       tokens:
-        - "auth,proxy,node:{{ .Token }}"
+        - "proxy,node:{{ .Token }}"
+    teleport:
+      data_dir: /var/lib/teleport
+      auth_token: {{ .Token }}
+      log:
+        output: stderr
+        severity: DEBUG
+      storage:
+        type: dir
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: teleport-proxy-secret
+  namespace: teleport
+  labels:
+    app.kubernetes.io/name: teleport
+stringData:
+  teleport.yaml: |
     proxy_service:
       https_cert_file: /var/lib/certs/tls.crt
       https_key_file: /var/lib/certs/tls.key

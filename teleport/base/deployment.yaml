@@ -24,7 +24,7 @@ spec:
     spec:
       automountServiceAccountToken: true
       containers:
-      - name: teleport
+      - name: teleport-proxy
         image: "quay.io/cybozu/teleport:4.0.2.2"
         imagePullPolicy: IfNotPresent
         env:
@@ -49,7 +49,7 @@ spec:
           name: teleport-tls-web
           readOnly: true
         - mountPath: /etc/teleport
-          name: teleport-secret
+          name: teleport-proxy-secret
           readOnly: true
         - mountPath: /var/lib/teleport
           name: teleport-storage
@@ -63,9 +63,9 @@ spec:
       - name: teleport-tls-web
         secret:
           secretName: tls-web
-      - name: teleport-secret
+      - name: teleport-proxy-secret
         secret:
-          secretName: teleport-secret
+          secretName: teleport-proxy-secret
       - name: teleport-storage
         emptyDir: {}
       - configMap:
