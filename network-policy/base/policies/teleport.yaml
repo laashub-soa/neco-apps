@@ -1,13 +1,24 @@
 apiVersion: crd.projectcalico.org/v1
+kind: NetworkSet
+metadata:
+  name: node
+  namespace: teleport
+  labels:
+    role: node
+spec:
+  nets:
+    - 10.69.0.0/16
+---
+apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
-  name: ingress-teleport
+  name: ingress-teleport-proxy
   namespace: teleport
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   order: 1000.0
-  selector: app.kubernetes.io/name == 'teleport'
+  selector: app.kubernetes.io/name == 'teleport' && app.kubernetes.io/component == 'proxy'
   types:
     - Ingress
   ingress:
@@ -17,6 +28,44 @@ spec:
         ports:
           - 3023
           - 3024
-          - 3025
           - 3026
           - 3080
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-teleport-auth
+  namespace: teleport
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  order: 1000.0
+  selector: app.kubernetes.io/name == 'teleport' && app.kubernetes.io/component == 'auth'
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 3025
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-teleport-node-allow
+  namespace: teleport
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  order: 500.0
+  selector: app.kubernetes.io/name == 'teleport' && app.kubernetes.io/component == 'proxy'
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: role == 'node'
+        ports:
+          - 3022
