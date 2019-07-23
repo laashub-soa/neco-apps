@@ -82,7 +82,7 @@ stringData:
         enabled: true
         listen_addr: 0.0.0.0:3026
       listen_addr: 0.0.0.0:3023
-      public_addr: teleport.gcp0.dev-ne.co:3080
+      public_addr: {{ .TestID }}-teleport.gcp0.dev-ne.co:3080
       web_listen_addr: 0.0.0.0:3080
     teleport:
       data_dir: /var/lib/teleport
@@ -94,6 +94,18 @@ stringData:
         severity: DEBUG
       storage:
         type: dir
+`
+	teleportCert = `apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: teleport-certificate
+  namespace: teleport
+spec:
+  secretName: tls-web
+  issuerRef:
+    kind: ClusterIssuer
+    name: clouddns
+  commonName: %s-teleport.gcp0.dev-ne.co
 `
 )
 
@@ -150,9 +162,11 @@ func testSetup() {
 			teleportTmpl := template.Must(template.New("").Parse(teleportSecret))
 			buf := bytes.NewBuffer(nil)
 			err = teleportTmpl.Execute(buf, struct {
-				Token string
+				Token  string
+				TestID string
 			}{
-				Token: teleportToken,
+				Token:  teleportToken,
+				TestID: testID,
 			})
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "teleport")
 			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
@@ -232,6 +246,13 @@ func applyAndWaitForApplications() {
 	}).Should(Succeed())
 
 	for _, appName := range syncOrder {
+		if appName == "teleport" {
+			By("create certificates for teleport-proxy")
+			teleportCertWithID := fmt.Sprintf(teleportCert, testID)
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(teleportCertWithID), "kubectl", "apply", "-n", "teleport", "-f", "-")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		}
+
 		By("syncing " + appName + " manually")
 		ExecSafeAt(boot0, "argocd", "app", "sync", appName)
 	}

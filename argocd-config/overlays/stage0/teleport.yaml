@@ -6,3 +6,4 @@ metadata:
 spec:
   source:
     targetRevision: HEAD
+    path: teleport/overlays/stage0

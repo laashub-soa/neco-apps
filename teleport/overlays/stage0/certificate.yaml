@@ -8,4 +8,4 @@ spec:
   issuerRef:
     kind: ClusterIssuer
     name: clouddns
-  commonName: teleport.gcp0.dev-ne.co
+  commonName: teleport.stage0.cybozu-ne.co
