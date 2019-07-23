@@ -14,6 +14,8 @@ PATH=/usr/local/go/bin:\$GOPATH/bin:\$PATH
 export PATH
 NECO_DIR=\$HOME/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/neco
 export NECO_DIR
+CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM
+export CIRCLE_BUILD_NUM
 git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} \$HOME/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
 cd \$HOME/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
 git checkout -qf ${CIRCLE_SHA1}

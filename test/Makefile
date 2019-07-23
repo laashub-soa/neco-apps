@@ -40,7 +40,8 @@ test: install.yaml validation opa-test test-alert-rules kustomize-check
 test-upgrade:
 	-git worktree remove /tmp/neco-apps
 	git worktree add /tmp/neco-apps $(BASE_BRANCH)
-	cd /tmp/neco-apps; make test-apps BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH)
+	cp account.json /tmp/neco-apps/test
+	cd /tmp/neco-apps/test; make test-apps BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH)
 	UPGRADE=1 ./test.sh
 
 test-apps: install.yaml
