@@ -26,27 +26,35 @@ spec:
       - name: teleport
         image: "quay.io/cybozu/teleport:4.0.2.2"
         imagePullPolicy: IfNotPresent
-        args:
-        - start
-        - --roles=auth
-        - -c
-        - /etc/teleport/teleport.yaml
         env:
+        - name: SSL_CERT_FILE
+          value: /var/lib/ca-certs/ca.pem
         - name: NO_PROXY
           value: 10.0.0.0/8
         - name: HTTP_PROXY
           value: http://squid.internet-egress.svc.cluster.local:3128
         - name: HTTPS_PROXY
           value: http://squid.internet-egress.svc.cluster.local:3128
+        args:
+        - start
+        - --roles=auth
+        - -c
+        - /etc/teleport/teleport.yaml
         ports:
         - name: authssh
           containerPort: 3025
         volumeMounts:
+        - mountPath: /var/lib/certs
+          name: teleport-tls-web
+          readOnly: true
         - mountPath: /etc/teleport
           name: teleport-secret
           readOnly: true
         - mountPath: /var/lib/teleport
           name: teleport-storage
+        - mountPath: /var/lib/ca-certs
+          name: ca-certs
+          readOnly: true
       securityContext:
         runAsNonRoot: true
         runAsUser: 10000
@@ -56,4 +64,10 @@ spec:
       - name: teleport-secret
         secret:
           secretName: teleport-secret
+      - name: teleport-tls-web
+        secret:
+          secretName: tls-web
+      - configMap:
+          name: ca-certs
+        name: ca-certs
       serviceAccountName: teleport
