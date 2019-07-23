@@ -90,6 +90,7 @@ func testSetup() {
 	}
 
 	It("should checkout neco-apps repository@"+commitID, func() {
+		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128",
 			"git", "clone", "https://github.com/cybozu-go/neco-apps")
 		ExecSafeAt(boot0, "cd neco-apps; git checkout "+commitID)
