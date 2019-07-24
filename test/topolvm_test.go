@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"time"
 
@@ -14,14 +13,6 @@ import (
 )
 
 func testTopoLVM() {
-	// temporary workaround
-	It("should set scheduler extender policy", func() {
-		data, err := ioutil.ReadFile("cke-template.yml")
-		Expect(err).ShouldNot(HaveOccurred())
-		_, stderr, err := ExecAtWithInput(boot0, data, "ckecli", "sabakan", "set-template", "/dev/stdin")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", string(stderr))
-	})
-
 	ns := "test-topolvm"
 	It("should create test-topolvm namespace", func() {
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
