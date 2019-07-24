@@ -27,9 +27,6 @@ spec:
       - name: teleport-proxy
         image: "quay.io/cybozu/teleport:4.0.2.2"
         imagePullPolicy: IfNotPresent
-        env:
-        - name: SSL_CERT_FILE
-          value: /var/lib/ca-certs/ca.pem
         args:
         - start
         - --roles=proxy
@@ -46,29 +43,23 @@ spec:
           containerPort: 3080
         volumeMounts:
         - mountPath: /var/lib/certs
-          name: teleport-tls-web
+          name: teleport-proxy-tls
           readOnly: true
         - mountPath: /etc/teleport
           name: teleport-proxy-secret
           readOnly: true
         - mountPath: /var/lib/teleport
           name: teleport-storage
-        - mountPath: /var/lib/ca-certs
-          name: ca-certs
-          readOnly: true
       securityContext:
         runAsNonRoot: true
         runAsUser: 10000
       volumes:
-      - name: teleport-tls-web
+      - name: teleport-proxy-tls
         secret:
-          secretName: tls-web
+          secretName: teleport-proxy-tls
       - name: teleport-proxy-secret
         secret:
           secretName: teleport-proxy-secret
       - name: teleport-storage
         emptyDir: {}
-      - configMap:
-          name: ca-certs
-        name: ca-certs
       serviceAccountName: teleport
