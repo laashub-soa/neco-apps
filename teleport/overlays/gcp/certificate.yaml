@@ -20,7 +20,7 @@ spec:
   duration: 87600h0m0s # 10y
   issuerRef:
     name: teleport-proxy-selfsign
-  commonName: "ca.webhook.open-policy-agent"
+  commonName: "ca.proxy.teleport"
   isCA: true
 ---
 apiVersion: certmanager.k8s.io/v1alpha1

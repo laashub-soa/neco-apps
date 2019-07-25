@@ -38,7 +38,6 @@ spec:
         - --roles=auth
         - -c
         - /etc/teleport/teleport.yaml
-        - --insecure-no-tls
         ports:
         - name: authssh
           containerPort: 3025
