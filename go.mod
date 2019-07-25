@@ -12,6 +12,7 @@ replace (
 require (
 	github.com/argoproj/argo-cd v1.1.0-rc7
 	github.com/argoproj/pkg v0.0.0-20190708182346-fb13aebbef1c // indirect
+	github.com/creack/pty v1.1.7
 	github.com/cybozu-go/log v1.5.0
 	github.com/cybozu-go/sabakan/v2 v2.4.2
 	github.com/google/gofuzz v1.0.0 // indirect

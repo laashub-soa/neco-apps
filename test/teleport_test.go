@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/creack/pty"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -49,7 +50,9 @@ func testTeleport() {
 		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 		addr := string(stdout)
 		f, err := os.OpenFile("/etc/hosts", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		_, err = f.Write([]byte("\n" + addr + " teleport.gcp0.dev-ne.co\n"))
+		Expect(err).ShouldNot(HaveOccurred())
+		_, err = f.Write([]byte(addr + " teleport.gcp0.dev-ne.co\n"))
+		Expect(err).ShouldNot(HaveOccurred())
 		f.Close()
 
 		By("creating user")
@@ -63,27 +66,31 @@ func testTeleport() {
 			"second_factor_token": "",
 			"user":                "cybozu",
 		})
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		Expect(err).ShouldNot(HaveOccurred())
 		cmd := exec.Command("curl", "--fail", "--insecure", "-H", "Content-Type: application/json; charset=UTF-8", "-d", string(payload), "https://teleport.gcp0.dev-ne.co:3080/v1/webapi/users")
-		err = cmd.Run()
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		output, err := cmd.CombinedOutput()
+		Expect(err).ShouldNot(HaveOccurred(), "output=%s", output)
 
 		By("logging in using tsh command")
 		cmd = exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:3080", "--user=cybozu", "login")
-		stdin, err := cmd.StdinPipe()
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		err = cmd.Start()
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		_, err = io.WriteString(stdin, "dummypass\n")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		ptmx, err := pty.Start(cmd)
+		Expect(err).ShouldNot(HaveOccurred())
+		defer ptmx.Close()
+		_, err = ptmx.Write([]byte("dummypass\n"))
+		Expect(err).ShouldNot(HaveOccurred())
+		go func() { io.Copy(os.Stdout, ptmx) }()
 		err = cmd.Wait()
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		Expect(err).ShouldNot(HaveOccurred())
 
 		By("accessing boot servers using tsh command")
 		for _, n := range []string{"boot-0", "boot-1", "boot-2"} {
-			cmd := exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:3080", "--user=cybozu", "cybozu@"+n, "date")
-			err = cmd.Run()
-			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+			cmd := exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:3080", "--user=cybozu", "ssh", "cybozu@"+n, "date")
+			output, err := cmd.CombinedOutput()
+			Expect(err).ShouldNot(HaveOccurred(), "output=%s", output)
 		}
+
+		By("clearing /etc/hosts")
+		output, err = exec.Command("sed", "-i", "-e", "/teleport.gcp0.dev-ne.co/d", "/etc/hosts").CombinedOutput()
+		Expect(err).ShouldNot(HaveOccurred(), "output=%s", output)
 	})
 }

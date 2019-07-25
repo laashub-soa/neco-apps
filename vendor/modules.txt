@@ -12,6 +12,8 @@ github.com/argoproj/argo-cd/util/config
 # github.com/argoproj/pkg v0.0.0-20190708182346-fb13aebbef1c
 github.com/argoproj/pkg/exec
 github.com/argoproj/pkg/rand
+# github.com/creack/pty v1.1.7
+github.com/creack/pty
 # github.com/cybozu-go/log v1.5.0
 github.com/cybozu-go/log
 # github.com/cybozu-go/netutil v1.2.0
