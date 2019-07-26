@@ -45,6 +45,9 @@ spec:
         - mountPath: /etc/teleport
           name: teleport-auth-secret
           readOnly: true
+        - mountPath: /var/lib/etcd-certs
+          name: teleport-etcd-certs
+          readOnly: true
         - mountPath: /var/lib/teleport
           name: teleport-storage
       securityContext:
@@ -53,6 +56,9 @@ spec:
       volumes:
       - name: teleport-storage
         emptyDir: {}
+      - name: teleport-etcd-certs
+        secret:
+          secretName: teleport-etcd-certs
       - name: teleport-auth-secret
         secret:
           secretName: teleport-auth-secret

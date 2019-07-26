@@ -64,7 +64,13 @@ stringData:
         output: stderr
         severity: DEBUG
       storage:
-        type: dir
+        type: etcd
+        peers: ["https://cke-etcd.kube-system.svc.cluster.local:2379"]
+        tls_cert_file: /var/lib/etcd-certs/tls.crt
+        tls_key_file: /var/lib/etcd-certs/tls.key
+        tls_ca_file: /var/lib/etcd-certs/ca.crt
+        prefix: /teleport
+        insecure: false
 ---
 apiVersion: v1
 kind: Secret
@@ -92,8 +98,6 @@ stringData:
       log:
         output: stderr
         severity: DEBUG
-      storage:
-        type: dir
 `
 )
 
@@ -157,6 +161,12 @@ func testSetup() {
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "teleport")
 			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+			ExecSafeAt(boot0, "ckecli", "etcd", "user-add", "teleport", "/teleport")
+			ExecSafeAt(boot0, "ckecli", "etcd", "issue", "teleport", "--output", "file")
+			ExecSafeAt(boot0, "kubectl", "-n", "teleport", "create", "secret", "generic",
+				"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
+				"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
 		})
 	}
 
