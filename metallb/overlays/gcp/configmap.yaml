@@ -17,7 +17,7 @@ data:
     - name: bastion
       protocol: bgp
       addresses:
-      - 10.72.48.240/28
+      - 10.72.48.48/28
       auto-assign: false
     - name: internet
       protocol: bgp
