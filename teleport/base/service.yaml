@@ -26,6 +26,8 @@ metadata:
   labels:
     app.kubernetes.io/name: teleport
     app.kubernetes.io/component: proxy
+  annotations:
+    metallb.universe.tf/address-pool: bastion
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
