@@ -1,6 +1,7 @@
 package test
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,10 +10,20 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/creack/pty"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	yaml "gopkg.in/yaml.v2"
 )
+
+type Node struct {
+	Kind     string
+	Metadata struct {
+		Name string
+	}
+}
 
 func testTeleport() {
 	It("should deploy teleport node services", func() {
@@ -93,4 +104,48 @@ func testTeleport() {
 		output, err = exec.Command("sed", "-i", "-e", "/teleport.gcp0.dev-ne.co/d", "/etc/hosts").CombinedOutput()
 		Expect(err).ShouldNot(HaveOccurred(), "output=%s", output)
 	})
+
+	It("should retain the state even after recreating the teleport-auth pod", func() {
+		By("getting the node list before recreating the teleport-auth pod")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "teleport", "exec", "teleport-auth-0", "tctl", "get", "nodes")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		beforeNodes := decodeNodes(stdout)
+
+		By("recreating the teleport-auth pod")
+		ExecSafeAt(boot0, "kubectl", "-n", "teleport", "delete", "pod", "teleport-auth-0")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "teleport", "exec", "teleport-auth-0", "tctl", "status")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("comparing the current node list with the obtained before")
+		Eventually(func() error {
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "teleport", "exec", "teleport-auth-0", "tctl", "get", "nodes")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			afterNodes := decodeNodes(stdout)
+			if !cmp.Equal(afterNodes, beforeNodes) {
+				return fmt.Errorf("before: %v, after: %v", beforeNodes, afterNodes)
+			}
+			return nil
+		}).Should(Succeed())
+	})
+}
+
+func decodeNodes(input []byte) []Node {
+	decoder := yaml.NewDecoder(bytes.NewBuffer(input))
+	var nodes []Node
+	for {
+		var node Node
+		if decoder.Decode(&node) != nil {
+			break
+		}
+		nodes = append(nodes, node)
+	}
+
+	return nodes
 }

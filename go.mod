@@ -15,6 +15,7 @@ require (
 	github.com/creack/pty v1.1.7
 	github.com/cybozu-go/log v1.5.0
 	github.com/cybozu-go/sabakan/v2 v2.4.2
+	github.com/google/go-cmp v0.3.0
 	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/jetstack/cert-manager v0.8.0
