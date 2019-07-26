@@ -26,6 +26,7 @@ spec:
       protocol: TCP
       destination:
         ports:
+          - 3020
           - 3023
           - 3024
           - 3026
@@ -48,6 +49,7 @@ spec:
       protocol: TCP
       destination:
         ports:
+          - 3020
           - 3025
 ---
 apiVersion: crd.projectcalico.org/v1
@@ -73,7 +75,7 @@ spec:
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
-  name: egress-teleport-auth-cke-allow
+  name: egress-teleport-auth-etcd-allow
   namespace: teleport
   annotations:
     argocd.argoproj.io/sync-wave: "1"

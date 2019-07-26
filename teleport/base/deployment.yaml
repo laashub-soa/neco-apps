@@ -21,6 +21,8 @@ spec:
       labels:
         app.kubernetes.io/name: teleport
         app.kubernetes.io/component: proxy
+      annotations:
+        prometheus.io/port: "3020"
     spec:
       automountServiceAccountToken: true
       containers:
@@ -30,8 +32,15 @@ spec:
         args:
         - start
         - --roles=proxy
+        - --diag-addr=0.0.0.0:3020
         - -c
         - /etc/teleport/teleport.yaml
+        livenessProbe:
+          httpGet:
+            port: 3020
+            path: /healthz
+          initialDelaySeconds: 5
+          periodSeconds: 5
         ports:
         - name: proxyssh
           containerPort: 3023
