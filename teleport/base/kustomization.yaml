@@ -7,3 +7,4 @@ resources:
   - service.yaml
   - serviceaccount.yaml
   - statefulset.yaml
+  - clusterrole.yaml
