@@ -136,12 +136,13 @@ func applyAndWaitForApplications() {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
+			fmt.Println(stdout)
 			var app argocd.Application
 			err = json.Unmarshal(stdout, &app)
 			if err != nil {
 				return err
 			}
-			if app.Spec.Source.TargetRevision != commitID {
+			if app.Status.Sync.ComparedTo.Source.TargetRevision != commitID {
 				return errors.New(appName + " does not have correct target yet")
 			}
 			st := app.Status
