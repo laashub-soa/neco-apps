@@ -13,5 +13,10 @@ spec:
         - --provider=google
         - --google-project=neco-test
         - --registry=txt
-        - --txt-owner-id=neco
+        - --txt-owner-id=$(POD_NAME)
         - --log-format=json
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
