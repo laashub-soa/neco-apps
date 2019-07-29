@@ -124,5 +124,25 @@ spec:
 		// 	}
 		// 	return nil
 		// }).Should(Succeed())
+
+		By("confirming the pods on the rebooted node come back")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "--all-namespaces", "--field-selector", "spec.nodeName="+nodeName, "-o", "json")
+			if err != nil {
+				return fmt.Errorf("kubectl failed; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			podList := new(corev1.PodList)
+			err = json.Unmarshal(stdout, podList)
+			if err != nil {
+				return err
+			}
+
+			for _, pod := range podList.Items {
+				if !(pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodSucceeded) {
+					return fmt.Errorf("Pod %s is %s", pod.Name, pod.Status.Phase)
+				}
+			}
+			return nil
+		}).Should(Succeed())
 	})
 }

@@ -141,6 +141,9 @@ func applyAndWaitForApplications() {
 			if err != nil {
 				return err
 			}
+			if app.Status.Sync.ComparedTo.Source.TargetRevision != commitID {
+				return errors.New(appName + " does not have correct target yet")
+			}
 			st := app.Status
 			if st.Sync.Status == argocd.SyncStatusCodeSynced &&
 				st.Health.Status == argocd.HealthStatusHealthy &&
