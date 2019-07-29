@@ -168,6 +168,47 @@ func testSetup() {
 				"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
 				"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
 		})
+	} else {
+		// Workaround for teleport initial release
+		// TODO: Remove this else block when teleport is merged into the release branch.
+		It("should prepare secrets for teleport", func() {
+			By("checking teleport namespace")
+			stdout := ExecSafeAt(boot0, "kubectl", "get", "namespaces", "-o", "json")
+			var nsList corev1.NamespaceList
+			err := json.Unmarshal(stdout, &nsList)
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", string(stdout))
+			setupTeleport := true
+			for _, v := range nsList.Items {
+				if v.Name == "teleport" {
+					setupTeleport = false
+					break
+				}
+			}
+
+			if setupTeleport {
+				By("creating namespace and secrets for teleport")
+				stdout, stderr, err := ExecAt(boot0, "env", "ETCDCTL_API=3", "etcdctl", "--cert=/etc/etcd/backup.crt", "--key=/etc/etcd/backup.key",
+					"get", "--print-value-only", "/neco/teleport/auth-token")
+				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+				teleportToken := strings.TrimSpace(string(stdout))
+				teleportTmpl := template.Must(template.New("").Parse(teleportSecret))
+				buf := bytes.NewBuffer(nil)
+				err = teleportTmpl.Execute(buf, struct {
+					Token string
+				}{
+					Token: teleportToken,
+				})
+				ExecSafeAt(boot0, "kubectl", "create", "namespace", "teleport")
+				stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
+				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+				ExecSafeAt(boot0, "ckecli", "etcd", "user-add", "teleport", "/teleport")
+				ExecSafeAt(boot0, "ckecli", "etcd", "issue", "teleport", "--output", "file")
+				ExecSafeAt(boot0, "kubectl", "-n", "teleport", "create", "secret", "generic",
+					"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
+					"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
+			}
+		})
 	}
 
 	It("should checkout neco-apps repository@"+commitID, func() {
