@@ -30,6 +30,7 @@ configMapGenerator:
     namespace: opa
     files:
       - validation/network-policy.rego
+      - validation/rolebinding-policy.rego
 generatorOptions:
   labels:
     openpolicyagent.org/policy: rego
