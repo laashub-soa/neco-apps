@@ -136,7 +136,6 @@ func applyAndWaitForApplications() {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			fmt.Println(stdout)
 			var app argocd.Application
 			err = json.Unmarshal(stdout, &app)
 			if err != nil {
