@@ -15,10 +15,3 @@ spec:
   syncPolicy:
     automated:
       prune: true
-  ignoreDifferences:
-    - group: core
-      kind: Secret
-      name: webhook-server-secret
-      namespace: elastic-system
-      jsonPointers:
-        - /metadata/labels
