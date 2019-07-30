@@ -62,7 +62,3 @@ kind: Secret
 metadata:
   name: webhook-server-secret
   namespace: elastic-system
-  labels:
-    # argocd added app.kubernetes.io/instance=elastic label automatically.
-    # https://argoproj.github.io/argo-cd/faq/#why-is-my-app-out-of-sync-even-after-syncing
-    app.kubernetes.io/instance: elastic
