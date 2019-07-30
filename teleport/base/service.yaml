@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: teleport-auth
+  namespace: teleport
+  labels:
+    app.kubernetes.io/name: teleport
+    app.kubernetes.io/component: auth
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - name: authssh
+      port: 3025
+      protocol: TCP
+      targetPort: 3025
+  selector:
+    app.kubernetes.io/name: teleport
+    app.kubernetes.io/component: auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: teleport-proxy
+  namespace: teleport
+  labels:
+    app.kubernetes.io/name: teleport
+    app.kubernetes.io/component: proxy
+  annotations:
+    metallb.universe.tf/address-pool: bastion
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - name: proxyssh
+      port: 3023
+      protocol: TCP
+      targetPort: 3023
+    - name: proxytunnel
+      port: 3024
+      protocol: TCP
+      targetPort: 3024
+    - name: proxykube
+      port: 3026
+      protocol: TCP
+      targetPort: 3026
+    - name: proxyweb
+      port: 3080
+      protocol: TCP
+      targetPort: 3080
+  selector:
+    app.kubernetes.io/name: teleport
+    app.kubernetes.io/component: proxy

@@ -170,3 +170,16 @@ scrape_configs:
         regex: external-dns-metrics
       - action: labelmap
         regex: __meta_kubernetes_service_(.+)
+  - job_name: "teleport"
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ["teleport"]
+    relabel_configs:
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: ${1}:${2}
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_(.+)

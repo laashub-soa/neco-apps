@@ -1,4 +1,6 @@
 BOOT0 = 10.72.48.0
+BOOT1 = 10.72.48.1
+BOOT2 = 10.72.48.2
 GINKGO = env GO111MODULE=on GOFLAGS=-mod=vendor $(GOPATH)/bin/ginkgo --failFast -v
 SSH_PRIVKEY = $(NECO_DIR)/dctest/dctest_key
 TEST_ID := test$(CIRCLE_BUILD_NUM)
@@ -6,7 +8,7 @@ BASE_BRANCH = master
 COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 KUSTOMIZATION_DIRS := $(shell find ../ -name "kustomization.yaml" -exec dirname {} \;)
 SUDO = sudo
-export BOOT0 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS BOOTSTRAP
+export BOOT0 BOOT1 BOOT2 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID KUSTOMIZATION_DIRS BOOTSTRAP
 
 ### for Go
 GOFLAGS = -mod=vendor
@@ -17,6 +19,7 @@ export GOFLAGS
 KUSTOMIZE_VERSION = 2.0.3
 OPA_VERSION = 0.12.0
 PROMTOOL_VERSION := 2.9.2
+TELEPORT_VERSION := 4.0.2
 REGO_FILES = $(shell find .. -path ../vendor -prune -o -name '*.rego' -print)
 
 install.yaml: $(shell find ../argocd/base)
@@ -57,6 +60,8 @@ setup:
 	go install github.com/onsi/ginkgo/ginkgo
 	curl -sSLf https://github.com/prometheus/prometheus/releases/download/v$(PROMTOOL_VERSION)/prometheus-$(PROMTOOL_VERSION).linux-amd64.tar.gz | tar -xzvf - --strip-components=1 prometheus-$(PROMTOOL_VERSION).linux-amd64/promtool
 	$(SUDO) mv promtool /usr/local/bin/promtool
+	curl -sSLf https://get.gravitational.com/teleport-v$(TELEPORT_VERSION)-linux-amd64-bin.tar.gz | tar -xzvf - --strip-component=1 teleport/tsh
+	$(SUDO) mv tsh /usr/local/bin/tsh
 
 clean:
 	rm -f install.yaml

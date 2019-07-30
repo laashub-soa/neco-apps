@@ -10,4 +10,5 @@ patchesStrategicMerge:
 - monitoring.yaml
 - network-policy.yaml
 - open-policy-agent.yaml
+- teleport.yaml
 - topolvm.yaml

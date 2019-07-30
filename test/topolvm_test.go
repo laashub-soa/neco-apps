@@ -1,15 +1,12 @@
 package test
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func testTopoLVM() {
@@ -98,22 +95,23 @@ spec:
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		Expect(strings.TrimSpace(string(stdout))).ShouldNot(BeEmpty())
 
-		By("getting node name where pod is placed")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", ns, "get", "pods/ubuntu", "-o", "json")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-		var pod corev1.Pod
-		err = json.Unmarshal(stdout, &pod)
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", stdout)
-		nodeName := pod.Spec.NodeName
+		// skip reboot of node temporarily due to ckecli or Kubernetes issue
 
-		By("rebooting the node")
-		ExecSafeAt(boot0, "ckecli", "sabakan", "disable")
-		stdout, stderr, err = ExecAt(boot0, "neco", "ipmipower", "restart", nodeName)
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-		time.Sleep(5 * time.Second)
+		// By("getting node name where pod is placed")
+		// stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", ns, "get", "pods/ubuntu", "-o", "json")
+		// Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		// var pod corev1.Pod
+		// err = json.Unmarshal(stdout, &pod)
+		// Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", stdout)
+		// nodeName := pod.Spec.NodeName
+
+		// By("rebooting the node")
+		// ExecSafeAt(boot0, "ckecli", "sabakan", "disable")
+		// stdout, stderr, err = ExecAt(boot0, "neco", "ipmipower", "restart", nodeName)
+		// Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		// time.Sleep(5 * time.Second)
 
 		// By("confirming that the file survives")
-		// skip temporarily due to ckecli or Kubernetes issue
 		// Eventually(func() error {
 		// 	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "cat", writePath)
 		// 	if err != nil {
@@ -124,25 +122,5 @@ spec:
 		// 	}
 		// 	return nil
 		// }).Should(Succeed())
-
-		By("confirming the pods on the rebooted node come back")
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "--all-namespaces", "--field-selector", "spec.nodeName="+nodeName, "-o", "json")
-			if err != nil {
-				return fmt.Errorf("kubectl failed; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			podList := new(corev1.PodList)
-			err = json.Unmarshal(stdout, podList)
-			if err != nil {
-				return err
-			}
-
-			for _, pod := range podList.Items {
-				if !(pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodSucceeded) {
-					return fmt.Errorf("Pod %s is %s", pod.Name, pod.Status.Phase)
-				}
-			}
-			return nil
-		}).Should(Succeed())
 	})
 }
