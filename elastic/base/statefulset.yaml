@@ -5,7 +5,6 @@ metadata:
   namespace: elastic-system
   labels:
     app.kubernetes.io/name: elastic-operator
-    app.kubernetes.io/instance: elastic
     control-plane: elastic-operator
 spec:
   selector:
@@ -63,3 +62,7 @@ kind: Secret
 metadata:
   name: webhook-server-secret
   namespace: elastic-system
+  labels:
+    # argocd added app.kubernetes.io/instance=elastic label automatically.
+    # https://argoproj.github.io/argo-cd/faq/#why-is-my-app-out-of-sync-even-after-syncing
+    app.kubernetes.io/instance: elastic
