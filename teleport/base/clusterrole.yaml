@@ -1,7 +1,9 @@
+# This ClusterRole is customizing one of the default ClusterRole named admin
+# The content of changes is written in this page ( https://neco-wiki.netlify.com/policy_user_management/#developer_1 )
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cybozu-admin
+  name: developer
 rules:
 - apiGroups:
   - ""
@@ -232,6 +234,7 @@ rules:
   - patch
   - update
   - watch
+# The permissions for CustomResources are written below
 - apiGroups:
   - crd.projectcalico.org
   resources:
