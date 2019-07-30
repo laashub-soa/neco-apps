@@ -59,4 +59,5 @@ var _ = Describe("Test applications", func() {
 	Context("metrics", testMetrics)
 	Context("teleport", testTeleport)
 	Context("topolvm", testTopoLVM)
+	Context("elastic", testElastic)
 })
