@@ -6,4 +6,5 @@ ingress
 teleport
 monitoring
 topolvm
+elastic
 network-policy
