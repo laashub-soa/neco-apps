@@ -21,4 +21,4 @@ spec:
       name: webhook-server-secret
       namespace: elastic-system
       jsonPointers:
-        - /metadata/labels/app\.kubernetes\.io\/instance
+        - /metadata/labels
