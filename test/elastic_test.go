@@ -79,5 +79,15 @@ spec:
 			return nil
 		}).Should(Succeed())
 
+		By("accessing to elasticsearch")
+		stdout, stderr, err := ExecAt(boot0,
+			"kubectl", "get", "secret", "sample-es-elastic-user", "-n", "test-es", "-o=jsonpath='{.data.elastic}'",
+			"|", "base64", "--decode")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		password := string(stdout)
+		stdout, stderr, err = ExecAt(boot0,
+			"ckecli", "ssh", "cybozu@10.69.0.4",
+			"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http:9200")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 }
