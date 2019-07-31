@@ -69,8 +69,6 @@ spec:
         runAsNonRoot: true
         runAsUser: 10000
       volumes:
-      - name: teleport-storage
-        emptyDir: {}
       - name: teleport-etcd-certs
         secret:
           secretName: teleport-etcd-certs
@@ -78,3 +76,13 @@ spec:
         secret:
           secretName: teleport-auth-secret
       serviceAccountName: teleport
+  volumeClaimTemplates:
+  - metadata:
+      name: teleport-storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: topolvm-provisioner

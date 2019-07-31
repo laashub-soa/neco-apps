@@ -6,3 +6,4 @@ resources:
   - certificate.yaml
 patchesStrategicMerge:
   - deployment.yaml
+  - statefulset.yaml
