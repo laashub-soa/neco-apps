@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  order: 1000.0
+  order: 1100.0
   selector: app.kubernetes.io/name == 'elastic-operator'
   types:
     - Ingress
