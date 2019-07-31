@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: teleport-auth
+  namespace: teleport
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: teleport-storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: topolvm-provisioner
