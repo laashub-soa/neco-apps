@@ -11,7 +11,7 @@ import (
 
 func testElastic() {
 	It("should create test-ingress namespace", func() {
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-es")
+		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-es", "--ignore-not-found=true")
 		ExecSafeAt(boot0, "kubectl", "create", "namespace", "test-es")
 	})
 
