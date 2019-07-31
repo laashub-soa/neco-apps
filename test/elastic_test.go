@@ -51,7 +51,7 @@ spec:
       node.ingest: true
     volumeClaimTemplates:
     - metadata:
-      name: elasticsearch-data
+        name: elasticsearch-data
       spec:
         accessModes:
         - ReadWriteOnce
