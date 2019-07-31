@@ -43,10 +43,10 @@ metadata:
   namespace: test-es
 spec:
   version: 7.1.0
-  # it avoids sysctl command by initContainers
+  # it avoids sysctl command by initContainers under PSP
   setVmMaxMapCount: false
   nodes:
-  - nodeCount: 3
+  - nodeCount: 1
     config:
       node.master: true
       node.data: true
