@@ -51,19 +51,18 @@ spec:
       node.ingest: true
     volumeClaimTemplates:
     - metadata:
-        name: elasticsearch-data
+      name: elasticsearch-data
       spec:
         accessModes:
         - ReadWriteOnce
         resources:
           requests:
             storage: 1Gi
-        storageClassName: topolvm-provisioner
-		`
+        storageClassName: topolvm-provisioner`
 		_, stderr, err := ExecAtWithInput(boot0, []byte(elasticYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		By("waiting Elasticsearch resouce health becomes green")
+		By("waiting Elasticsearch resource health becomes green")
 		Eventually(func() error {
 			stdout, _, err := ExecAt(
 				boot0,
