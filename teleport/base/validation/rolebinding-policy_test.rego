@@ -8,7 +8,7 @@ test_allow_binding_clusterrole_in_clusterrolebinding {
 		"userInfo": {
 			"username": "admin",
 			"uid": "014fbff9a07c",
-			"groups": ["system:authenticated", "system:masters"],
+			"groups": ["system:authenticated", "developer"],
 		},
 		"object": {"roleRef": {
 			"apiGroup": "apiGroup: rbac.authorization.k8s.io",
@@ -25,22 +25,6 @@ test_allow_binding_role_in_rolebinding {
 			"username": "user",
 			"uid": "014fbff9a07c",
 			"groups": ["system:authenticated", "cybozu"],
-		},
-		"object": {"roleRef": {
-			"apiGroup": "apiGroup: rbac.authorization.k8s.io",
-			"kind": "Role",
-			"name": "foo",
-		}},
-	}}
-}
-
-test_allow_binding_role_in_clusterrolebinding {
-	count(admission.deny) == 0 with input as {"request": {
-		"kind": {"kind": "ClusterRoleBinding"},
-		"userInfo": {
-			"username": "admin",
-			"uid": "014fbff9a07c",
-			"groups": ["system:authenticated", "system:masters"],
 		},
 		"object": {"roleRef": {
 			"apiGroup": "apiGroup: rbac.authorization.k8s.io",
@@ -72,7 +56,7 @@ test_deny_binding_clusterrole_in_rolebinding_by_user {
 		"userInfo": {
 			"username": "user",
 			"uid": "014fbff9a07c",
-			"groups": ["system:authenticated", "cybozu"],
+			"groups": ["system:authenticated", "developer"],
 		},
 		"object": {"roleRef": {
 			"apiGroup": "apiGroup: rbac.authorization.k8s.io",
