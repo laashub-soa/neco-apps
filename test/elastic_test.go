@@ -43,6 +43,8 @@ metadata:
   namespace: test-es
 spec:
   version: 7.1.0
+  # it avoids sysctl command by initContainers
+  setVmMaxMapCount: false
   nodes:
   - nodeCount: 3
     config:
@@ -86,7 +88,7 @@ spec:
 		password := string(stdout)
 		stdout, stderr, err = ExecAt(boot0,
 			"ckecli", "ssh", "cybozu@10.69.0.4",
-			"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http:9200")
+			"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http.test-es.svc.cluster.local:9200")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 }
