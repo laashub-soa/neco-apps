@@ -93,10 +93,10 @@ jobs:
       - checkout
       - boot-dctest
       - run:
-          name: Bootstrap neco-apps at master
+          name: Bootstrap neco-apps at release
           command: |
             export NECO_DIR=$(pwd)/neco
-            TARGET=test-upgrade ./bin/run-test.sh
+            TARGET=test-upgrade BASE_BRANCH=release ./bin/run-test.sh
           no_output_timeout: 20m
       - run:
           name: Remove instance

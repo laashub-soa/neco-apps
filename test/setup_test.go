@@ -16,6 +16,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"gopkg.in/yaml.v2"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -207,6 +208,25 @@ func testSetup() {
 				ExecSafeAt(boot0, "kubectl", "-n", "teleport", "create", "secret", "generic",
 					"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
 					"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
+			}
+		})
+
+		// Workaround for teleport-auth upgrade
+		// TODO: Remove this section when teleport-auth using pv is merged into the release branch.
+		It("should upgrade statefulset (teleport-auth)", func() {
+			By("checking teleport-auth spec")
+			stdout := ExecSafeAt(boot0, "kubectl", "-n", "teleport", "get", "statefulset", "-o", "json")
+			var stsList appsv1.StatefulSetList
+			err := json.Unmarshal(stdout, &stsList)
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", string(stdout))
+			for _, sts := range stsList.Items {
+				if sts.Name != "teleport-auth" {
+					continue
+				}
+				if len(sts.Spec.VolumeClaimTemplates) == 0 {
+					By("deleting previous teleport-auth")
+					ExecSafeAt(boot0, "kubectl", "-n", "teleport", "delete", "statefulset", "teleport-auth")
+				}
 			}
 		})
 	}
