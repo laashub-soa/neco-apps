@@ -40,6 +40,21 @@ receivers:
     http_config:
       proxy_url: http://squid.internet-egress.svc.cluster.local:3128
 `
+
+	grafanaSecret = `apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/name: grafana
+  name: grafana
+  namespace: monitoring
+type: Opaque
+data:
+  admin-password: QVVKVWwxSzJ4Z2Vxd01kWjNYbEVGYzFRaGdFUUl0T0RNTnpKd1FtZQ==
+  admin-user: YWRtaW4=
+  ldap-toml: ""
+`
+
 	teleportSecret = `
 apiVersion: v1
 kind: Secret
@@ -153,6 +168,11 @@ func testSetup() {
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "monitoring")
 			ExecSafeAt(boot0, "kubectl", "--namespace=monitoring", "create", "secret",
 				"generic", "alertmanager", "--from-file", "alertmanager.yaml")
+
+			By("creating namespace and secrets for grafana")
+			stdout, stderr, err = ExecAtWithInput(boot0, []byte(grafanaSecret), "dd", "of=grafana.yaml")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			ExecSafeAt(boot0, "kubectl", "apply", "-f", "grafana.yaml")
 
 			By("creating namespace and secrets for teleport")
 			stdout, stderr, err = ExecAt(boot0, "env", "ETCDCTL_API=3", "etcdctl", "--cert=/etc/etcd/backup.crt", "--key=/etc/etcd/backup.key",
