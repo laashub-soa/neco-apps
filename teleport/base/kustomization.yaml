@@ -8,3 +8,11 @@ resources:
   - serviceaccount.yaml
   - statefulset.yaml
   - clusterrole.yaml
+configMapGenerator:
+  - name: rolebinding-policy-validator
+    namespace: opa
+    files:
+      - validation/rolebinding-policy.rego
+generatorOptions:
+  labels:
+    openpolicyagent.org/policy: rego
