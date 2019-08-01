@@ -202,6 +202,92 @@ func testAlertmanager() {
 	})
 }
 
+func testGrafana() {
+	It("should be deployed successfully", func() {
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
+				"get", "deployment/grafana", "-o=json")
+			if err != nil {
+				return err
+			}
+			deployment := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deployment)
+			if err != nil {
+				return err
+			}
+
+			if int(deployment.Status.AvailableReplicas) != 1 {
+				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
+			}
+			return nil
+		}).Should(Succeed())
+	})
+
+	It("should answer health", func() {
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
+				"get", "pods", "--selector=app.kubernetes.io/name=grafana", "-o=json")
+			if err != nil {
+				return err
+			}
+			podList := new(corev1.PodList)
+			err = json.Unmarshal(stdout, podList)
+			if err != nil {
+				return err
+			}
+			if len(podList.Items) != 1 {
+				return errors.New("grafana pod doesn't exist")
+			}
+			podName := podList.Items[0].Name
+
+			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+				podName, "curl", "http://localhost:3000/api/health")
+			if err != nil {
+				return fmt.Errorf("unable to curl :3000/api/health, stderr: %s, err: %v", stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+	})
+
+	It("should run grafana successfully", func() {
+		By("getting contour service")
+		var targetIP string
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "ingress", "service/grafana", "-o", "json")
+			if err != nil {
+				return err
+			}
+
+			service := new(corev1.Service)
+			err = json.Unmarshal(stdout, service)
+			if err != nil {
+				return err
+			}
+
+			if len(service.Status.LoadBalancer.Ingress) < 1 {
+				return errors.New("LoadBalancerIP is not assigned")
+			}
+			targetIP = service.Status.LoadBalancer.Ingress[0].IP
+			if len(targetIP) == 0 {
+				return errors.New("LoadBalancerIP is empty")
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("requesting grafana endpoint")
+		Eventually(func() error {
+			_, _, err := ExecAt(boot0,
+				"curl", "--resolve", "grafana.monitoring.gcp0.dev-ne.co:80:"+targetIP,
+				"https://grafana.monitoring.gcp0.dev-ne.co/",
+				"-m", "5",
+				"--fail",
+				"--insecure",
+			)
+			return err
+		}).Should(Succeed())
+	})
+}
+
 func testMetrics() {
 	It("should be up all scraping", func() {
 		var podName string
