@@ -41,9 +41,6 @@ spec:
           timeoutSeconds: 30
         name: grafana
         ports:
-        - containerPort: 80
-          name: service
-          protocol: TCP
         - containerPort: 3000
           name: grafana
           protocol: TCP

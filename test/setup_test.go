@@ -284,6 +284,28 @@ func testSetup() {
 				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			}
 		})
+
+		// TODO: Remove this else block when grafana is merged into the release branch.
+		It("should prepare secrets for grafana", func() {
+			By("checking elastic namespace")
+			stdout := ExecSafeAt(boot0, "kubectl", "get", "deployment", "-n", "monitoring", "-o", "json")
+			var deployList appsv1.DeploymentList
+			err := json.Unmarshal(stdout, &deployList)
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", string(stdout))
+			setupGrafana := true
+			for _, d := range deployList.Items {
+				if d.Name == "grafana" {
+					setupGrafana = false
+					break
+				}
+			}
+
+			if setupGrafana {
+				By("creating secrets for grafana")
+				stdout, stderr, err := ExecAtWithInput(boot0, []byte(grafanaSecret), "kubectl", "--namespace=monitoring", "create", "-f", "-")
+				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			}
+		})
 	}
 
 	It("should checkout neco-apps repository@"+commitID, func() {

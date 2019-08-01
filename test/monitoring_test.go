@@ -248,44 +248,6 @@ func testGrafana() {
 			return nil
 		}).Should(Succeed())
 	})
-
-	It("should run grafana successfully", func() {
-		By("getting contour service")
-		var targetIP string
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "ingress", "service/grafana", "-o", "json")
-			if err != nil {
-				return err
-			}
-
-			service := new(corev1.Service)
-			err = json.Unmarshal(stdout, service)
-			if err != nil {
-				return err
-			}
-
-			if len(service.Status.LoadBalancer.Ingress) < 1 {
-				return errors.New("LoadBalancerIP is not assigned")
-			}
-			targetIP = service.Status.LoadBalancer.Ingress[0].IP
-			if len(targetIP) == 0 {
-				return errors.New("LoadBalancerIP is empty")
-			}
-			return nil
-		}).Should(Succeed())
-
-		By("requesting grafana endpoint")
-		Eventually(func() error {
-			_, _, err := ExecAt(boot0,
-				"curl", "--resolve", "grafana.monitoring.gcp0.dev-ne.co:80:"+targetIP,
-				"https://grafana.monitoring.gcp0.dev-ne.co/",
-				"-m", "5",
-				"--fail",
-				"--insecure",
-			)
-			return err
-		}).Should(Succeed())
-	})
 }
 
 func testMetrics() {
