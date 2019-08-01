@@ -83,13 +83,13 @@ spec:
 
 		By("waiting Elasticsearch resource health becomes green")
 		Eventually(func() error {
-			stdout, _, err := ExecAt(
+			stdout, stderr, err := ExecAt(
 				boot0,
 				"kubectl", "-n", "test-es", "get", "elasticsearch/sample",
-				"--template", "{{ .status.health }}",
+				"--template", "'{{ .status.health }}'",
 			)
 			if err != nil {
-				return err
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			if string(stdout) != "green" {
 				return fmt.Errorf("elastic resource health should be green: %s", stdout)
