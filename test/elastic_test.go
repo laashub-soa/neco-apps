@@ -60,7 +60,24 @@ spec:
         resources:
           requests:
             storage: 1Gi
-        storageClassName: topolvm-provisioner`
+        storageClassName: topolvm-provisioner
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-sample
+  namespace: test-es
+spec:
+  order: 2000.0
+  selector: elasticsearch.k8s.elastic.co/cluster-name == "sample"
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 9200`
 		_, stderr, err := ExecAtWithInput(boot0, []byte(elasticYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
