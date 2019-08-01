@@ -45,7 +45,7 @@ spec:
       protocol: TCP
       targetPort: 3026
     - name: proxyweb
-      port: 3080
+      port: 443
       protocol: TCP
       targetPort: 3080
   selector:

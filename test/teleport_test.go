@@ -78,12 +78,12 @@ func testTeleport() {
 			"user":                "cybozu",
 		})
 		Expect(err).ShouldNot(HaveOccurred())
-		cmd := exec.Command("curl", "--fail", "--insecure", "-H", "Content-Type: application/json; charset=UTF-8", "-d", string(payload), "https://teleport.gcp0.dev-ne.co:3080/v1/webapi/users")
+		cmd := exec.Command("curl", "--fail", "--insecure", "-H", "Content-Type: application/json; charset=UTF-8", "-d", string(payload), "https://teleport.gcp0.dev-ne.co/v1/webapi/users")
 		output, err := cmd.CombinedOutput()
 		Expect(err).ShouldNot(HaveOccurred(), "output=%s", output)
 
 		By("logging in using tsh command")
-		cmd = exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:3080", "--user=cybozu", "login")
+		cmd = exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu", "login")
 		ptmx, err := pty.Start(cmd)
 		Expect(err).ShouldNot(HaveOccurred())
 		defer ptmx.Close()
@@ -95,7 +95,7 @@ func testTeleport() {
 
 		By("accessing boot servers using tsh command")
 		for _, n := range []string{"boot-0", "boot-1", "boot-2"} {
-			cmd := exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:3080", "--user=cybozu", "ssh", "cybozu@"+n, "date")
+			cmd := exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu", "ssh", "cybozu@"+n, "date")
 			output, err := cmd.CombinedOutput()
 			Expect(err).ShouldNot(HaveOccurred(), "output=%s", output)
 		}
