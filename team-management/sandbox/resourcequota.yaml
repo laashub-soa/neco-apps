@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: sandbox-quota
+  namespace: sandbox
+spec:
+  hard:
+    requests.cpu: 128
+    limits.cpu: 128
+    requests.memory: 1Ti
+    limits.memory: 1Ti
+    requests.storage: 200Ti

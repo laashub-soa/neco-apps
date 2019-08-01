@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: team-management
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/cybozu-go/neco-apps.git
+    targetRevision: release
+    path: team-management/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sandbox
+  syncPolicy:
+    automated:
+      prune: true
