@@ -1,0 +1,19 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-elastic
+  namespace: elastic-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  order: 1100.0
+  selector: app.kubernetes.io/name == 'elastic-operator'
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 8080
+          - 9443

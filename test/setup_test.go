@@ -100,6 +100,13 @@ stringData:
         output: stderr
         severity: DEBUG
 `
+	elasticSecret = `
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webhook-server-secret
+  namespace: elastic-system
+`
 )
 
 // testSetup tests setup of Argo CD
@@ -168,6 +175,11 @@ func testSetup() {
 			ExecSafeAt(boot0, "kubectl", "-n", "teleport", "create", "secret", "generic",
 				"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
 				"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
+
+			By("creating namespace and secrets for elastic")
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "elastic-system")
+			stdout, stderr, err = ExecAtWithInput(boot0, []byte(elasticSecret), "kubectl", "--namespace=elastic-system", "create", "-f", "-")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		})
 	} else {
 		// Workaround for teleport initial release
@@ -227,6 +239,29 @@ func testSetup() {
 					By("deleting previous teleport-auth")
 					ExecSafeAt(boot0, "kubectl", "-n", "teleport", "delete", "statefulset", "teleport-auth")
 				}
+			}
+		})
+
+		// TODO: Remove this else block when elastic is merged into the release branch.
+		It("should prepare secrets for elastic", func() {
+			By("checking elastic namespace")
+			stdout := ExecSafeAt(boot0, "kubectl", "get", "namespaces", "-o", "json")
+			var nsList corev1.NamespaceList
+			err := json.Unmarshal(stdout, &nsList)
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", string(stdout))
+			setupElastic := true
+			for _, v := range nsList.Items {
+				if v.Name == "elastic-system" {
+					setupElastic = false
+					break
+				}
+			}
+
+			if setupElastic {
+				By("creating namespace and secrets for elastic")
+				ExecSafeAt(boot0, "kubectl", "create", "namespace", "elastic-system")
+				stdout, stderr, err := ExecAtWithInput(boot0, []byte(elasticSecret), "kubectl", "--namespace=elastic-system", "create", "-f", "-")
+				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			}
 		})
 	}
