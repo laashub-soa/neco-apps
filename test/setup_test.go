@@ -126,6 +126,10 @@ metadata:
 
 // testSetup tests setup of Argo CD
 func testSetup() {
+	It("should disable CKE-sabakan integration feature", func() {
+		ExecSafeAt(boot0, "ckecli", "sabakan", "disable")
+	})
+
 	It("should list all apps in app-sync-order.txt", func() {
 		appList := loadSyncOrder()
 		kustomFile, err := filepath.Abs("../argocd-config/base/kustomization.yaml")

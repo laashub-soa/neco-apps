@@ -77,7 +77,8 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - 9200`
+          - 9200:9400
+`
 		_, stderr, err := ExecAtWithInput(boot0, []byte(elasticYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
