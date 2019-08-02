@@ -9,5 +9,5 @@ roleRef:
   name: developer
 subjects:
   - kind: Group
-    name: sandbox
+    name: system:authenticated
     apiGroup: rbac.authorization.k8s.io
