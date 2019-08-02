@@ -34,6 +34,22 @@ test_allow_binding_clusterrole_in_rolebinding_by_admin {
 	}}
 }
 
+test_allow_binding_clusterrole_in_rolebinding_by_argocd {
+	count(admission.deny) == 0 with input as {"request": {
+		"kind": {"kind": "RoleBinding"},
+		"userInfo": {
+			"username": "system:serviceaccount:argocd:argocd-application-controller",
+			"uid": "014fbff9a07c",
+			"groups": ["system:serviceaccounts", "system:serviceaccounts:argocd", "system:authenticated"],
+		},
+		"object": {"roleRef": {
+			"apiGroup": "apiGroup: rbac.authorization.k8s.io",
+			"kind": "ClusterRole",
+			"name": "foo",
+		}},
+	}}
+}
+
 test_allow_binding_clusterrole_in_clusterrolebinding {
 	count(admission.deny) == 0 with input as {"request": {
 		"kind": {"kind": "ClusterRoleBinding"},
