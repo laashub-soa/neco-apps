@@ -55,6 +55,7 @@ var _ = Describe("Test applications", func() {
 	Context("machines-endpoints", testMachinesEndpoints)
 	Context("kube-state-metrics", testKubeStateMetrics)
 	Context("prometheus", testPrometheus)
+	Context("grafana", testGrafana)
 	Context("alertmanager", testAlertmanager)
 	Context("metrics", testMetrics)
 	Context("teleport", testTeleport)

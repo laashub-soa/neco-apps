@@ -17,6 +17,9 @@ resources:
   - prometheus/deployment.yaml
   - prometheus/service.yaml
   - prometheus/serviceaccount.yaml
+  - grafana/deployment.yaml
+  - grafana/service.yaml
+  - grafana/configmap.yaml
   - alertmanager/deployment.yaml
   - alertmanager/service.yaml
 configMapGenerator:

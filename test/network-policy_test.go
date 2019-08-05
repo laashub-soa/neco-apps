@@ -244,6 +244,7 @@ spec:
 			{"kube-system", "app.kubernetes.io/name=kube-state-metrics", []int{8080, 8081}},
 			{"metallb-system", "app.kubernetes.io/component=controller", []int{7472}},
 			{"monitoring", "app.kubernetes.io/name=alertmanager", []int{9093}},
+			{"monitoring", "app.kubernetes.io/name=grafana", []int{3000}},
 			{"monitoring", "app.kubernetes.io/name=prometheus", []int{9090}},
 			{"opa", "app.kubernetes.io/name=opa", []int{8443}},
 			{"topolvm-system", "app.kubernetes.io/name==topolvm-hook", []int{9252}},

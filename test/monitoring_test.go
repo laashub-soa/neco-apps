@@ -202,6 +202,54 @@ func testAlertmanager() {
 	})
 }
 
+func testGrafana() {
+	It("should be deployed successfully", func() {
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
+				"get", "deployment/grafana", "-o=json")
+			if err != nil {
+				return err
+			}
+			deployment := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deployment)
+			if err != nil {
+				return err
+			}
+
+			if int(deployment.Status.AvailableReplicas) != 1 {
+				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
+			}
+			return nil
+		}).Should(Succeed())
+	})
+
+	It("should answer health", func() {
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
+				"get", "pods", "--selector=app.kubernetes.io/name=grafana", "-o=json")
+			if err != nil {
+				return err
+			}
+			podList := new(corev1.PodList)
+			err = json.Unmarshal(stdout, podList)
+			if err != nil {
+				return err
+			}
+			if len(podList.Items) != 1 {
+				return errors.New("grafana pod doesn't exist")
+			}
+			podName := podList.Items[0].Name
+
+			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+				podName, "curl", "http://localhost:3000/api/health")
+			if err != nil {
+				return fmt.Errorf("unable to curl :3000/api/health, stderr: %s, err: %v", stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+	})
+}
+
 func testMetrics() {
 	It("should be up all scraping", func() {
 		var podName string

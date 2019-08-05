@@ -61,6 +61,16 @@ spec:
           requests:
             storage: 1Gi
         storageClassName: topolvm-provisioner
+    podTemplate:
+      spec:
+        containers:
+          - name: elasticsearch
+            env:
+              - name: ES_JAVA_OPTS
+                value: "-Xms128M -Xmx128M"
+            resources:
+              limits:
+                memory: 256M
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
@@ -77,7 +87,8 @@ spec:
       protocol: TCP
       destination:
         ports:
-          - 9200`
+          - 9200:9400
+`
 		_, stderr, err := ExecAtWithInput(boot0, []byte(elasticYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
