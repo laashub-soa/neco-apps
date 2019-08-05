@@ -45,3 +45,15 @@ rules:
   resources:
   - poddisruptionbudgets
   verbs: ["list", "watch"]
+- apiGroups: ["certificates.k8s.io"]
+  resources:
+  - certificatesigningrequests
+  verbs: ["list", "watch"]
+- apiGroups: ["storage.k8s.io"]
+  resources:
+  - storageclasses
+  verbs: ["list", "watch"]
+- apiGroups: ["autoscaling.k8s.io"]
+  resources:
+  - verticalpodautoscalers
+  verbs: ["list", "watch"]
