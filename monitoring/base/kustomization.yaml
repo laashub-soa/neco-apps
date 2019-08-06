@@ -45,6 +45,3 @@ configMapGenerator:
   - name: dashboard-kubernetes-cluster
     files:
       - grafana/dashboards/kubernetes_cluster.json
-  - name: dashboard-node-exporter
-    files:
-      - grafana/dashboards/node_exporter.json

@@ -4,8 +4,8 @@ open-policy-agent
 metallb
 ingress
 teleport
-monitoring
 topolvm
+monitoring
 elastic
 network-policy
 team-management
