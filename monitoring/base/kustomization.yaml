@@ -20,6 +20,7 @@ resources:
   - grafana/deployment.yaml
   - grafana/service.yaml
   - grafana/configmap.yaml
+  - grafana/pvc.yaml
   - alertmanager/deployment.yaml
   - alertmanager/service.yaml
 configMapGenerator:
@@ -30,3 +31,11 @@ configMapGenerator:
   - name: alertmanager
     files:
       - alertmanager/neco.template
+  - name: grafana-dashboards
+    files:
+      - grafana/dashboards/calico.json
+      - grafana/dashboards/contour.json
+      - grafana/dashboards/envoy.json
+      - grafana/dashboards/etcd.json
+      - grafana/dashboards/kubernetes_cluster.json
+      - grafana/dashboards/node_exporter.json

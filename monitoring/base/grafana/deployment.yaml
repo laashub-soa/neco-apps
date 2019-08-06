@@ -65,6 +65,12 @@ spec:
           subPath: ldap.toml
         - mountPath: /var/lib/grafana
           name: storage
+        - name: dashboards-volume
+          mountPath: /var/lib/grafana/dashboards
+        - name: dashboard-provider
+          mountPath: /etc/grafana/provisioning/dashboards
+        - name: datasources-provider
+          mountPath: /etc/grafana/provisioning/datasources
       securityContext:
         fsGroup: 10000
         runAsUser: 10000
@@ -80,5 +86,21 @@ spec:
           - key: ldap-toml
             path: ldap.toml
           secretName: grafana
-      - emptyDir: {}
-        name: storage
+      - name: storage
+        persistentVolumeClaim:
+          claimName: grafana-storage-claim
+      - name: dashboards-volume
+        configMap:
+          name: grafana-dashboards
+      - name: dashboard-provider
+        configMap:
+          name: grafana-dash-provider
+          items:
+            - key: providers.yaml
+              path: providers.yaml
+      - name: datasources-provider
+        configMap:
+          name: grafana-datasources-provider
+          items:
+            - key: providers.yaml
+              path: providers.yaml

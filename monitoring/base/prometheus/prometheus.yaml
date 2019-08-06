@@ -126,6 +126,22 @@ scrape_configs:
         target_label: __address__
       - action: labelmap
         regex: __meta_kubernetes_endpoint_(.+)
+  - job_name: "calico-node"
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ["kube-system"]
+    relabel_configs:
+      - source_labels: ["__meta_kubernetes_label_app.kubernetes.io/name"]
+        action: keep
+        regex: calico-node
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}:9091
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_endpoint_(.+)
   - job_name: "monitor-hw"
     kubernetes_sd_configs:
       - role: endpoints
