@@ -30,14 +30,41 @@ data:
   providers.yaml: |
     apiVersion: 1
     providers:
-    - name: 'default'
-      orgId: 1
+    - name: 'calico'
       folder: ''
       type: file
       disableDeletion: false
       editable: false
       options:
-        path: /var/lib/grafana/dashboards
+        path: /var/lib/grafana/dashboards/calico
+    - name: 'contour'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/contour
+    - name: 'etcd'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/etcd
+    - name: 'kubernetes-cluster'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/kubernetes-cluster
+    - name: 'node-exporter'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/node-exporter
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -65,8 +65,16 @@ spec:
           subPath: ldap.toml
         - mountPath: /var/lib/grafana
           name: storage
-        - name: dashboards-volume
-          mountPath: /var/lib/grafana/dashboards
+        - name: dashboard-calico
+          mountPath: /var/lib/grafana/dashboards/calico
+        - name: dashboard-contour
+          mountPath: /var/lib/grafana/dashboards/contour
+        - name: dashboard-etcd
+          mountPath: /var/lib/grafana/dashboards/etcd
+        - name: dashboard-kubernetes-cluster
+          mountPath: /var/lib/grafana/dashboards/kubernetes-cluster
+        - name: dashboard-node-exporter
+          mountPath: /var/lib/grafana/dashboards/node-exporter
         - name: dashboard-provider
           mountPath: /etc/grafana/provisioning/dashboards
         - name: datasources-provider
@@ -89,9 +97,21 @@ spec:
       - name: storage
         persistentVolumeClaim:
           claimName: grafana-storage-claim
-      - name: dashboards-volume
+      - name: dashboard-calico-volume
         configMap:
-          name: grafana-dashboards
+          name: dashboard-calico
+      - name: dashboard-contour-volume
+        configMap:
+          name: dashboard-contour
+      - name: dashboard-etcd-volume
+        configMap:
+          name: dashboard-etcd
+      - name: dashboard-kubernetes-cluster-volume
+        configMap:
+          name: dashboard-kubernetes-cluster
+      - name: dashboard-node-exporter-volume
+        configMap:
+          name: dashboard-node-exporter
       - name: dashboard-provider
         configMap:
           name: grafana-dash-provider

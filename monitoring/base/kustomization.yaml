@@ -32,11 +32,19 @@ configMapGenerator:
   - name: alertmanager
     files:
       - alertmanager/neco.template
-  - name: grafana-dashboards
+  - name: dashboard-calico
     files:
       - grafana/dashboards/calico.json
+  - name: dashboard-contour
+    files:
       - grafana/dashboards/contour.json
       - grafana/dashboards/envoy.json
+  - name: dashboard-etcd
+    files:
       - grafana/dashboards/etcd.json
+  - name: dashboard-kubernetes-cluster
+    files:
       - grafana/dashboards/kubernetes_cluster.json
+  - name: dashboard-node-exporter
+    files:
       - grafana/dashboards/node_exporter.json
