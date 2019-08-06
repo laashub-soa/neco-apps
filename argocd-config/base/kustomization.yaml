@@ -11,3 +11,4 @@ resources:
 - open-policy-agent.yaml
 - teleport.yaml
 - topolvm.yaml
+- team-management.yaml
