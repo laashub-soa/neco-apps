@@ -4,9 +4,6 @@ metadata:
   name: prometheus-storage-claim
   namespace: monitoring
 spec:
-  accessModes:
-    - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
-  storageClassName: topolvm-provisioner
+      storage: 10Gi

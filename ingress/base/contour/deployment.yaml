@@ -65,9 +65,6 @@ spec:
         command: ["contour"]
         args:
         - bootstrap
-        - --statsd-enable
-        - --stats-address=0.0.0.0
-        - --stats-port=8002
         - /config/contour.json
         volumeMounts:
         - name: contour-config
