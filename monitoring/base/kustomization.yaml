@@ -14,14 +14,12 @@ resources:
   - kube-state-metrics/serviceaccount.yaml
   - prometheus/clusterrole.yaml
   - prometheus/clusterrolebinding.yaml
-  - prometheus/deployment.yaml
   - prometheus/service.yaml
   - prometheus/serviceaccount.yaml
-  - prometheus/pvc.yaml
-  - grafana/deployment.yaml
+  - prometheus/statefulset.yaml
   - grafana/service.yaml
+  - grafana/statefulset.yaml
   - grafana/configmap.yaml
-  - grafana/pvc.yaml
   - alertmanager/deployment.yaml
   - alertmanager/service.yaml
 configMapGenerator:

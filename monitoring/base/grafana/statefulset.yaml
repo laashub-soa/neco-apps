@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: grafana
+  labels:
+    app.kubernetes.io/name: grafana
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  serviceName: grafana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grafana
+    spec:
+      initContainers:
+        # JSON of https://grafana.com/api/dashboards/1860 is too large to create ConfigMap by kubectl, so use init container
+        - image: quay.io/cybozu/grafana:6.2.5.1
+          imagePullPolicy: IfNotPresent
+          name: grafana-initconfig
+          command: ["curl"]
+          args:
+            - -sSLf
+            - -o /config/node-exporter.json
+            - https://grafana.com/api/dashboards/1860/revisions/14/download
+          env:
+            - name: HTTPS_PROXY
+              value: http://squid.internet-egress.svc.cluster.local:3128
+          volumeMounts:
+            - name: dashboard-node-exporter-volume
+              mountPath: /config
+      containers:
+        - env:
+            - name: GF_SECURITY_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  key: admin-user
+                  name: grafana
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: admin-password
+                  name: grafana
+          image: quay.io/cybozu/grafana:6.2.5.1
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /api/health
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 30
+          name: grafana
+          ports:
+            - containerPort: 3000
+              name: grafana
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/health
+              port: 3000
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /etc/grafana/grafana.ini
+              name: config
+              subPath: grafana.ini
+            - mountPath: /etc/grafana/ldap.toml
+              name: ldap
+              subPath: ldap.toml
+            - mountPath: /var/lib/grafana
+              name: storage
+            - name: dashboard-calico-volume
+              mountPath: /var/lib/grafana/dashboards/calico
+            - name: dashboard-contour-volume
+              mountPath: /var/lib/grafana/dashboards/contour
+            - name: dashboard-etcd-volume
+              mountPath: /var/lib/grafana/dashboards/etcd
+            - name: dashboard-kubernetes-cluster-volume
+              mountPath: /var/lib/grafana/dashboards/kubernetes-cluster
+            - name: dashboard-node-exporter-volume
+              mountPath: /var/lib/grafana/dashboards/node-exporter
+            - name: dashboard-provider
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: datasources-provider
+              mountPath: /etc/grafana/provisioning/datasources
+      securityContext:
+        fsGroup: 10000
+        runAsUser: 10000
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: grafana
+          name: config
+        - name: ldap
+          secret:
+            defaultMode: 420
+            items:
+              - key: ldap-toml
+                path: ldap.toml
+            secretName: grafana
+        - name: dashboard-calico-volume
+          configMap:
+            name: dashboard-calico
+        - name: dashboard-contour-volume
+          configMap:
+            name: dashboard-contour
+        - name: dashboard-etcd-volume
+          configMap:
+            name: dashboard-etcd
+        - name: dashboard-kubernetes-cluster-volume
+          configMap:
+            name: dashboard-kubernetes-cluster
+        - name: dashboard-node-exporter-volume
+          emptyDir: {}
+        - name: dashboard-provider
+          configMap:
+            name: grafana-dash-provider
+            items:
+              - key: providers.yaml
+                path: providers.yaml
+        - name: datasources-provider
+          configMap:
+            name: grafana-datasources-provider
+            items:
+              - key: providers.yaml
+                path: providers.yaml
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: topolvm-provisioner
+        resources:
+          requests:
+            storage: 1Gi
