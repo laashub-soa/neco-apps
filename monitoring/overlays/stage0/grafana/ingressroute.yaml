@@ -10,8 +10,3 @@ spec:
     fqdn: grafana.monitoring.stage0.cybozu-ne.co
     tls:
       secretName: grafana-tls
-  routes:
-    - match: /
-      services:
-        - name: grafana
-          port: 80
