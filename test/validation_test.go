@@ -68,6 +68,7 @@ func TestValidation(t *testing.T) {
 			var crd crdValidation
 			err = yaml.Unmarshal(data, &crd)
 			if err != nil {
+				// return nil
 				// Skip because this YAML might not be custom resource definition
 				return nil
 			}

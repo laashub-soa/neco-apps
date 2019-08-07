@@ -190,6 +190,7 @@ func testSetup() {
 			}{
 				Token: teleportToken,
 			})
+			Expect(err).NotTo(HaveOccurred())
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "teleport")
 			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
@@ -235,6 +236,7 @@ func testSetup() {
 				}{
 					Token: teleportToken,
 				})
+				Expect(err).NotTo(HaveOccurred())
 				ExecSafeAt(boot0, "kubectl", "create", "namespace", "teleport")
 				stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
 				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
