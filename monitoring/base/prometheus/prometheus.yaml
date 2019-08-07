@@ -132,7 +132,7 @@ scrape_configs:
         namespaces:
           names: ["kube-system"]
     relabel_configs:
-      - source_labels: ["__meta_kubernetes_label_app.kubernetes.io/name"]
+      - source_labels: ["__meta_kubernetes_label_app_kubernetes_io_name"]
         action: keep
         regex: calico-node
       - source_labels: [__address__]

@@ -22,7 +22,8 @@ spec:
           command: ["curl"]
           args:
             - -sSLf
-            - -o /config/node-exporter.json
+            - -o
+            - /config/node-exporter.json
             - https://grafana.com/api/dashboards/1860/revisions/14/download
           env:
             - name: HTTPS_PROXY
