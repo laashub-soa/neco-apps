@@ -82,18 +82,18 @@ func testPrometheus() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/prometheus", "-o=json")
+				"get", "statefulset/prometheus", "-o=json")
 			if err != nil {
 				return err
 			}
-			deployment := new(appsv1.Deployment)
-			err = json.Unmarshal(stdout, deployment)
+			statefulSet := new(appsv1.StatefulSet)
+			err = json.Unmarshal(stdout, statefulSet)
 			if err != nil {
 				return err
 			}
 
-			if int(deployment.Status.AvailableReplicas) != 1 {
-				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
+			if int(statefulSet.Status.ReadyReplicas) != 1 {
+				return fmt.Errorf("ReadyReplicas is not 1: %d", int(statefulSet.Status.ReadyReplicas))
 			}
 			return nil
 		}).Should(Succeed())
@@ -206,18 +206,18 @@ func testGrafana() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/grafana", "-o=json")
+				"get", "statefulset/grafana", "-o=json")
 			if err != nil {
 				return err
 			}
-			deployment := new(appsv1.Deployment)
-			err = json.Unmarshal(stdout, deployment)
+			statefulSet := new(appsv1.StatefulSet)
+			err = json.Unmarshal(stdout, statefulSet)
 			if err != nil {
 				return err
 			}
 
-			if int(deployment.Status.AvailableReplicas) != 1 {
-				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
+			if int(statefulSet.Status.ReadyReplicas) != 1 {
+				return fmt.Errorf("ReadyReplicas is not 1: %d", int(statefulSet.Status.ReadyReplicas))
 			}
 			return nil
 		}).Should(Succeed())
