@@ -10,8 +10,8 @@ spec:
       cpu: 50m
       memory: 5Mi
     max: 
-      cpu: 8
-      memory: 16Gi
+      cpu: 20
+      memory: 100Gi
   - type: Container
     defaultRequest:
       cpu: 100m
@@ -23,8 +23,8 @@ spec:
       cpu: 50m
       memory: 5Mi
     max:
-      cpu: 8
-      memory: 16Gi
+      cpu: 20
+      memory: 100Gi
   - type: PersistentVolumeClaim
     defaultRequest:
       storage: 1Gi
@@ -33,4 +33,4 @@ spec:
     min:
       storage: 1Gi
     max:
-      storage: 100Gi
+      storage: 1Ti
