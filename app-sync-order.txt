@@ -3,9 +3,9 @@ external-dns
 open-policy-agent
 metallb
 ingress
+elastic
 teleport
 topolvm
 monitoring
-elastic
 network-policy
 team-management
