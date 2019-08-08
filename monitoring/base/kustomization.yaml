@@ -17,7 +17,6 @@ resources:
   - prometheus/service.yaml
   - prometheus/serviceaccount.yaml
   - prometheus/statefulset.yaml
-  - grafana/ingressroute.yaml
   - grafana/service.yaml
   - grafana/statefulset.yaml
   - grafana/configmap.yaml
