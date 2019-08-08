@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/cybozu-go/sabakan/v2"
@@ -201,78 +200,12 @@ spec:
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", pod.Namespace, pod.Name, "--", "curl", testhttpdIP, "-m", "5")
 			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
-	})
-
-	It("should accept and deny TCP packets according to the registered network policies", func() {
-		const portShouldBeDenied = 65535
-
-		testcase := []struct {
-			namespace string
-			selector  string
-			ports     []int
-		}{
-			{"argocd", "app.kubernetes.io/name=argocd-application-controller", []int{8082}},
-			{"argocd", "app.kubernetes.io/name=argocd-redis", []int{6379}},
-			{"argocd", "app.kubernetes.io/name=argocd-repo-server", []int{8081, 8084}},
-			{"argocd", "app.kubernetes.io/name=argocd-server", []int{8080, 8083}},
-			{"external-dns", "app.kubernetes.io/name=external-dns", []int{7979}},
-			{"external-dns", "app.kubernetes.io/name=cert-manager", []int{9402}},
-			{"external-dns", "app.kubernetes.io/name=webhook", []int{6443}},
-			{"ingress", "app.kubernetes.io/name=contour", []int{8000, 8002, 8080, 8443}},
-			{"internet-egress", "app.kubernetes.io/name=squid", []int{3128}},
-			{"internet-egress", "app.kubernetes.io/name=unbound", []int{53}},
-			{"kube-system", "cke.cybozu.com/appname=cluster-dns", []int{1053, 8080}},
-			{"kube-system", "app.kubernetes.io/name=kube-state-metrics", []int{8080, 8081}},
-			{"metallb-system", "app.kubernetes.io/component=controller", []int{7472}},
-			{"monitoring", "app.kubernetes.io/name=alertmanager", []int{9093}},
-			{"monitoring", "app.kubernetes.io/name=grafana", []int{3000}},
-			{"monitoring", "app.kubernetes.io/name=prometheus", []int{9090}},
-			{"opa", "app.kubernetes.io/name=opa", []int{8443}},
-			{"topolvm-system", "app.kubernetes.io/name==topolvm-hook", []int{9252}},
-			{"elastic-system", "app.kubernetes.io/name==elastic-operator", []int{8080, 9443}},
-		}
-
-		for _, tc := range testcase {
-			By("getting target pod list: ns=" + tc.namespace + ", selector=" + tc.selector)
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", tc.namespace, "-l", tc.selector, "get", "pods", "-o=json")
-			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
-			podList := new(corev1.PodList)
-			err = json.Unmarshal(stdout, podList)
-			Expect(err).NotTo(HaveOccurred())
-
-			for _, pod := range podList.Items {
-				By("connecting to pod: " + pod.GetName())
-				for _, port := range tc.ports {
-					By("  -> port: " + strconv.Itoa(port) + " (allowed)")
-					stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(port), "-e", "X")
-					Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-				}
-
-				By("  -> port: " + strconv.Itoa(portShouldBeDenied) + " (denied)")
-				stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(portShouldBeDenied), "-e", "X")
-				switch t := err.(type) {
-				case *ssh.ExitError:
-					// telnet command returns 124 when it times out
-					Expect(t.ExitStatus()).To(Equal(124), "stdout: %s, stderr: %s", stdout, stderr)
-				default:
-					Fail("telnet should fail with timeout")
-				}
-
-				if tc.namespace == "internet-egress" {
-					By("accessing to local IP")
-					testhttpdIP := testhttpdPodList.Items[0].Status.PodIP
-					stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", pod.Namespace, pod.Name, "--", "curl", testhttpdIP, "-m", "5")
-					Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-				}
-			}
-		}
 
 		By("deploying ubuntu for network commands in internet-egress NS")
 		createUbuntuDebugPod("internet-egress")
 
 		By("labelling pod as squid")
-		_, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name=squid")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name=squid")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("accessing DNS port of some node as squid")
