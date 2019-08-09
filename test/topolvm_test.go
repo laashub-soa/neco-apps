@@ -73,7 +73,7 @@ spec:
 
 			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "grep", "/test1", "/proc/mounts")
 			if err != nil {
-				return err
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			fields := strings.Fields(string(stdout))
 			if len(fields) < 3 {

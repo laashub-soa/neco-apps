@@ -117,6 +117,6 @@ spec:
 		stdout, stderr, err = ExecAt(boot0,
 			"ckecli", "ssh", "cybozu@10.69.0.4", "--",
 			"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http.test-es.svc.cluster.local:9200")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 	})
 }
