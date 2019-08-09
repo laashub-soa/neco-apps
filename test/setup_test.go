@@ -269,6 +269,7 @@ func applyAndWaitForApplications() {
 				continue
 			}
 			for _, cond := range st.Conditions {
+				fmt.Printf("%s: %v\n", appName, cond.Type)
 				if cond.Type == argocd.ApplicationConditionSyncError {
 					continue OUTER
 				}
