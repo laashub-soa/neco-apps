@@ -8,7 +8,7 @@ test_deny_binding_clusterrole_in_rolebinding_by_user {
 		"userInfo": {
 			"username": "user",
 			"uid": "014fbff9a07c",
-			"groups": ["system:authenticated", "developer"],
+			"groups": ["system:authenticated", "neco-developer"],
 		},
 		"object": {"roleRef": {
 			"apiGroup": "apiGroup: rbac.authorization.k8s.io",
@@ -56,7 +56,7 @@ test_allow_binding_clusterrole_in_clusterrolebinding {
 		"userInfo": {
 			"username": "user",
 			"uid": "014fbff9a07c",
-			"groups": ["system:authenticated", "developer"],
+			"groups": ["system:authenticated", "neco-developer"],
 		},
 		"object": {"roleRef": {
 			"apiGroup": "apiGroup: rbac.authorization.k8s.io",
@@ -72,7 +72,7 @@ test_allow_binding_role_in_rolebinding {
 		"userInfo": {
 			"username": "user",
 			"uid": "014fbff9a07c",
-			"groups": ["system:authenticated", "developer"],
+			"groups": ["system:authenticated", "neco-developer"],
 		},
 		"object": {"roleRef": {
 			"apiGroup": "apiGroup: rbac.authorization.k8s.io",
