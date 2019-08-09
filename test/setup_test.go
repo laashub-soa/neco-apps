@@ -371,12 +371,7 @@ func applyAndWaitForApplications() {
 			}
 			st := app.Status
 			if st.Sync.Status == argocd.SyncStatusCodeSynced &&
-				st.Health.Status == argocd.HealthStatusHealthy &&
-				app.Operation == nil {
-				continue
-			}
-			if st.Sync.Status == argocd.SyncStatusCodeSynced &&
-				st.Health.Status == argocd.HealthStatusProgressing &&
+				(st.Health.Status == argocd.HealthStatusHealthy || st.Health.Status == argocd.HealthStatusProgressing) &&
 				app.Operation == nil {
 				continue
 			}
