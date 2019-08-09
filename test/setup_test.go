@@ -375,6 +375,11 @@ func applyAndWaitForApplications() {
 				app.Operation == nil {
 				continue
 			}
+			if st.Sync.Status == argocd.SyncStatusCodeSynced &&
+				st.Health.Status == argocd.HealthStatusProgressing &&
+				app.Operation == nil {
+				continue
+			}
 			for _, cond := range st.Conditions {
 				if cond.Type == argocd.ApplicationConditionSyncError {
 					continue OUTER
