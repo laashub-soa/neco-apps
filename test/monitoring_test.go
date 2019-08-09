@@ -223,27 +223,50 @@ func testGrafana() {
 		}).Should(Succeed())
 	})
 
-	It("should answer health", func() {
+	It("should have data sources and dashboards", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=grafana", "-o=json")
+			By("getting external IP of grafana service")
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "get", "services", "grafana", "-o=json")
 			if err != nil {
 				return err
 			}
-			podList := new(corev1.PodList)
-			err = json.Unmarshal(stdout, podList)
+			service := new(corev1.Service)
+			err = json.Unmarshal(stdout, service)
 			if err != nil {
 				return err
 			}
-			if len(podList.Items) != 1 {
-				return errors.New("grafana pod doesn't exist")
-			}
-			podName := podList.Items[0].Name
+			loadBalancerIP := service.Status.LoadBalancer.Ingress[0].IP
 
-			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
-				podName, "curl", "http://localhost:3000/api/health")
+			type res struct {
+				ID int `json:"id"`
+			}
+
+			By("getting data sources from grafana")
+			stdout, stderr, err := ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/datasources")
 			if err != nil {
-				return fmt.Errorf("unable to curl :3000/api/health, stderr: %s, err: %v", stderr, err)
+				return fmt.Errorf("unable to get data sources, stderr: %s, err: %v", stderr, err)
+			}
+			var datasources []res
+			err = json.Unmarshal(stdout, &datasources)
+			if err != nil {
+				return err
+			}
+			if len(datasources) == 0 {
+				return fmt.Errorf("no data sources")
+			}
+
+			By("getting dashboards from grafana")
+			stdout, stderr, err = ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/search?folderIds=0&query=&starred=false")
+			if err != nil {
+				return fmt.Errorf("unable to get dashboards, stderr: %s, err: %v", stderr, err)
+			}
+			var dashboards []res
+			err = json.Unmarshal(stdout, &dashboards)
+			if err != nil {
+				return err
+			}
+			if len(dashboards) == 0 {
+				return fmt.Errorf("no dashboards")
 			}
 			return nil
 		}).Should(Succeed())

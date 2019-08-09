@@ -23,7 +23,7 @@ spec:
         - image: docker.elastic.co/eck/eck-operator:0.9.0
           name: manager
           args:
-            ["manager", "--operator-roles", "all", "--enable-debug-logs=true"]
+            ["manager", "--operator-roles", "all", "--enable-debug-logs=false"]
           env:
             - name: OPERATOR_NAMESPACE
               valueFrom:
