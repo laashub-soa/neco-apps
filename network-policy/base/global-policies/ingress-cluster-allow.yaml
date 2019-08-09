@@ -1,0 +1,14 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: ingress-cluster-allow
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  order: 1000.0
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      source:
+        selector: role == 'cluster'

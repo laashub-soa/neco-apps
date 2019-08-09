@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teleport-proxy
+  namespace: teleport
+  labels:
+    app.kubernetes.io/name: teleport
+    app.kubernetes.io/component: proxy
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: teleport
+      app.kubernetes.io/component: proxy
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: teleport
+        app.kubernetes.io/component: proxy
+      annotations:
+        prometheus.io/port: "3020"
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - name: teleport-proxy
+        image: "quay.io/cybozu/teleport:4.0.2.2"
+        imagePullPolicy: IfNotPresent
+        args:
+        - start
+        - --roles=proxy
+        - --diag-addr=0.0.0.0:3020
+        - -c
+        - /etc/teleport/teleport.yaml
+        livenessProbe:
+          httpGet:
+            port: 3020
+            path: /healthz
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        ports:
+        - name: proxyssh
+          containerPort: 3023
+        - name: proxytunnel
+          containerPort: 3024
+        - name: proxykube
+          containerPort: 3026
+        - name: proxyweb
+          containerPort: 3080
+        volumeMounts:
+        - mountPath: /var/lib/certs
+          name: teleport-proxy-tls
+          readOnly: true
+        - mountPath: /etc/teleport
+          name: teleport-proxy-secret
+          readOnly: true
+        - mountPath: /var/lib/teleport
+          name: teleport-storage
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+      volumes:
+      - name: teleport-proxy-tls
+        secret:
+          secretName: teleport-proxy-tls
+      - name: teleport-proxy-secret
+        secret:
+          secretName: teleport-proxy-secret
+      - name: teleport-storage
+        emptyDir: {}
+      serviceAccountName: teleport

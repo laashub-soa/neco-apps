@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - namespace.yaml
+  - rbac.yaml
+  - service.yaml
+  - serviceaccount.yaml
+  - statefulset.yaml
+  - clusterrole.yaml
+configMapGenerator:
+  - name: rolebinding-policy-validator
+    namespace: opa
+    files:
+      - validation/rolebinding-policy.rego
+generatorOptions:
+  labels:
+    openpolicyagent.org/policy: rego

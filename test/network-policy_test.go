@@ -2,15 +2,16 @@ package test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"golang.org/x/crypto/ssh"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -20,7 +21,7 @@ func testNetworkPolicy() {
 		ExecSafeAt(boot0, "kubectl", "create", "namespace", "test-netpol")
 	})
 
-	It("should create test pods with network policies", func() {
+	It("should create test pods", func() {
 		By("deploying testhttpd pods")
 		deployYAML := `
 apiVersion: extensions/v1beta1
@@ -55,26 +56,28 @@ spec:
     targetPort: 8000
   selector:
     app.kubernetes.io/name: testhttpd
----
-apiVersion: crd.projectcalico.org/v1
-kind: NetworkPolicy
-metadata:
-  name: ingress-httpdtest
-  namespace: test-netpol
-spec:
-  order: 2000.0
-  selector: app.kubernetes.io/name== 'testhttpd'
-  types:
-    - Ingress
-  ingress:
-    - action: Allow
-      protocol: TCP
-      destination:
-        ports:
-          - 8000
 `
 		_, stderr, err := ExecAtWithInput(boot0, []byte(deployYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+
+		By("waiting pods are ready")
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "-n", "test-netpol", "get", "deployments/testhttpd", "-o", "json")
+			if err != nil {
+				return err
+			}
+
+			deployment := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deployment)
+			if err != nil {
+				return err
+			}
+
+			if deployment.Status.ReadyReplicas != 2 {
+				return errors.New("ReadyReplicas is not 2")
+			}
+			return nil
+		}).Should(Succeed())
 
 		// connections to 8080 and 8443 of contour are rejected unless we register IngressRoute
 		By("creating IngressRoute")
@@ -125,21 +128,15 @@ spec:
 		createUbuntuDebugPod("default")
 	})
 
-	podList := new(corev1.PodList)
 	testhttpdPodList := new(corev1.PodList)
 	nodeList := new(corev1.NodeList)
 	var nodeIP string
 	var apiServerIP string
 
 	It("should get pod/node list", func() {
-		By("getting all pod list")
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-A", "-o=json")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		err = json.Unmarshal(stdout, podList)
-		Expect(err).NotTo(HaveOccurred())
 
 		By("getting httpd pod list")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "-n", "test-netpol", "-o=json")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n", "test-netpol", "-o=json")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		err = json.Unmarshal(stdout, testhttpdPodList)
 		Expect(err).NotTo(HaveOccurred())
@@ -190,86 +187,25 @@ spec:
 		}).Should(Succeed())
 	})
 
-	It("should filter icmp packets to pods", func() {
+	It("should filter packets from squid/unbound to private network", func() {
+		By("accessing to local IP")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "get", "pods", "-o=json")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		podList := new(corev1.PodList)
+		err = json.Unmarshal(stdout, podList)
+		Expect(err).NotTo(HaveOccurred())
+		testhttpdIP := testhttpdPodList.Items[0].Status.PodIP
+
 		for _, pod := range podList.Items {
-			if pod.Spec.HostNetwork {
-				continue
-			}
-			By("ping to " + pod.GetName())
-			stdout, stderr, err := ExecAt(boot0, "ping", "-c", "1", "-W", "3", pod.Status.PodIP)
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", pod.Namespace, pod.Name, "--", "curl", testhttpdIP, "-m", "5")
 			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
-	})
 
-	It("should accept and deny TCP packets according to the registered network policies", func() {
-		const portShouldBeDenied = 65535
-
-		testcase := []struct {
-			namespace string
-			selector  string
-			ports     []int
-		}{
-			{"argocd", "app.kubernetes.io/name=argocd-application-controller", []int{8082}},
-			{"argocd", "app.kubernetes.io/name=argocd-redis", []int{6379}},
-			{"argocd", "app.kubernetes.io/name=argocd-repo-server", []int{8081, 8084}},
-			{"argocd", "app.kubernetes.io/name=argocd-server", []int{8080, 8083}},
-			{"external-dns", "app.kubernetes.io/name=external-dns", []int{7979}},
-			{"external-dns", "app.kubernetes.io/name=cert-manager", []int{9402}},
-			{"external-dns", "app.kubernetes.io/name=webhook", []int{6443}},
-			{"ingress", "app.kubernetes.io/name=contour", []int{8002, 8080, 8443}},
-			{"internet-egress", "app.kubernetes.io/name=squid", []int{3128}},
-			{"internet-egress", "app.kubernetes.io/name=unbound", []int{53}},
-			{"kube-system", "cke.cybozu.com/appname=cluster-dns", []int{1053, 8080}},
-			{"kube-system", "app.kubernetes.io/name=kube-state-metrics", []int{8080, 8081}},
-			{"metallb-system", "app.kubernetes.io/component=controller", []int{7472}},
-			{"monitoring", "app.kubernetes.io/name=alertmanager", []int{9093}},
-			{"monitoring", "app.kubernetes.io/name=prometheus", []int{9090}},
-			{"opa", "app.kubernetes.io/name=opa", []int{8443}},
-		}
-
-		for _, tc := range testcase {
-			By("getting target pod list: ns=" + tc.namespace + ", selector=" + tc.selector)
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", tc.namespace, "-l", tc.selector, "get", "pods", "-o=json")
-			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
-			podList := new(corev1.PodList)
-			err = json.Unmarshal(stdout, podList)
-			Expect(err).NotTo(HaveOccurred())
-
-			for _, pod := range podList.Items {
-				By("connecting to pod: " + pod.GetName())
-				for _, port := range tc.ports {
-					By("  -> port: " + strconv.Itoa(port) + " (allowed)")
-					stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(port), "-e", "X")
-					Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-				}
-
-				By("  -> port: " + strconv.Itoa(portShouldBeDenied) + " (denied)")
-				stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "timeout", "3s", "telnet", pod.Status.PodIP, strconv.Itoa(portShouldBeDenied), "-e", "X")
-				switch t := err.(type) {
-				case *ssh.ExitError:
-					// telnet command returns 124 when it times out
-					Expect(t.ExitStatus()).To(Equal(124), "stdout: %s, stderr: %s", stdout, stderr)
-				default:
-					Fail("telnet should fail with timeout")
-				}
-
-				if tc.namespace == "internet-egress" {
-					By("accessing to local IP")
-					testhttpdIP := testhttpdPodList.Items[0].Status.PodIP
-					stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", pod.Namespace, pod.Name, "--", "curl", testhttpdIP, "-m", "5")
-					Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-				}
-			}
-		}
-	})
-
-	It("should filter packets from squid/unbound to private network", func() {
 		By("deploying ubuntu for network commands in internet-egress NS")
 		createUbuntuDebugPod("internet-egress")
 
 		By("labelling pod as squid")
-		_, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name=squid")
+		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name=squid")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("accessing DNS port of some node as squid")
