@@ -7,7 +7,6 @@ resources:
   - service.yaml
   - serviceaccount.yaml
   - statefulset.yaml
-  - clusterrole.yaml
 configMapGenerator:
   - name: rolebinding-policy-validator
     namespace: opa
