@@ -1,3 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-init-script
+data:
+  init.sh: |-
+    #!/bin/bash
+    # Download node-exporter-full dashboard JSON,
+    # then replace ${DS_PROMETHEUS} to "prometheus"
+    # because ${DS_PROMETHEUS} is not available in provisioning
+    curl -sSLf https://grafana.com/api/dashboards/1860/revisions/14/download | \
+    jq '(.rows[].panels[] | select(.datasource == "${DS_PROMETHEUS}") | .datasource) |= "prometheus"' | \
+    jq '(.templating.list[] | select(.datasource == "${DS_PROMETHEUS}") | .datasource) |= "prometheus"' \
+    > /config/node-exporter.json
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -16,19 +31,17 @@ spec:
     spec:
       initContainers:
         # JSON of https://grafana.com/api/dashboards/1860 is too large to create ConfigMap by kubectl, so use init container
-        - image: quay.io/cybozu/grafana:6.2.5.1
+        - image: quay.io/cybozu/ubuntu-debug:18.0.4
           imagePullPolicy: IfNotPresent
           name: grafana-initconfig
-          command: ["curl"]
-          args:
-            - -sSLf
-            - -o
-            - /config/node-exporter.json
-            - https://grafana.com/api/dashboards/1860/revisions/14/download
+          command: ["/bin/init.sh"]
           env:
             - name: HTTPS_PROXY
               value: http://squid.internet-egress.svc.cluster.local:3128
           volumeMounts:
+            - name: grafana-init-script-volume
+              mountPath: /bin
+              readOnly: true
             - name: dashboard-node-exporter-volume
               mountPath: /config
       containers:
@@ -99,6 +112,10 @@ spec:
         fsGroup: 10000
         runAsUser: 10000
       volumes:
+        - name: grafana-init-script-volume
+          configMap:
+            name: grafana-init-script
+            defaultMode: 0777
         - configMap:
             defaultMode: 420
             name: grafana
