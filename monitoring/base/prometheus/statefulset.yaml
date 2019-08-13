@@ -1,11 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: prometheus
   labels:
     app.kubernetes.io/name: prometheus
 spec:
-  replicas: 1
+  serviceName: prometheus
   selector:
     matchLabels:
       app.kubernetes.io/name: prometheus
@@ -32,5 +32,12 @@ spec:
           configMap:
             defaultMode: 420
             name: prometheus-server-conf
-        - name: prometheus-storage-volume
-          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: prometheus-storage-volume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: topolvm-provisioner
+        resources:
+          requests:
+            storage: 1Gi

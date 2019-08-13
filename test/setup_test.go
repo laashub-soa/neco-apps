@@ -16,7 +16,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"gopkg.in/yaml.v2"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -206,112 +205,6 @@ func testSetup() {
 			stdout, stderr, err = ExecAtWithInput(boot0, []byte(elasticSecret), "kubectl", "--namespace=elastic-system", "create", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		})
-	} else {
-		// Workaround for teleport initial release
-		// TODO: Remove this else block when teleport is merged into the release branch.
-		It("should prepare secrets for teleport", func() {
-			By("checking teleport namespace")
-			stdout := ExecSafeAt(boot0, "kubectl", "get", "namespaces", "-o", "json")
-			var nsList corev1.NamespaceList
-			err := json.Unmarshal(stdout, &nsList)
-			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", string(stdout))
-			setupTeleport := true
-			for _, v := range nsList.Items {
-				if v.Name == "teleport" {
-					setupTeleport = false
-					break
-				}
-			}
-
-			if setupTeleport {
-				By("creating namespace and secrets for teleport")
-				stdout, stderr, err := ExecAt(boot0, "env", "ETCDCTL_API=3", "etcdctl", "--cert=/etc/etcd/backup.crt", "--key=/etc/etcd/backup.key",
-					"get", "--print-value-only", "/neco/teleport/auth-token")
-				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-				teleportToken := strings.TrimSpace(string(stdout))
-				teleportTmpl := template.Must(template.New("").Parse(teleportSecret))
-				buf := bytes.NewBuffer(nil)
-				err = teleportTmpl.Execute(buf, struct {
-					Token string
-				}{
-					Token: teleportToken,
-				})
-				Expect(err).NotTo(HaveOccurred())
-				ExecSafeAt(boot0, "kubectl", "create", "namespace", "teleport")
-				stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
-				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
-				ExecSafeAt(boot0, "ckecli", "etcd", "user-add", "teleport", "/teleport")
-				ExecSafeAt(boot0, "ckecli", "etcd", "issue", "teleport", "--output", "file")
-				ExecSafeAt(boot0, "kubectl", "-n", "teleport", "create", "secret", "generic",
-					"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
-					"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
-			}
-		})
-
-		// Workaround for teleport-auth upgrade
-		// TODO: Remove this section when teleport-auth using pv is merged into the release branch.
-		It("should upgrade statefulset (teleport-auth)", func() {
-			By("checking teleport-auth spec")
-			stdout := ExecSafeAt(boot0, "kubectl", "-n", "teleport", "get", "statefulset", "-o", "json")
-			var stsList appsv1.StatefulSetList
-			err := json.Unmarshal(stdout, &stsList)
-			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", string(stdout))
-			for _, sts := range stsList.Items {
-				if sts.Name != "teleport-auth" {
-					continue
-				}
-				if len(sts.Spec.VolumeClaimTemplates) == 0 {
-					By("deleting previous teleport-auth")
-					ExecSafeAt(boot0, "kubectl", "-n", "teleport", "delete", "statefulset", "teleport-auth")
-				}
-			}
-		})
-
-		// TODO: Remove this else block when elastic is merged into the release branch.
-		It("should prepare secrets for elastic", func() {
-			By("checking elastic namespace")
-			stdout := ExecSafeAt(boot0, "kubectl", "get", "namespaces", "-o", "json")
-			var nsList corev1.NamespaceList
-			err := json.Unmarshal(stdout, &nsList)
-			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", string(stdout))
-			setupElastic := true
-			for _, v := range nsList.Items {
-				if v.Name == "elastic-system" {
-					setupElastic = false
-					break
-				}
-			}
-
-			if setupElastic {
-				By("creating namespace and secrets for elastic")
-				ExecSafeAt(boot0, "kubectl", "create", "namespace", "elastic-system")
-				stdout, stderr, err := ExecAtWithInput(boot0, []byte(elasticSecret), "kubectl", "--namespace=elastic-system", "create", "-f", "-")
-				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-			}
-		})
-
-		// TODO: Remove this else block when grafana is merged into the release branch.
-		It("should prepare secrets for grafana", func() {
-			By("checking elastic namespace")
-			stdout := ExecSafeAt(boot0, "kubectl", "get", "deployment", "-n", "monitoring", "-o", "json")
-			var deployList appsv1.DeploymentList
-			err := json.Unmarshal(stdout, &deployList)
-			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", string(stdout))
-			setupGrafana := true
-			for _, d := range deployList.Items {
-				if d.Name == "grafana" {
-					setupGrafana = false
-					break
-				}
-			}
-
-			if setupGrafana {
-				By("creating secrets for grafana")
-				stdout, stderr, err := ExecAtWithInput(boot0, []byte(grafanaSecret), "kubectl", "--namespace=monitoring", "create", "-f", "-")
-				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-			}
-		})
 	}
 
 	It("should checkout neco-apps repository@"+commitID, func() {
@@ -371,7 +264,7 @@ func applyAndWaitForApplications() {
 			}
 			st := app.Status
 			if st.Sync.Status == argocd.SyncStatusCodeSynced &&
-				st.Health.Status == argocd.HealthStatusHealthy &&
+				(st.Health.Status == argocd.HealthStatusHealthy || st.Health.Status == argocd.HealthStatusProgressing) &&
 				app.Operation == nil {
 				continue
 			}

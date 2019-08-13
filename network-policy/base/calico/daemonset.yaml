@@ -88,6 +88,8 @@ spec:
                   fieldPath: spec.nodeName
             - name: FELIX_HEALTHENABLED
               value: "true"
+            - name: FELIX_PROMETHEUSMETRICSENABLED
+              value: "true"
             - name: NO_PROXY
               value: localhost
           securityContext:

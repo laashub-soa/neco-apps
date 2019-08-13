@@ -4,6 +4,7 @@ metadata:
   name: opa
   labels:
     openpolicyagent.org/webhook: ignore
+    control-plane: "true"
 spec:
   finalizers:
     - kubernetes
@@ -14,6 +15,7 @@ metadata:
   name: kube-system
   labels:
     openpolicyagent.org/webhook: ignore
+    control-plane: "true"
 spec:
   finalizers:
     - kubernetes
