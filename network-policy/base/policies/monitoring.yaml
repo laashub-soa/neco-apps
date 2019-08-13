@@ -31,3 +31,23 @@ spec:
           - 9093
           - 9100
           - 9105
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-prometheus-etcd-allow
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  order: 500.0
+  selector: app.kubernetes.io/name == 'prometheus'
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: role == 'node'
+        ports:
+          - 2381
