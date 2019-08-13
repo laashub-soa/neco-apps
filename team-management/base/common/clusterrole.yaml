@@ -8,12 +8,39 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - pods
   - pods/attach
   - pods/exec
   - pods/portforward
   - pods/proxy
   - secrets
+  - services
   - services/proxy
+  - configmaps
+  - endpoints
+  - persistentvolumeclaims
+  - replicationcontrollers
+  - replicationcontrollers/scale
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - bindings
+  - events
+  - limitranges
+  - pods/log
+  - pods/status
+  - replicationcontrollers/status
+  - resourcequotas
+  - resourcequotas/status
   verbs:
   - get
   - list
@@ -23,33 +50,38 @@ rules:
   resources:
   - serviceaccounts
   verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
   - impersonate
 - apiGroups:
-  - ""
+  - apps
   resources:
-  - pods
-  - pods/attach
-  - pods/exec
-  - pods/portforward
-  - pods/proxy
+  - daemonsets
+  - deployments
+  - deployments/scale
+  - replicasets
+  - replicasets/scale
+  - statefulsets
+  - statefulsets/scale
   verbs:
+  - get
+  - list
+  - watch
   - create
   - delete
   - deletecollection
   - patch
   - update
 - apiGroups:
-  - ""
+  - apps
   resources:
-  - configmaps
-  - endpoints
-  - persistentvolumeclaims
-  - replicationcontrollers
-  - replicationcontrollers/scale
-  - secrets
-  - serviceaccounts
-  - services
-  - services/proxy
+  - deployments/rollback
   verbs:
   - create
   - delete
@@ -59,20 +91,11 @@ rules:
 - apiGroups:
   - apps
   resources:
-  - daemonsets
-  - deployments
-  - deployments/rollback
-  - deployments/scale
-  - replicasets
-  - replicasets/scale
-  - statefulsets
-  - statefulsets/scale
+  - controllerrevisions
   verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
+  - get
+  - list
+  - watch
 - apiGroups:
   - autoscaling
   resources:
@@ -88,22 +111,6 @@ rules:
   resources:
   - cronjobs
   - jobs
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - extensions
-  resources:
-  - daemonsets
-  - deployments
-  - deployments/rollback
-  - deployments/scale
-  - replicasets
-  - replicasets/scale
-  - replicationcontrollers/scale
   verbs:
   - create
   - delete
@@ -121,51 +128,6 @@ rules:
   - patch
   - update
 - apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - endpoints
-  - persistentvolumeclaims
-  - pods
-  - replicationcontrollers
-  - replicationcontrollers/scale
-  - serviceaccounts
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - bindings
-  - events
-  - limitranges
-  - pods/log
-  - pods/status
-  - replicationcontrollers/status
-  - resourcequotas
-  - resourcequotas/status
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - controllerrevisions
-  - daemonsets
-  - deployments
-  - deployments/scale
-  - replicasets
-  - replicasets/scale
-  - statefulsets
-  - statefulsets/scale
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
   - autoscaling
   resources:
   - horizontalpodautoscalers
@@ -178,19 +140,6 @@ rules:
   resources:
   - cronjobs
   - jobs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - daemonsets
-  - deployments
-  - deployments/scale
-  - replicasets
-  - replicasets/scale
-  - replicationcontrollers/scale
   verbs:
   - get
   - list
