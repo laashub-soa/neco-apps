@@ -164,14 +164,14 @@ rules:
   - rolebindings
   - roles
   verbs:
+  - get
+  - list
+  - watch
   - create
   - delete
   - deletecollection
-  - get
-  - list
   - patch
   - update
-  - watch
 # The permissions for CustomResources are written below
 - apiGroups:
   - crd.projectcalico.org
@@ -214,6 +214,15 @@ rules:
   - patch
   - delete
   - deletecollection
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - challenges
+  - orders
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - externaldns.k8s.io
   resources:
