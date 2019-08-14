@@ -1,12 +1,11 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
-  name: sandbox-role-binding
-  namespace: sandbox
+  name: authenticated-user-cluster-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: neco-developer
+  name: authenticated-users
 subjects:
   - kind: Group
     name: system:authenticated

@@ -3,147 +3,39 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: developer
+  name: neco-developer
 rules:
 - apiGroups:
   - ""
   resources:
-  - pods/attach
-  - pods/exec
-  - pods/portforward
-  - pods/proxy
-  - secrets
-  - services/proxy
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - serviceaccounts
-  verbs:
-  - impersonate
-- apiGroups:
-  - ""
-  resources:
   - pods
   - pods/attach
   - pods/exec
   - pods/portforward
   - pods/proxy
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - endpoints
-  - persistentvolumeclaims
-  - replicationcontrollers
-  - replicationcontrollers/scale
   - secrets
-  - serviceaccounts
   - services
+  - serviceaccounts
   - services/proxy
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - apps
-  resources:
-  - daemonsets
-  - deployments
-  - deployments/rollback
-  - deployments/scale
-  - replicasets
-  - replicasets/scale
-  - statefulsets
-  - statefulsets/scale
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - autoscaling
-  resources:
-  - horizontalpodautoscalers
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - batch
-  resources:
-  - cronjobs
-  - jobs
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - extensions
-  resources:
-  - daemonsets
-  - deployments
-  - deployments/rollback
-  - deployments/scale
-  - replicasets
-  - replicasets/scale
-  - replicationcontrollers/scale
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
   - configmaps
   - endpoints
   - persistentvolumeclaims
-  - persistentvolumes
-  - nodes
-  - pods
   - replicationcontrollers
   - replicationcontrollers/scale
-  - serviceaccounts
-  - services
   verbs:
   - get
   - list
   - watch
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
 - apiGroups:
   - ""
   resources:
-  - bindings
   - events
   - limitranges
-  - namespaces/status
   - pods/log
   - pods/status
   - replicationcontrollers/status
@@ -154,17 +46,8 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
   - apps
   resources:
-  - controllerrevisions
   - daemonsets
   - deployments
   - deployments/scale
@@ -176,10 +59,15 @@ rules:
   - get
   - list
   - watch
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
 - apiGroups:
-  - autoscaling
+  - apps
   resources:
-  - horizontalpodautoscalers
+  - controllerrevisions
   verbs:
   - get
   - list
@@ -193,19 +81,11 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - extensions
-  resources:
-  - daemonsets
-  - deployments
-  - deployments/scale
-  - replicasets
-  - replicasets/scale
-  - replicationcontrollers/scale
-  verbs:
-  - get
-  - list
-  - watch
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
 - apiGroups:
   - policy
   resources:
@@ -214,6 +94,24 @@ rules:
   - get
   - list
   - watch
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
 - apiGroups:
   - authorization.k8s.io
   resources:
@@ -226,14 +124,14 @@ rules:
   - rolebindings
   - roles
   verbs:
+  - get
+  - list
+  - watch
   - create
   - delete
   - deletecollection
-  - get
-  - list
   - patch
   - update
-  - watch
 # The permissions for CustomResources are written below
 - apiGroups:
   - crd.projectcalico.org
@@ -277,6 +175,15 @@ rules:
   - delete
   - deletecollection
 - apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - challenges
+  - orders
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - externaldns.k8s.io
   resources:
   - dnsendpoints
@@ -302,3 +209,21 @@ rules:
   - patch
   - delete
   - deletecollection
+---
+# As rolebinding resource does not allow for manipulating cluster-wide resources, create clusterrole to manipulate cluster-wide resources to use with clusterrolebinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: authenticated-users
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  - nodes
+  - namespaces
+  - namespaces/status
+  verbs:
+  - get
+  - list
+  - watch
