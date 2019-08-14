@@ -105,7 +105,7 @@
                     "tableColumn": "",
                     "targets": [
                         {
-                            "expr": "max(etcd_server_has_leader)",
+                            "expr": "max(etcd_server_has_leader{job='$Job'})",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "refId": "A",
@@ -186,7 +186,7 @@
                     "tableColumn": "",
                     "targets": [
                         {
-                            "expr": "max(etcd_server_leader_changes_seen_total)",
+                            "expr": "max(etcd_server_leader_changes_seen_total{job='$Job'})",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "refId": "A",
@@ -262,7 +262,7 @@
                     "tableColumn": "",
                     "targets": [
                         {
-                            "expr": "max(etcd_server_leader_changes_seen_total)",
+                            "expr": "max(etcd_server_leader_changes_seen_total{job='$Job'})",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "refId": "A",
@@ -328,7 +328,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(rate(grpc_server_started_total{grpc_type=\"unary\"}[5m]))",
+                            "expr": "sum(rate(grpc_server_started_total{grpc_type=\"unary\",job='$Job'}[5m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "RPC Rate",
@@ -337,7 +337,7 @@
                             "step": 60
                         },
                         {
-                            "expr": "sum(rate(grpc_server_handled_total{grpc_type=\"unary\",grpc_code!=\"OK\"}[5m]))",
+                            "expr": "sum(rate(grpc_server_handled_total{grpc_type=\"unary\",grpc_code!=\"OK\",job='$Job'}[5m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "RPC Failed Rate",
@@ -417,7 +417,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(grpc_server_started_total{grpc_service=\"etcdserverpb.Watch\",grpc_type=\"bidi_stream\"}) - sum(grpc_server_handled_total{grpc_service=\"etcdserverpb.Watch\",grpc_type=\"bidi_stream\"})",
+                            "expr": "sum(grpc_server_started_total{grpc_service=\"etcdserverpb.Watch\",grpc_type=\"bidi_stream\",job='$Job'}) - sum(grpc_server_handled_total{grpc_service=\"etcdserverpb.Watch\",grpc_type=\"bidi_stream\",job='$Job'})",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "Watch Streams",
@@ -426,7 +426,7 @@
                             "step": 60
                         },
                         {
-                            "expr": "sum(grpc_server_started_total{grpc_service=\"etcdserverpb.Lease\",grpc_type=\"bidi_stream\"}) - sum(grpc_server_handled_total{grpc_service=\"etcdserverpb.Lease\",grpc_type=\"bidi_stream\"})",
+                            "expr": "sum(grpc_server_started_total{grpc_service=\"etcdserverpb.Lease\",grpc_type=\"bidi_stream\",job='$Job'}) - sum(grpc_server_handled_total{grpc_service=\"etcdserverpb.Lease\",grpc_type=\"bidi_stream\",job='$Job'})",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "Lease Streams",
@@ -520,7 +520,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "etcd_debugging_mvcc_db_total_size_in_bytes",
+                            "expr": "etcd_debugging_mvcc_db_total_size_in_bytes{job='$Job'}",
                             "format": "time_series",
                             "hide": false,
                             "interval": "",
@@ -601,7 +601,7 @@
                     "steppedLine": true,
                     "targets": [
                         {
-                            "expr": "histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m])) by (instance, le))",
+                            "expr": "histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket{job='$Job'}[5m])) by (instance, le))",
                             "format": "time_series",
                             "hide": false,
                             "intervalFactor": 2,
@@ -611,7 +611,7 @@
                             "step": 120
                         },
                         {
-                            "expr": "histogram_quantile(0.99, sum(rate(etcd_disk_backend_commit_duration_seconds_bucket[5m])) by (instance, le))",
+                            "expr": "histogram_quantile(0.99, sum(rate(etcd_disk_backend_commit_duration_seconds_bucket{job='$Job'}[5m])) by (instance, le))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "{{instance}} DB fsync",
@@ -689,7 +689,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "process_resident_memory_bytes",
+                            "expr": "process_resident_memory_bytes{job='$Job'}",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "{{instance}} Resident Memory",
@@ -781,7 +781,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "rate(etcd_network_client_grpc_received_bytes_total[5m])",
+                            "expr": "rate(etcd_network_client_grpc_received_bytes_total{job='$Job'}[5m])",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "{{instance}} Client Traffic In",
@@ -861,7 +861,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "rate(etcd_network_client_grpc_sent_bytes_total[5m])",
+                            "expr": "rate(etcd_network_client_grpc_sent_bytes_total{job='$Job'}[5m])",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "{{instance}} Client Traffic Out",
@@ -941,7 +941,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(rate(etcd_network_peer_received_bytes_total[5m])) by (instance)",
+                            "expr": "sum(rate(etcd_network_peer_received_bytes_total{job='$Job'}[5m])) by (instance)",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "{{instance}} Peer Traffic In",
@@ -1023,7 +1023,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(rate(etcd_network_peer_sent_bytes_total[5m])) by (instance)",
+                            "expr": "sum(rate(etcd_network_peer_sent_bytes_total{job='$Job'}[5m])) by (instance)",
                             "format": "time_series",
                             "hide": false,
                             "interval": "",
@@ -1115,7 +1115,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(rate(etcd_server_proposals_failed_total[5m]))",
+                            "expr": "sum(rate(etcd_server_proposals_failed_total{job='$Job'}[5m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "Proposal Failure Rate",
@@ -1124,7 +1124,7 @@
                             "step": 60
                         },
                         {
-                            "expr": "sum(etcd_server_proposals_pending)",
+                            "expr": "sum(etcd_server_proposals_pending{job='$Job'})",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "Proposal Pending Total",
@@ -1133,7 +1133,7 @@
                             "step": 60
                         },
                         {
-                            "expr": "sum(rate(etcd_server_proposals_committed_total[5m]))",
+                            "expr": "sum(rate(etcd_server_proposals_committed_total{job='$Job'}[5m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "Proposal Commit Rate",
@@ -1142,7 +1142,7 @@
                             "step": 60
                         },
                         {
-                            "expr": "sum(rate(etcd_server_proposals_applied_total[5m]))",
+                            "expr": "sum(rate(etcd_server_proposals_applied_total{job='$Job'}[5m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "Proposal Apply Rate",
@@ -1224,7 +1224,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "changes(etcd_server_leader_changes_seen_total[1d])",
+                            "expr": "changes(etcd_server_leader_changes_seen_total{job='$Job'}[1d])",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "{{instance}} Total Leader Elections Per Day",
@@ -1317,7 +1317,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(rate(etcd_server_proposals_committed_total[5m]))",
+                            "expr": "sum(rate(etcd_server_proposals_committed_total{job='$Job'}[5m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "total number of consensus proposals committed",
@@ -1326,7 +1326,7 @@
                             "step": 60
                         },
                         {
-                            "expr": "sum(rate(etcd_server_proposals_applied_total[5m]))",
+                            "expr": "sum(rate(etcd_server_proposals_applied_total{job='$Job'}[5m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "total number of consensus proposals applied",
@@ -1404,7 +1404,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(etcd_server_proposals_pending)",
+                            "expr": "sum(etcd_server_proposals_pending{job='$Job'})",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "Proposals pending",
@@ -1492,7 +1492,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(rate(etcd_disk_wal_fsync_duration_seconds_sum[1m]))",
+                            "expr": "sum(rate(etcd_disk_wal_fsync_duration_seconds_sum{job='$Job'}[1m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "\tThe latency distributions of fsync called by wal",
@@ -1500,7 +1500,7 @@
                             "step": 30
                         },
                         {
-                            "expr": "sum(rate(etcd_disk_backend_commit_duration_seconds_sum[1m]))",
+                            "expr": "sum(rate(etcd_disk_backend_commit_duration_seconds_sum{job='$Job'}[1m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "The latency distributions of commit called by backend",
@@ -1588,7 +1588,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(rate(etcd_network_client_grpc_received_bytes_total[1m]))",
+                            "expr": "sum(rate(etcd_network_client_grpc_received_bytes_total{job='$Job'}[1m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "The total number of bytes received by grpc clients",
@@ -1596,7 +1596,7 @@
                             "step": 30
                         },
                         {
-                            "expr": "sum(rate(etcd_network_client_grpc_sent_bytes_total[1m]))",
+                            "expr": "sum(rate(etcd_network_client_grpc_sent_bytes_total{job='$Job'}[1m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "The total number of bytes sent to grpc clients",
@@ -1685,7 +1685,7 @@
                     "steppedLine": false,
                     "targets": [
                         {
-                            "expr": "sum(rate(etcd_debugging_snap_save_total_duration_seconds_sum[1m]))",
+                            "expr": "sum(rate(etcd_debugging_snap_save_total_duration_seconds_sum{job='$Job'}[1m]))",
                             "format": "time_series",
                             "intervalFactor": 2,
                             "legendFormat": "The total latency distributions of save called by snapshot",
@@ -1742,7 +1742,31 @@
     "style": "dark",
     "tags": [],
     "templating": {
-        "list": []
+        "list": [
+            {
+                "allValue": ".*",
+                "current": {
+                    "text": "bootserver-etcd",
+                    "value": "bootserver-etcd"
+                },
+                "datasource": "prometheus",
+                "hide": 0,
+                "includeAll": false,
+                "label": null,
+                "multi": false,
+                "name": "Job",
+                "options": [],
+                "query": "label_values(etcd_server_has_leader,job)",
+                "refresh": 1,
+                "regex": "",
+                "sort": 0,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            }
+        ]
     },
     "time": {
         "from": "now-6h",
