@@ -15,6 +15,7 @@ rules:
   - pods/proxy
   - secrets
   - services
+  - serviceaccounts
   - services/proxy
   - configmaps
   - endpoints
@@ -33,7 +34,6 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - bindings
   - events
   - limitranges
   - pods/log
@@ -45,20 +45,6 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - serviceaccounts
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-  - impersonate
 - apiGroups:
   - apps
   resources:
@@ -81,37 +67,20 @@ rules:
 - apiGroups:
   - apps
   resources:
-  - deployments/rollback
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
-  - apps
-  resources:
   - controllerrevisions
   verbs:
   - get
   - list
   - watch
 - apiGroups:
-  - autoscaling
-  resources:
-  - horizontalpodautoscalers
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
-- apiGroups:
   - batch
   resources:
   - cronjobs
   - jobs
   verbs:
+  - get
+  - list
+  - watch
   - create
   - delete
   - deletecollection
@@ -122,6 +91,9 @@ rules:
   resources:
   - poddisruptionbudgets
   verbs:
+  - get
+  - list
+  - watch
   - create
   - delete
   - deletecollection
@@ -135,23 +107,11 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - batch
-  resources:
-  - cronjobs
-  - jobs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - get
-  - list
-  - watch
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
 - apiGroups:
   - authorization.k8s.io
   resources:
@@ -261,22 +221,8 @@ rules:
   resources:
   - persistentvolumes
   - nodes
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - namespaces/status
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
   - namespaces
+  - namespaces/status
   verbs:
   - get
   - list
