@@ -61,3 +61,13 @@ groups:
         labels:
           severity: warning
         for: 10m
+#  TODO: Uncomment after setting up the staging machines
+#  - name: all
+#    rules:
+#      - alert: TargetDown
+#        expr: up == 0
+#        labels:
+#          severity: warning
+#        for: 1h
+#        annotations:
+#          summary: "{{ $labels.job }} in {{ $labels.instance }} is down"
