@@ -1,9 +1,9 @@
-package kubernetes.test_admission
+package networkPolicyOrder.test_violation
 
-import data.kubernetes.admission
+import data.networkPolicyOrder
 
 test_allow_creating_network_policy_in_system_namespaces {
-	count(admission.deny) == 0 with input as {"request": {
+	count(networkPolicyOrder.violation) == 0 with input as {"review": {
 		"kind": {
 			"kind": "NetworkPolicy",
 			"group": "crd.projectcalico.org",
@@ -14,11 +14,14 @@ test_allow_creating_network_policy_in_system_namespaces {
 			"metadata": {"name": "foo"},
 			"spec": {},
 		},
+	}, "parameters": {
+		"systemNamespaces": ["kube-system", "argocd"],
+		"limitOrder": 1000.0,
 	}}
 }
 
 test_deny_creating_high_priority_network_policy {
-	count(admission.deny) > 0 with input as {"request": {
+	count(networkPolicyOrder.violation) > 0 with input as {"review": {
 		"kind": {
 			"kind": "NetworkPolicy",
 			"group": "crd.projectcalico.org",
@@ -30,11 +33,14 @@ test_deny_creating_high_priority_network_policy {
 			"metadata": {"name": "foo"},
 			"spec": {"order": 100},
 		},
+	}, "parameters": {
+		"systemNamespaces": ["kube-system", "argocd"],
+		"limitOrder": 1000.0,
 	}}
 }
 
 test_deny_creating_high_priority_network_policy_with_old_version {
-	count(admission.deny) > 0 with input as {"request": {
+	count(networkPolicyOrder.violation) > 0 with input as {"review": {
 		"kind": {
 			"kind": "NetworkPolicy",
 			"group": "crd.projectcalico.org",
@@ -46,11 +52,14 @@ test_deny_creating_high_priority_network_policy_with_old_version {
 			"metadata": {"name": "foo"},
 			"spec": {"order": 100},
 		},
+	}, "parameters": {
+		"systemNamespaces": ["kube-system", "argocd"],
+		"limitOrder": 1000.0,
 	}}
 }
 
 test_deny_updating_high_priority_network_policy {
-	count(admission.deny) > 0 with input as {"request": {
+	count(networkPolicyOrder.violation) > 0 with input as {"review": {
 		"kind": {
 			"kind": "NetworkPolicy",
 			"group": "crd.projectcalico.org",
@@ -61,11 +70,14 @@ test_deny_updating_high_priority_network_policy {
 			"metadata": {"name": "foo"},
 			"spec": {"order": 100},
 		},
+	}, "parameters": {
+		"systemNamespaces": ["kube-system", "argocd"],
+		"limitOrder": 1000.0,
 	}}
 }
 
 test_allow_creating_low_priority_network_policy {
-	count(admission.deny) == 0 with input as {"request": {
+	count(networkPolicyOrder.violation) == 0 with input as {"review": {
 		"kind": {
 			"kind": "NetworkPolicy",
 			"group": "crd.projectcalico.org",
@@ -76,5 +88,8 @@ test_allow_creating_low_priority_network_policy {
 			"metadata": {"name": "foo"},
 			"spec": {"order": 2000},
 		},
+	}, "parameters": {
+		"systemNamespaces": ["kube-system", "argocd"],
+		"limitOrder": 1000.0,
 	}}
 }

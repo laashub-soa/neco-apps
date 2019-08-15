@@ -46,6 +46,7 @@ var _ = Describe("Test applications", func() {
 	if doBootstrap {
 		return
 	}
+	Context("gatekeeper", testGatekeeper)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)
 	Context("external-dns", testExternalDNS)
