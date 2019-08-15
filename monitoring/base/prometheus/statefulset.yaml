@@ -19,7 +19,9 @@ spec:
         - name: prometheus
           image: quay.io/cybozu/prometheus:2.9.2.1
           command: ["prometheus"]
-          args: ["--config.file=/etc/prometheus/prometheus.yaml"]
+          args:
+            - --config.file=/etc/prometheus/prometheus.yaml
+            - --web.enable-admin-api
           ports:
             - containerPort: 9090
           volumeMounts:
