@@ -21,6 +21,7 @@ spec:
           command: ["prometheus"]
           args:
             - --config.file=/etc/prometheus/prometheus.yaml
+            - --storage.tsdb.path=/prometheus/data/
             - --web.enable-admin-api
           ports:
             - containerPort: 9090
