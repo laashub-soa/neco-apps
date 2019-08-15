@@ -1,0 +1,34 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: networkpolicyorder
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  crd:
+    spec:
+      names:
+        kind: NetworkPolicyOrder
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            systemNamespaces:
+              type: array
+              items:
+                type: string
+            limitOrder:
+              type: integer
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package networkPolicyOrder
+        operations = {"CREATE", "UPDATE"}
+
+        violation[{"msg": msg, "details": {"order": order}}] {
+          operations[input.review.operation]
+          not input.parameters.systemNamespaces[input.review.namespace]
+          order := input.review.object.spec.order
+          order <= input.parameters.limitOrder
+          msg := sprintf("cannot create/update non-system NetworkPolicy with order <= %v", [input.parameters.limitOrder])
+        }

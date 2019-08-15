@@ -46,7 +46,6 @@ var _ = Describe("Test applications", func() {
 	if doBootstrap {
 		return
 	}
-	Context("open-policy-agent", testOpenPolicyAgent)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)
 	Context("external-dns", testExternalDNS)

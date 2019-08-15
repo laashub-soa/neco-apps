@@ -1,0 +1,24 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: NetworkPolicyOrder
+metadata:
+  name: np-order-must-be-gt-1000
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  match:
+    kinds:
+      - apiGroups: ["crd.projectcalico.org"]
+        kinds: ["NetworkPolicy"]
+  parameters:
+    systemNamespaces:
+      - "kube-system"
+      - "argocd"
+      - "external-dns"
+      - "ingress"
+      - "internet-egress"
+      - "metallb-system"
+      - "monitoring"
+      - "opa"
+      - "topolvm-system"
+      - "teleport"
+    limitOrder: 1000
