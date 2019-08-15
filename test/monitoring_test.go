@@ -237,35 +237,23 @@ func testGrafana() {
 			}
 			loadBalancerIP := service.Status.LoadBalancer.Ingress[0].IP
 
-			type res struct {
-				ID int `json:"id"`
-			}
-
-			By("getting data sources from grafana")
-			stdout, stderr, err := ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/datasources")
+			By("getting admin stats from grafana")
+			stdout, stderr, err := ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/admin/stats")
 			if err != nil {
-				return fmt.Errorf("unable to get data sources, stderr: %s, err: %v", stderr, err)
+				return fmt.Errorf("unable to get admin stats, stderr: %s, err: %v", stderr, err)
 			}
-			var datasources []res
-			err = json.Unmarshal(stdout, &datasources)
+			var adminStats struct {
+				Dashboards  int `json:"dashboards"`
+				Datasources int `json:"datasources"`
+			}
+			err = json.Unmarshal(stdout, &adminStats)
 			if err != nil {
 				return err
 			}
-			if len(datasources) == 0 {
+			if adminStats.Datasources == 0 {
 				return fmt.Errorf("no data sources")
 			}
-
-			By("getting dashboards from grafana")
-			stdout, stderr, err = ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/search?folderIds=0&query=&starred=false")
-			if err != nil {
-				return fmt.Errorf("unable to get dashboards, stderr: %s, err: %v", stderr, err)
-			}
-			var dashboards []res
-			err = json.Unmarshal(stdout, &dashboards)
-			if err != nil {
-				return err
-			}
-			if len(dashboards) == 0 {
+			if adminStats.Dashboards == 0 {
 				return fmt.Errorf("no dashboards")
 			}
 			return nil

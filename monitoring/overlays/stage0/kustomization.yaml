@@ -4,6 +4,9 @@ bases:
   - ../../base
 resources:
   - grafana/ingressroute.yaml
+patches:
+  - grafana/statefulset.yaml
+  - prometheus/statefulset.yaml
 configMapGenerator:
   - name: alertmanager
     behavior: merge
