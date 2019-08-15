@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
@@ -273,23 +274,24 @@ spec:
 		var machines []sabakan.Machine
 		err = json.Unmarshal(stdout, &machines)
 		Expect(err).ShouldNot(HaveOccurred())
-		for _, m := range machines {
-			// BMC
-			By("ping to " + m.Spec.BMC.IPv4)
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", m.Spec.BMC.IPv4)
-			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-			// Node
-			By("ping to " + m.Spec.IPv4[0])
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", m.Spec.IPv4[0])
-			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		wg := sync.WaitGroup{}
+		ping := func(addr string) {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", addr)
+			Expect(err).To(HaveOccurred(), "ping did not fail. to: %s, stdout: %s, stderr: %s", addr, stdout, stderr)
+			wg.Done()
 		}
-
+		for _, m := range machines {
+			wg.Add(1)
+			go ping(m.Spec.BMC.IPv4)
+			wg.Add(1)
+			go ping(m.Spec.IPv4[0])
+		}
 		// Bastion
-		By("ping to " + boot0)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", boot0)
-		Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		wg.Add(1)
+		go ping(boot0)
 
+		wg.Wait()
 		// switch -- not tested for now because address range for switches is 10.0.1.0/24 in placemat env, not 10.72.0.0/20.
 	})
 
