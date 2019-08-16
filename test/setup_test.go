@@ -205,7 +205,8 @@ func testSetup() {
 			stdout, stderr, err = ExecAtWithInput(boot0, []byte(elasticSecret), "kubectl", "--namespace=elastic-system", "create", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-			By("creating secret for gatekeeper")
+			By("creating namespace and secret for gatekeeper")
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "gatekeeper-system")
 			ExecSafeAt(boot0, "kubectl", "create", "secret", "generic", "gatekeeper-webhook-server-secret", "-n", "gatekeeper-system")
 		})
 	}
