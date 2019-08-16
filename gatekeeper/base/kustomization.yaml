@@ -4,7 +4,6 @@ resources:
   - crd.yaml
   - namespace.yaml
   - rbac.yaml
-  - secret.yaml
   - service.yaml
   - statefulset.yaml
   - constraint-template.yaml

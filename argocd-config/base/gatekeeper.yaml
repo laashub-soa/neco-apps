@@ -15,8 +15,3 @@ spec:
   syncPolicy:
     automated:
       prune: true
-  ignoreDifferences:
-    - group: core
-      kind: Secret
-      jsonPointers:
-        - /metadata/labels/app.kubernetes.io~1instance
