@@ -16,7 +16,7 @@ spec:
       - "internet-egress"
       - "metallb-system"
       - "monitoring"
-      - "opa"
+      - "gatekeeper-system"
       - "topolvm-system"
       - "teleport"
     limitOrder: 1000

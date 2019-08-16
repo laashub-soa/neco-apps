@@ -10,7 +10,7 @@ test_allow_creating_network_policy_in_system_namespaces {
 				"group": "crd.projectcalico.org",
 			},
 			"operation": "CREATE",
-			"namespace": "argocd",
+			"namespace": "internet-egress",
 			"object": {
 				"metadata": {"name": "foo"},
 				"spec": {},

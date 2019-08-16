@@ -1,6 +1,10 @@
 package test
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -55,8 +59,40 @@ spec:
   parameters:
     labels: ["gatekeeper"]
 `
-		stdout, stderr, err = ExecAtWithInput(boot0, []byte(constraint), "kubectl", "apply", "-f", "-")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		Eventually(func() error {
+			stdout, stderr, err = ExecAtWithInput(boot0, []byte(constraint), "kubectl", "apply", "-f", "-")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("waiting for constrains enforced")
+		Eventually(func() error {
+			stdout, stderr, err = ExecAtWithInput(boot0, []byte(constraint), "kubectl", "get", "k8srequiredlabels", "ns-must-have-gk", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			var constraint struct {
+				Status struct {
+					ByPod []struct {
+						Enforced bool `json:"enforced"`
+					} `json:"byPod"`
+				} `json:"status"`
+			}
+
+			err = json.Unmarshal(stdout, &constraint)
+			if err != nil {
+				return fmt.Errorf("data: %s, err: %v", string(stdout), err)
+			}
+			if len(constraint.Status.ByPod) < 1 {
+				return errors.New("byPod is empty")
+			}
+			if constraint.Status.ByPod[0].Enforced != true {
+				return errors.New("not enforced")
+			}
+			return nil
+		}).Should(Succeed())
 
 		By("creating bad Namespace")
 		badNSYAML := `

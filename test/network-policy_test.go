@@ -317,7 +317,7 @@ spec:
 `
 		_, stderr, err := ExecAtWithInput(boot0, []byte(policyYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).To(HaveOccurred())
-		Expect(stderr).To(ContainSubstring("validating-webhook.openpolicyagent.org"))
+		Expect(string(stderr)).To(ContainSubstring("cannot create/update non-system NetworkPolicy with order <= 1000"))
 	})
 }
 
