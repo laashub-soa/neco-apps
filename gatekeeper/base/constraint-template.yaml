@@ -2,8 +2,6 @@ apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
   name: networkpolicyorder
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   crd:
     spec:
