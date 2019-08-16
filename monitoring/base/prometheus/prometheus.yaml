@@ -158,6 +158,17 @@ scrape_configs:
         target_label: __address__
       - action: labelmap
         regex: __meta_kubernetes_endpoint_(.+)
+  - job_name: "contour"
+    kubernetes_sd_configs:
+      - role: service
+        namespaces:
+          names: ["ingress"]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        action: keep
+        regex: contour-metrics
+      - action: labelmap
+        regex: __meta_kubernetes_service_(.+)
   - job_name: "ingress"
     kubernetes_sd_configs:
       - role: pod
