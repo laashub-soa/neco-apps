@@ -280,7 +280,7 @@ func applyAndWaitForApplications() {
 
 	for _, appName := range syncOrder {
 		By("syncing " + appName + " manually")
-		ExecSafeAt(boot0, "argocd", "app", "sync", appName)
+		ExecSafeAt(boot0, "argocd", "app", "sync", "--prune", appName)
 	}
 }
 
