@@ -13,4 +13,4 @@ spec:
         storageClassName: topolvm-provisioner
         resources:
           requests:
-            storage: 10Gi
+            storage: 150Gi # TODO: tune the storage size if more machines are brought up in DC
