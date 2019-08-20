@@ -1141,8 +1141,8 @@
         "list": []
     },
     "time": {
-        "from": "2017-09-18T04:55:00.138Z",
-        "to": "2017-09-18T06:36:59.405Z"
+        "from": "now-30m",
+        "to": "now"
     },
     "timepicker": {
         "refresh_intervals": [
