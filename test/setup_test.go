@@ -121,6 +121,19 @@ metadata:
   name: webhook-server-secret
   namespace: elastic-system
 `
+	gatekeeperNS = `
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gatekeeper-system
+`
+	gatekeeperSecret = `
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gatekeeper-webhook-server-secret
+  namespace: gatekeeper-system
+`
 )
 
 // testSetup tests setup of Argo CD
@@ -207,6 +220,15 @@ func testSetup() {
 		})
 	}
 
+	It("should prepare secrets for gatekeeper", func() {
+		//TODO: move into `if !doUpgrade {}` when the gatekeeper is released
+		By("creating namespace and secret for gatekeeper")
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(gatekeeperNS), "kubectl", "apply", "-f", "-")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		stdout, stderr, err = ExecAtWithInput(boot0, []byte(gatekeeperSecret), "kubectl", "apply", "-f", "-")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+	})
+
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 		ExecSafeAt(boot0, "env", "https_proxy=http://10.0.49.3:3128",
@@ -280,7 +302,7 @@ func applyAndWaitForApplications() {
 
 	for _, appName := range syncOrder {
 		By("syncing " + appName + " manually")
-		ExecSafeAt(boot0, "argocd", "app", "sync", appName)
+		ExecSafeAt(boot0, "argocd", "app", "sync", "--prune", appName)
 	}
 }
 

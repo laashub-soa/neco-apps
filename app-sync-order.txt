@@ -1,6 +1,6 @@
 argocd
 external-dns
-open-policy-agent
+gatekeeper
 metallb
 ingress
 topolvm
