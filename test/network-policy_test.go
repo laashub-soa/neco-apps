@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/cybozu-go/log"
 	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -277,10 +278,13 @@ spec:
 
 		eg := errgroup.Group{}
 		ping := func(addr string) error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", addr)
+			_, _, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", addr)
 			if err != nil {
-				return fmt.Errorf("ping did not fail. error: %s, to: %s, stdout: %s, stderr: %s", err.Error(), addr, stdout, stderr)
+				return err
 			}
+			log.Error("ping should be failed, but it was succeeded", map[string]interface{}{
+				"target": addr,
+			})
 			return nil
 		}
 		for _, m := range machines {
@@ -297,7 +301,7 @@ spec:
 		eg.Go(func() error {
 			return ping(boot0)
 		})
-		Expect(eg.Wait()).ShouldNot(HaveOccurred())
+		Expect(eg.Wait()).Should(HaveOccurred())
 		// switch -- not tested for now because address range for switches is 10.0.1.0/24 in placemat env, not 10.72.0.0/20.
 	})
 
