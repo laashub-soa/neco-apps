@@ -78,10 +78,12 @@ spec:
           - name: elasticsearch
             env:
               - name: ES_JAVA_OPTS
-                value: "-Xms128M -Xmx128M"
+                value: "-Xms1g -Xmx1g"
             resources:
               limits:
-                memory: 256M
+                memory: 2Gi
+              requests:
+                memory: 2Gi
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
