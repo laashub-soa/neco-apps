@@ -1,0 +1,17 @@
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: grafana
+  namespace: monitoring
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  virtualhost:
+    fqdn: grafana.monitoring.tokyo0.cybozu-ne.co
+    tls:
+      secretName: grafana-tls
+  routes:
+    - match: /
+      services:
+        - name: grafana
+          port: 80
