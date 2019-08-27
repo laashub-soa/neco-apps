@@ -155,6 +155,23 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_service_name]
         action: keep
         regex: contour-metrics
+      - source_labels: [__meta_kubernetes_service_port_name]
+        action: keep
+        regex: contour-metrics
+  - job_name: "envoy"
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: ["ingress"]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        action: keep
+        regex: contour-metrics
+      - source_labels: [__meta_kubernetes_service_port_name]
+        action: keep
+        regex: envoy-metrics
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        target_label: __metrics_path__
   - job_name: "ingress"
     kubernetes_sd_configs:
       - role: pod
