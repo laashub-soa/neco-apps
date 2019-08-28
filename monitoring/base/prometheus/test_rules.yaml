@@ -116,9 +116,9 @@ tests:
   - interval: 30m
     input_series:
       - series: 'etcd_mvcc_db_total_size_in_use_in_bytes{instance="10.0.0.1:2379", job="etcd", __name__="etcd"}'
-        values: '0+20000000000x120'
+        values: '0 6000000'
     alert_rule_test:
-      - eval_time: 120m
+      - eval_time: 60m
         alertname: LogicalDatabaseUsageIncreaseRapidly
         exp_alerts:
           - exp_labels:
@@ -126,7 +126,7 @@ tests:
               instance: 10.0.0.1:2379
               severity: warning
             exp_annotations:
-              summary: "10.0.0.1:2379, etcd of etcd DB space increases 11.11MB/h"
+              summary: "10.0.0.1:2379, etcd of etcd DB space increases 12MB/h"
               runbook: "Please consider to find root causes, and solve the problems"
   - interval: 1m
     input_series:
