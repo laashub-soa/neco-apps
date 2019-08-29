@@ -44,7 +44,7 @@ groups:
           summary: "{{ $labels.instance }}, {{ $labels.job }} of etcd DB space uses more than 90%"
           runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"
       - alert: LogicalDatabaseUsageIncreaseRapidly
-        expr: delta(etcd_mvcc_db_total_size_in_use_in_bytes[1h]) > 30000000
+        expr: rate(etcd_mvcc_db_total_size_in_use_in_bytes[1h]) * 3600 > 10000000
         for: 1m
         labels:
           severity: warning
@@ -61,13 +61,12 @@ groups:
         labels:
           severity: warning
         for: 10m
-#  TODO: Uncomment after setting up the staging machines
-#  - name: all
-#    rules:
-#      - alert: TargetDown
-#        expr: up == 0
-#        labels:
-#          severity: warning
-#        for: 1h
-#        annotations:
-#          summary: "{{ $labels.job }} in {{ $labels.instance }} is down"
+  - name: all
+    rules:
+      - alert: ExporterDown
+        expr: up == 0
+        labels:
+          severity: warning
+        for: 1h
+        annotations:
+          summary: "{{ $labels.job }} in {{ $labels.instance }} is down"
