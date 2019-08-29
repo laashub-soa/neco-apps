@@ -6,18 +6,18 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	yaml "gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
+	"sigs.k8s.io/yaml"
 )
 
 // ckeCluster is part of cke.Cluster in github.com/cybozu-go/cke
 type ckeCluster struct {
-	Nodes []*ckeNode `yaml:"nodes"`
+	Nodes []*ckeNode `json:"nodes"`
 }
 
 // ckeNode is part of cke.Node in github.com/cybozu-go/cke
 type ckeNode struct {
-	Address string `yaml:"address"`
+	Address string `json:"address"`
 }
 
 func testElastic() {

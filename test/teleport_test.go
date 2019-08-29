@@ -15,7 +15,7 @@ import (
 	"github.com/creack/pty"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2" // intentionally used to generate YAML file for placemat
 )
 
 type Node struct {
