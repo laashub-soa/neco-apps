@@ -78,7 +78,7 @@ github.com/kballard/go-shellquote
 github.com/kevinburke/ssh_config
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/kubernetes-incubator/external-dns v0.5.14
+# github.com/kubernetes-incubator/external-dns v0.5.12
 github.com/kubernetes-incubator/external-dns/endpoint
 # github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
 github.com/mailru/easyjson/jlexer
@@ -169,7 +169,7 @@ golang.org/x/crypto/openpgp/s2k
 golang.org/x/crypto/ssh/agent
 golang.org/x/crypto/cast5
 golang.org/x/crypto/openpgp/elgamal
-# golang.org/x/net v0.0.0-20190522155817-f3200d17e092
+# golang.org/x/net v0.0.0-20190812203447-cdfb69ac37fc
 golang.org/x/net/http2
 golang.org/x/net/netutil
 golang.org/x/net/html/charset
@@ -279,13 +279,13 @@ gopkg.in/tomb.v1
 gopkg.in/warnings.v0
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
-# k8s.io/api v0.0.0-20190528154508-67ef80593b24 => k8s.io/api v0.0.0-20190409021203-6e4e0e4f393b
+# k8s.io/api v0.0.0-20190819141258-3544db3b9e44
 k8s.io/api/apps/v1
 k8s.io/api/core/v1
 # k8s.io/apiextensions-apiserver v0.0.0-20190528080216-be227facef18
 k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1
 k8s.io/apiextensions-apiserver/pkg/apis/apiextensions
-# k8s.io/apimachinery v0.0.0-20190528154326-e59c2fb0a8e5 => k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
+# k8s.io/apimachinery v0.0.0-20190817020851-f2f3a405f61d
 k8s.io/apimachinery/pkg/util/yaml
 k8s.io/apimachinery/pkg/apis/meta/v1
 k8s.io/apimachinery/pkg/apis/meta/v1/unstructured
@@ -319,7 +319,7 @@ k8s.io/apimachinery/pkg/runtime/serializer/versioning
 k8s.io/apimachinery/pkg/runtime/serializer/protobuf
 k8s.io/apimachinery/pkg/runtime/serializer/recognizer
 k8s.io/apimachinery/pkg/util/framer
-# k8s.io/client-go v11.0.0+incompatible => k8s.io/client-go v11.0.0+incompatible
+# k8s.io/client-go v0.0.0-20190819141724-e14f31a72a77
 k8s.io/client-go/rest
 k8s.io/client-go/tools/clientcmd
 k8s.io/client-go/tools/clientcmd/api
