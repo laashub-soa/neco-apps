@@ -12,6 +12,8 @@ spec:
       secretName: grafana-tls
   routes:
     - match: /
+      timeoutPolicy:
+        request: 2m
       services:
         - name: grafana
           port: 80
