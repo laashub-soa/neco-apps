@@ -80,7 +80,7 @@ scrape_configs:
         target_label: kubernetes_name
       - source_labels: [__name__]
         action: drop
-        regex: node_cpu_seconds.*
+        regex: node_cpu_seconds_total
   - job_name: 'bootserver-etcd'
     kubernetes_sd_configs:
       - role: endpoints
