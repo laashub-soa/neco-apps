@@ -15,8 +15,8 @@ import (
 	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -149,7 +149,7 @@ func testSetup() {
 		stdout, err := ioutil.ReadFile(kustomFile)
 		Expect(err).ShouldNot(HaveOccurred())
 		k := struct {
-			Resources []string `yaml:"resources"`
+			Resources []string `json:"resources"`
 		}{}
 		Expect(yaml.Unmarshal(stdout, &k)).ShouldNot(HaveOccurred())
 		var resources []string

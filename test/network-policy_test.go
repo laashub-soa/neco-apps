@@ -26,7 +26,7 @@ func testNetworkPolicy() {
 	It("should create test pods", func() {
 		By("deploying testhttpd pods")
 		deployYAML := `
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: testhttpd
