@@ -78,8 +78,6 @@ github.com/kballard/go-shellquote
 github.com/kevinburke/ssh_config
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/kubernetes-incubator/external-dns v0.5.12
-github.com/kubernetes-incubator/external-dns/endpoint
 # github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
