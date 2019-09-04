@@ -1,11 +1,11 @@
 argocd
 external-dns
-open-policy-agent
+gatekeeper
 metallb
 ingress
+topolvm
 teleport
 monitoring
-topolvm
 elastic
 network-policy
 team-management

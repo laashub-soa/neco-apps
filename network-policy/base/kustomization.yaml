@@ -20,11 +20,4 @@ resources:
   - global-policies/ingress-cluster-allow.yaml
   - global-policies/network-set.yaml
   - global-policies/node-dns.yaml
-configMapGenerator:
-  - name: network-policy-validator
-    namespace: opa
-    files:
-      - validation/network-policy.rego
-generatorOptions:
-  labels:
-    openpolicyagent.org/policy: rego
+  - validation/network-policy-order.yaml

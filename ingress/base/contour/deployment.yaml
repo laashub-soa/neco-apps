@@ -17,7 +17,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8002"
-        prometheus.io/path: "/stats"
+        prometheus.io/path: "/stats/prometheus"
         prometheus.io/format: "prometheus"
     spec:
       containers:
@@ -25,7 +25,7 @@ spec:
         name: contour
         command: ["contour"]
         args: ["serve", "--incluster"]
-      - image: quay.io/cybozu/contour-plus:0.2.5
+      - image: quay.io/cybozu/contour-plus:0.2.7
         name: contour-plus
         env:
         - name: CP_SERVICE_NAME
@@ -65,11 +65,6 @@ spec:
         command: ["contour"]
         args:
         - bootstrap
-        # Uncomment the statsd-enable to enable statsd metrics
-        #- --statsd-enable
-        # Uncomment to set a custom stats emission address and port
-        #- --stats-address=0.0.0.0
-        #- --stats-port=8002
         - /config/contour.json
         volumeMounts:
         - name: contour-config

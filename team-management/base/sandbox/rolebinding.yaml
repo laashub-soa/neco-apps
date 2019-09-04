@@ -6,7 +6,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: developer
+  name: neco-developer
 subjects:
   - kind: Group
     name: system:authenticated

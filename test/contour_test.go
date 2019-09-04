@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kubernetes-incubator/external-dns/endpoint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
@@ -188,8 +187,15 @@ spec:
 			if err != nil {
 				return err
 			}
-			de := new(endpoint.DNSEndpoint)
-			err = json.Unmarshal(stdout, de)
+
+			var de struct {
+				Spec struct {
+					Endpoints []*struct {
+						Targets []string `json:"targets,omitempty"`
+					} `json:"endpoints,omitempty"`
+				} `json:"spec,omitempty"`
+			}
+			err = json.Unmarshal(stdout, &de)
 			if err != nil {
 				return err
 			}

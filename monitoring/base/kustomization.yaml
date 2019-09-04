@@ -14,11 +14,11 @@ resources:
   - kube-state-metrics/serviceaccount.yaml
   - prometheus/clusterrole.yaml
   - prometheus/clusterrolebinding.yaml
-  - prometheus/deployment.yaml
   - prometheus/service.yaml
   - prometheus/serviceaccount.yaml
-  - grafana/deployment.yaml
+  - prometheus/statefulset.yaml
   - grafana/service.yaml
+  - grafana/statefulset.yaml
   - grafana/configmap.yaml
   - alertmanager/deployment.yaml
   - alertmanager/service.yaml
@@ -30,3 +30,16 @@ configMapGenerator:
   - name: alertmanager
     files:
       - alertmanager/neco.template
+  - name: dashboard-calico
+    files:
+      - grafana/dashboards/calico.json
+  - name: dashboard-contour
+    files:
+      - grafana/dashboards/contour.json
+      - grafana/dashboards/envoy.json
+  - name: dashboard-etcd
+    files:
+      - grafana/dashboards/etcd.json
+  - name: dashboard-kubernetes-cluster
+    files:
+      - grafana/dashboards/kubernetes_cluster.json
