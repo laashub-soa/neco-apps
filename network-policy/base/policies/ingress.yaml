@@ -15,5 +15,7 @@ spec:
       protocol: TCP
       destination:
         ports:
+          - 8000
+          - 8002
           - 8080
           - 8443

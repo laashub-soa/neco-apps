@@ -6,11 +6,11 @@ patchesStrategicMerge:
 - argocd.yaml
 - elastic.yaml
 - external-dns.yaml
+- gatekeeper.yaml
 - ingress.yaml
 - metallb.yaml
 - monitoring.yaml
 - network-policy.yaml
-- open-policy-agent.yaml
 - teleport.yaml
 - topolvm.yaml
 - team-management.yaml

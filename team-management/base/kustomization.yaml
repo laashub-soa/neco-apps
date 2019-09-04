@@ -3,3 +3,4 @@ kind: Kustomization
 bases:
   - ./maneki
   - ./sandbox
+  - ./common

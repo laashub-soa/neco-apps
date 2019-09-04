@@ -7,7 +7,18 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
+	"sigs.k8s.io/yaml"
 )
+
+// ckeCluster is part of cke.Cluster in github.com/cybozu-go/cke
+type ckeCluster struct {
+	Nodes []*ckeNode `json:"nodes"`
+}
+
+// ckeNode is part of cke.Node in github.com/cybozu-go/cke
+type ckeNode struct {
+	Address string `json:"address"`
+}
 
 func testElastic() {
 	It("should create test-ingress namespace", func() {
@@ -67,10 +78,12 @@ spec:
           - name: elasticsearch
             env:
               - name: ES_JAVA_OPTS
-                value: "-Xms128M -Xmx128M"
+                value: "-Xms1g -Xmx1g"
             resources:
               limits:
-                memory: 256M
+                memory: 2Gi
+              requests:
+                memory: 2Gi
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
@@ -109,13 +122,19 @@ spec:
 		}).Should(Succeed())
 
 		By("accessing to elasticsearch")
-		stdout, stderr, err := ExecAt(boot0,
+		stdout, stderr, err := ExecAt(boot0, "ckecli", "cluster", "get")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		cluster := new(ckeCluster)
+		err = yaml.Unmarshal(stdout, cluster)
+		Expect(err).ShouldNot(HaveOccurred())
+		stdout, stderr, err = ExecAt(boot0,
 			"kubectl", "get", "secret", "sample-es-elastic-user", "-n", "test-es", "-o=jsonpath='{.data.elastic}'",
 			"|", "base64", "--decode")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 		password := string(stdout)
+		workerAddr := cluster.Nodes[0].Address
 		stdout, stderr, err = ExecAt(boot0,
-			"ckecli", "ssh", "cybozu@10.69.0.4", "--",
+			"ckecli", "ssh", "cybozu@"+workerAddr, "--",
 			"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http.test-es.svc.cluster.local:9200")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 	})

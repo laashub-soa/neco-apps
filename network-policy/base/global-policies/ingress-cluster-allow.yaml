@@ -5,7 +5,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  order: 1000.0
+  order: 9900.0
   types:
     - Ingress
   ingress:

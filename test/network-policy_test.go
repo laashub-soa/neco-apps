@@ -7,10 +7,12 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/cybozu-go/log"
 	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/sync/errgroup"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -24,7 +26,7 @@ func testNetworkPolicy() {
 	It("should create test pods", func() {
 		By("deploying testhttpd pods")
 		deployYAML := `
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: testhttpd
@@ -273,23 +275,33 @@ spec:
 		var machines []sabakan.Machine
 		err = json.Unmarshal(stdout, &machines)
 		Expect(err).ShouldNot(HaveOccurred())
-		for _, m := range machines {
-			// BMC
-			By("ping to " + m.Spec.BMC.IPv4)
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", m.Spec.BMC.IPv4)
-			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-			// Node
-			By("ping to " + m.Spec.IPv4[0])
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", m.Spec.IPv4[0])
-			Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		eg := errgroup.Group{}
+		ping := func(addr string) error {
+			_, _, err := ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", addr)
+			if err != nil {
+				return err
+			}
+			log.Error("ping should be failed, but it was succeeded", map[string]interface{}{
+				"target": addr,
+			})
+			return nil
 		}
-
+		for _, m := range machines {
+			bmcAddr := m.Spec.BMC.IPv4
+			node0Addr := m.Spec.IPv4[0]
+			eg.Go(func() error {
+				return ping(bmcAddr)
+			})
+			eg.Go(func() error {
+				return ping(node0Addr)
+			})
+		}
 		// Bastion
-		By("ping to " + boot0)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "ubuntu", "--", "ping", "-c", "1", "-W", "3", boot0)
-		Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
+		eg.Go(func() error {
+			return ping(boot0)
+		})
+		Expect(eg.Wait()).Should(HaveOccurred())
 		// switch -- not tested for now because address range for switches is 10.0.1.0/24 in placemat env, not 10.72.0.0/20.
 	})
 
@@ -315,7 +327,7 @@ spec:
 `
 		_, stderr, err := ExecAtWithInput(boot0, []byte(policyYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).To(HaveOccurred())
-		Expect(stderr).To(ContainSubstring("validating-webhook.openpolicyagent.org"))
+		Expect(string(stderr)).To(ContainSubstring("cannot create/update non-system NetworkPolicy with order <= 1000"))
 	})
 }
 
