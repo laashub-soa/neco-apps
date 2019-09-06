@@ -29,13 +29,13 @@ scrape_configs:
         namespaces:
           names: ["monitoring"]
     relabel_configs:
-      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
         action: keep
         regex: alertmanager
       - source_labels: [__address__]
         action: replace
-        regex: ([^:]+)(?::\d+)?
-        replacement: ${1}:9093
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: ${1}:${2}
         target_label: __address__
   - job_name: 'kubernetes-apiservers'
     kubernetes_sd_configs:
