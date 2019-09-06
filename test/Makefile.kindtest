@@ -50,4 +50,7 @@ start: launch-kind
 
 stop: stop-lvmd
 
+kindtest: install.yaml
+	$GINKGO kind
+
 .PHONY: launch-kind shutdown-kind start-lvmd stop-lvmd start stop
