@@ -20,6 +20,8 @@ KUSTOMIZE_VERSION = 2.0.3
 OPA_VERSION = 0.12.0
 PROMTOOL_VERSION := 2.9.2
 TELEPORT_VERSION := 4.0.2
+KUBERNETES_VERSION = 1.15.3
+KIND_VERSION = 0.5.1
 REGO_FILES = $(shell find .. -path ../vendor -prune -o -name '*.rego' -print)
 
 install.yaml: $(shell find ../argocd/base)
@@ -46,16 +48,6 @@ test: install.yaml validation opa-test test-alert-rules kustomize-check
 	ineffassign .
 	go vet ./...
 
-test-upgrade:
-	-git worktree remove /tmp/neco-apps
-	git worktree add /tmp/neco-apps $(BASE_BRANCH)
-	cp account.json /tmp/neco-apps/test
-	cd /tmp/neco-apps/test; make test-apps BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH)
-	UPGRADE=1 ./test.sh
-
-test-apps: install.yaml
-	./test.sh
-
 setup:
 	curl -sSLf -O https://github.com/kubernetes-sigs/kustomize/releases/download/v$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_linux_amd64
 	$(SUDO) mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 /usr/local/bin/kustomize
@@ -68,8 +60,9 @@ setup:
 	$(SUDO) mv promtool /usr/local/bin/promtool
 	curl -sSLf https://get.gravitational.com/teleport-v$(TELEPORT_VERSION)-linux-amd64-bin.tar.gz | tar -xzvf - --strip-component=1 teleport/tsh
 	$(SUDO) mv tsh /usr/local/bin/tsh
+	cd /tmp; env GOFLAGS= GO111MODULE=on go get sigs.k8s.io/kind@v$(KIND_VERSION)
 
 clean:
 	rm -f install.yaml
 
-.PHONY:	validation opa-test test-alert-rules kustomize-check test test-apps setup clean
+.PHONY:	validation opa-test test-alert-rules kustomize-check test setup clean
