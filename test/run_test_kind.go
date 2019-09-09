@@ -29,6 +29,10 @@ func prepareSSHClients(addresses ...string) error {
 	return nil
 }
 
+func issueKubeconfig() {
+	ExecSafeAt("kind", "cp", "$(kind get kubeconfig-path --name='kindtest')", "~/.kube/config")
+}
+
 // ExecAt executes command at given host
 func ExecAt(host string, args ...string) (stdout, stderr []byte, e error) {
 	return ExecAtWithInput(host, nil, args...)

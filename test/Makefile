@@ -22,6 +22,7 @@ PROMTOOL_VERSION := 2.9.2
 TELEPORT_VERSION := 4.0.2
 KUBERNETES_VERSION = 1.15.3
 KIND_VERSION = 0.5.1
+ARGOCD_VERSION = 1.0.1
 REGO_FILES = $(shell find .. -path ../vendor -prune -o -name '*.rego' -print)
 
 install.yaml: $(shell find ../argocd/base)
@@ -61,6 +62,8 @@ setup:
 	curl -sSLf https://get.gravitational.com/teleport-v$(TELEPORT_VERSION)-linux-amd64-bin.tar.gz | tar -xzvf - --strip-component=1 teleport/tsh
 	$(SUDO) mv tsh /usr/local/bin/tsh
 	cd /tmp; env GOFLAGS= GO111MODULE=on go get sigs.k8s.io/kind@v$(KIND_VERSION)
+	$(SUDO) curl -sSLf -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v$(ARGOCD_VERSION)/argocd-linux-amd64
+	chmod +x /usr/local/bin/argocd
 
 clean:
 	rm -f install.yaml

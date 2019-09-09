@@ -60,7 +60,9 @@ var _ = Describe("Test applications", func() {
 	Context("grafana", testGrafana)
 	Context("alertmanager", testAlertmanager)
 	Context("metrics", testMetrics)
-	Context("teleport", testTeleport)
+	if !withKind {
+		Context("teleport", testTeleport)
+	}
 	Context("topolvm", testTopoLVM)
 	Context("elastic", testElastic)
 })
