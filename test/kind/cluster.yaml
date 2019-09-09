@@ -13,7 +13,7 @@ kubeadmConfigPatches:
     podSubnet: 10.64.0.0/14
   apiServer:
     extraArgs:
-      "enable-admission-plugins": "NamespaceLifecycle,LimitRanger,ServiceAccount,Priority,DefaultTolerationSeconds,DefaultStorageClass,PersistentVolumeClaimResize,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,NodeRestriction,PodSecurityPolicy"
+      "enable-admission-plugins": "NamespaceLifecycle,LimitRanger,ServiceAccount,Priority,DefaultTolerationSeconds,DefaultStorageClass,PersistentVolumeClaimResize,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,NodeRestriction"
   scheduler:
     extraVolumes:
       - name: "config"
@@ -32,13 +32,13 @@ nodes:
 # the three workers
 - role: worker
   extraMounts:
-    - containerPath: /tmp/topolvm
+    - containerPath: /run/topolvm
       hostPath: /tmp/kindtest/lvmd
 - role: worker
   extraMounts:
-    - containerPath: /tmp/topolvm
+    - containerPath: /run/topolvm
       hostPath: /tmp/kindtest/lvmd
 - role: worker
   extraMounts:
-    - containerPath: /tmp/topolvm
+    - containerPath: /run/topolvm
       hostPath: /tmp/kindtest/lvmd
