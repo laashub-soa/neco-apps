@@ -14,4 +14,5 @@ var (
 	testID      = os.Getenv("TEST_ID")
 	commitID    = os.Getenv("COMMIT_ID")
 	externalPID = os.Getenv("EXTERNAL_PID")
+	withKind    = os.Getenv("KIND") == "1"
 )

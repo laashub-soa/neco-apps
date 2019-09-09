@@ -1,3 +1,5 @@
+// +build !kind
+
 package test
 
 import (
