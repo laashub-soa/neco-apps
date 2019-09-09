@@ -4,5 +4,4 @@ metadata:
   name: topolvm-system
   labels:
     app.kubernetes.io/name: topolvm-system
-    name: topolvm-system
     control-plane: "true"

@@ -4,6 +4,8 @@ metadata:
   name: alertmanager
   labels:
     app.kubernetes.io/name: alertmanager
+  annotations:
+    prometheus.io/port: "9093"
 spec:
   replicas: 1
   selector:

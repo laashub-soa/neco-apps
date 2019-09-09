@@ -4,6 +4,8 @@ metadata:
   name: prometheus
   labels:
     app.kubernetes.io/name: prometheus
+  annotations:
+    prometheus.io/port: "9090"
 spec:
   serviceName: prometheus
   selector:
