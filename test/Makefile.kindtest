@@ -51,6 +51,6 @@ start: launch-kind
 stop: stop-lvmd
 
 kindtest: install.yaml
-	$GINKGO kind
+	env KIND=1 $(GINKGO) -v -tags kind
 
 .PHONY: launch-kind shutdown-kind start-lvmd stop-lvmd start stop

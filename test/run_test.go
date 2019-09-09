@@ -41,6 +41,16 @@ type sshAgent struct {
 	conn   net.Conn
 }
 
+func prepare() {
+	err := prepareSSHClients(boot0, boot1, boot2)
+	Expect(err).NotTo(HaveOccurred())
+
+	// sync VM root filesystem to store newly generated SSH host keys.
+	for h := range sshClients {
+		ExecSafeAt(h, "sync")
+	}
+}
+
 func sshTo(address string, sshKey ssh.Signer, userName string) (*sshAgent, error) {
 	conn, err := agentDialer.Dial("tcp", address+":22")
 	if err != nil {

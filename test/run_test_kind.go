@@ -12,21 +12,37 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var (
-	sshClients = make(map[string]*sshAgent)
-)
-
 type sshAgent struct {
 	client *ssh.Client
 	conn   net.Conn
 }
 
-func sshTo(address string, sshKey ssh.Signer, userName string) (*sshAgent, error) {
-	return nil, nil
-}
+func prepare() {
+	resources := []string{
+		"https://raw.githubusercontent.com/cybozu-go/cke/master/static/pod-security-policy.yml",
+		"https://raw.githubusercontent.com/cybozu-go/cke/master/static/rbac.yml",
+		"https://raw.githubusercontent.com/cybozu-go/neco/master/etc/namespaces.yml",
+		"https://raw.githubusercontent.com/cybozu-go/neco/master/etc/pod-security-policy.yml",
+	}
 
-func prepareSSHClients(addresses ...string) error {
-	return nil
+	for _, r := range resources {
+		ExecSafeAt("", "kubectl", "apply", "-f", r)
+	}
+
+	ExecSafeAt("", "curl", "-sSLf", "-O", "https://raw.githubusercontent.com/cybozu-go/neco/master/artifacts.go")
+	bytes := ExecSafeAt("", "cat", "artifacts.go", "|", "grep", "squid", "|", "awk", "'match($0, /Repository: \"(.*)\", Tag: \"(.*)\"/, a) { print a[1] \":\" a[2]}'")
+	squidImg := strings.TrimSpace(string(bytes))
+	ExecSafeAt("", "rm", "-f", "artifacts.go")
+
+	ExecSafeAt("", "curl", "-sSLf", "-O", "https://raw.githubusercontent.com/cybozu-go/cke/master/images.go")
+	bytes = ExecSafeAt("", "cat", "images.go", "|", "grep", "quay.io/cybozu/unbound", "|", "awk", "'match($0, /Image\\(\"(.*)\"\\)/, a) { print a[1] }'")
+	unboundImg := strings.TrimSpace(string(bytes))
+	ExecSafeAt("", "rm", "-f", "images.go")
+
+	ExecSafeAt("", "curl", "-sSLf", "-O", "https://raw.githubusercontent.com/cybozu-go/neco/master/etc/squid.yml")
+	ExecSafeAt("", "sed", "-i", "'s@{{ .squid }}@"+squidImg+"@g'", "squid.yml")
+	ExecSafeAt("", "sed", "-i", "'s@{{ index . \"cke-unbound\" }}@"+unboundImg+"@g'", "squid.yml")
+	ExecSafeAt("", "kubectl", "apply", "-f", "squid.yml")
 }
 
 func issueKubeconfig() {

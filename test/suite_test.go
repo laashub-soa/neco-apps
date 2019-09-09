@@ -26,15 +26,7 @@ var _ = BeforeSuite(func() {
 	SetDefaultEventuallyPollingInterval(time.Second)
 	SetDefaultEventuallyTimeout(10 * time.Minute)
 
-	if !withKind {
-		err := prepareSSHClients(boot0, boot1, boot2)
-		Expect(err).NotTo(HaveOccurred())
-
-		// sync VM root filesystem to store newly generated SSH host keys.
-		for h := range sshClients {
-			ExecSafeAt(h, "sync")
-		}
-	}
+	prepare()
 
 	log.DefaultLogger().SetOutput(GinkgoWriter)
 

@@ -62,7 +62,8 @@ setup:
 	curl -sSLf https://get.gravitational.com/teleport-v$(TELEPORT_VERSION)-linux-amd64-bin.tar.gz | tar -xzvf - --strip-component=1 teleport/tsh
 	$(SUDO) mv tsh /usr/local/bin/tsh
 	cd /tmp; env GOFLAGS= GO111MODULE=on go get sigs.k8s.io/kind@v$(KIND_VERSION)
-	$(SUDO) curl -sSLf -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v$(ARGOCD_VERSION)/argocd-linux-amd64
+	curl -sSLf -O https://github.com/argoproj/argo-cd/releases/download/v$(ARGOCD_VERSION)/argocd-linux-amd64
+	$(SUDO) mv argocd-linux-amd64 /usr/local/bin/argocd
 	chmod +x /usr/local/bin/argocd
 
 clean:

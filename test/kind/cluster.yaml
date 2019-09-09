@@ -11,6 +11,9 @@ kubeadmConfigPatches:
   networking:
     serviceSubnet: 10.68.0.0/16
     podSubnet: 10.64.0.0/14
+  apiServer:
+    extraArgs:
+      "enable-admission-plugins": "NamespaceLifecycle,LimitRanger,ServiceAccount,Priority,DefaultTolerationSeconds,DefaultStorageClass,PersistentVolumeClaimResize,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,NodeRestriction,PodSecurityPolicy"
   scheduler:
     extraVolumes:
       - name: "config"
