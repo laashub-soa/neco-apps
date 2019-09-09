@@ -4,3 +4,6 @@ bases:
   - ../../base
 resources:
   - configmap.yaml
+patches:
+  - deployment.yaml
+  - pod-security-policy.yaml
