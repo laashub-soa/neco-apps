@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os/exec"
 	"strings"
 
 	"github.com/cybozu-go/log"
@@ -211,13 +212,15 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("accessing DNS port of some node as squid")
-		_, _, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
+		stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
 		switch t := err.(type) {
 		case *ssh.ExitError:
 			// telnet command returns 124 when it times out
 			Expect(t.ExitStatus()).To(Equal(124))
+		case *exec.ExitError:
+			Expect(t.ExitCode()).To(Equal(124))
 		default:
-			Fail("telnet should fail with timeout")
+			Fail(fmt.Sprintf("telnet should fail with timeout: stdout: %s, stderr: %s", stdout, stderr))
 		}
 
 		By("removing label")
@@ -234,6 +237,8 @@ spec:
 		case *ssh.ExitError:
 			// telnet command returns 124 when it times out
 			Expect(t.ExitStatus()).To(Equal(124))
+		case *exec.ExitError:
+			Expect(t.ExitCode()).To(Equal(124))
 		default:
 			Fail("telnet should fail with timeout")
 		}
