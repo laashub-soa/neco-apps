@@ -3,6 +3,7 @@ BOOT1 = 10.72.48.1
 BOOT2 = 10.72.48.2
 GINKGO = env GO111MODULE=on GOFLAGS=-mod=vendor $(GOPATH)/bin/ginkgo --failFast -v
 SSH_PRIVKEY = $(NECO_DIR)/dctest/dctest_key
+CIRCLE_BUILD_NUM ?= -$(USER)
 TEST_ID := test$(CIRCLE_BUILD_NUM)
 BASE_BRANCH = master
 COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
