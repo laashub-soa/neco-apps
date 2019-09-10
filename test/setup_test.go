@@ -272,7 +272,11 @@ func loadSyncOrder() []string {
 
 func applyAndWaitForApplications() {
 	By("creating Argo CD app")
-	ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
+	if withKind {
+		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/kind")
+	} else {
+		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
+	}
 
 	syncOrder := loadSyncOrder()
 
