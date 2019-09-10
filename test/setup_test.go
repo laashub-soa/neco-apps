@@ -330,7 +330,7 @@ func setupArgoCD() {
 		return nil
 	}).Should(Succeed())
 
-	By("logging in to Argo CD")
+	By("waiting Argo CD comes up")
 	// admin password is same as pod name
 	var podList corev1.PodList
 	Eventually(func() error {

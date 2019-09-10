@@ -43,6 +43,11 @@ func prepare() {
 	ExecSafeAt("", "sed", "-i", "'s@{{ .squid }}@"+squidImg+"@g'", "squid.yml")
 	ExecSafeAt("", "sed", "-i", "'s@{{ index . \"cke-unbound\" }}@"+unboundImg+"@g'", "squid.yml")
 	ExecSafeAt("", "kubectl", "apply", "-f", "squid.yml")
+
+	ExecSafeAt("", "kubectl", "label", "node", "kindtest-control-plane", "cke.cybozu.com/index-in-rack=4", "cke.cybozu.com/master=true", "cke.cybozu.com/rack=0", "cke.cybozu.com/role=cs")
+	ExecSafeAt("", "kubectl", "label", "node", "kindtest-worker", "cke.cybozu.com/index-in-rack=4", "cke.cybozu.com/rack=1", "cke.cybozu.com/role=cs")
+	ExecSafeAt("", "kubectl", "label", "node", "kindtest-worker2", "cke.cybozu.com/index-in-rack=4", "cke.cybozu.com/rack=2", "cke.cybozu.com/role=cs")
+	ExecSafeAt("", "kubectl", "label", "node", "kindtest-worker3", "cke.cybozu.com/index-in-rack=5", "cke.cybozu.com/rack=0", "cke.cybozu.com/role=cs")
 }
 
 func issueKubeconfig() {
