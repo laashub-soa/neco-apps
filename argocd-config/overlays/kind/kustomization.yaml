@@ -3,6 +3,7 @@ kind: Kustomization
 bases:
 - ../../base
 patchesStrategicMerge:
-- metallb.yaml
-- network-policy.yaml
 - external-dns.yaml
+- metallb.yaml
+- monitoring.yaml
+- network-policy.yaml
