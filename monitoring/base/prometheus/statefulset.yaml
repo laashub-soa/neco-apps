@@ -32,6 +32,8 @@ spec:
               mountPath: /etc/prometheus/
             - name: prometheus-storage-volume
               mountPath: /prometheus/
+      securityContext:
+        fsGroup: 10000
       volumes:
         - name: prometheus-config-volume
           configMap:
