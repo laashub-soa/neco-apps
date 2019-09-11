@@ -5,6 +5,7 @@ bases:
 patches:
   - grafana/statefulset.yaml
   - prometheus/statefulset.yaml
+  - machines-endpoints/cronjob.yaml
 configMapGenerator:
   - name: alertmanager
     behavior: merge
