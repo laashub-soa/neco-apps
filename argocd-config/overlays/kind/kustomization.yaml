@@ -7,3 +7,4 @@ patchesStrategicMerge:
 - metallb.yaml
 - monitoring.yaml
 - network-policy.yaml
+- teleport.yaml
