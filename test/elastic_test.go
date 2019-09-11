@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
 )
 
@@ -122,20 +123,31 @@ spec:
 		}).Should(Succeed())
 
 		By("accessing to elasticsearch")
-		stdout, stderr, err := ExecAt(boot0, "ckecli", "cluster", "get")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		cluster := new(ckeCluster)
-		err = yaml.Unmarshal(stdout, cluster)
-		Expect(err).ShouldNot(HaveOccurred())
-		stdout, stderr, err = ExecAt(boot0,
+		stdout, stderr, err := ExecAt(boot0,
 			"kubectl", "get", "secret", "sample-es-elastic-user", "-n", "test-es", "-o=jsonpath='{.data.elastic}'",
 			"|", "base64", "--decode")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 		password := string(stdout)
-		workerAddr := cluster.Nodes[0].Address
-		stdout, stderr, err = ExecAt(boot0,
-			"ckecli", "ssh", "cybozu@"+workerAddr, "--",
-			"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http.test-es.svc.cluster.local:9200")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		if withKind {
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "test-es", "get", "svc", "sample-es-http", "-o", "json")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			svc := new(corev1.Service)
+			err = json.Unmarshal(stdout, svc)
+			stdout, stderr, err = ExecAt(boot0,
+				"docker", "exec", "-i", "kindtest-worker", "curl", "-u", "elastic:"+password, "-k", "https://"+svc.Spec.ClusterIP+":9200")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		} else {
+			stdout, stderr, err = ExecAt(boot0, "ckecli", "cluster", "get")
+			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+			cluster := new(ckeCluster)
+			err = yaml.Unmarshal(stdout, cluster)
+			Expect(err).ShouldNot(HaveOccurred())
+			workerAddr := cluster.Nodes[0].Address
+			stdout, stderr, err = ExecAt(boot0,
+				"ckecli", "ssh", "cybozu@"+workerAddr, "--",
+				"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http.test-es.svc.cluster.local:9200")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		}
 	})
 }

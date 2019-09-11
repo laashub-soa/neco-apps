@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus
+  labels:
+    app.kubernetes.io/name: prometheus
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: prometheus-storage-volume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: topolvm-provisioner
+        resources:
+          requests:
+            storage: 5Gi # TODO: tune the storage size if more machines are brought up in DC

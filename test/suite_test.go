@@ -46,7 +46,9 @@ var _ = Describe("Test applications", func() {
 	Context("external-dns", testExternalDNS)
 	Context("cert-manager", testCertManager)
 	Context("contour", testContour)
-	Context("machines-endpoints", testMachinesEndpoints)
+	if !withKind {
+		Context("machines-endpoints", testMachinesEndpoints)
+	}
 	Context("kube-state-metrics", testKubeStateMetrics)
 	Context("prometheus", testPrometheus)
 	Context("grafana", testGrafana)

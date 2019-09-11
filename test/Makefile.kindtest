@@ -51,6 +51,7 @@ start: launch-kind
 stop: stop-lvmd
 
 kindtest: install.yaml
+	$(SUDO) sysctl -w vm.max_map_count=262144
 	env KIND=1 $(GINKGO) -tags kind
 
 .PHONY: launch-kind shutdown-kind start-lvmd stop-lvmd start stop kindtest
