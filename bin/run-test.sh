@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . ${NECO_DIR}/bin/env
-TARGET=${TARGET:-test-apps}
+TARGET=${TARGET:-dctest}
 BASE_BRANCH=${BASE_BRANCH:-master}
 
 cat >run.sh <<EOF
