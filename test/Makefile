@@ -43,7 +43,7 @@ kustomize-check:
 	./kustomize-check.sh
 
 test: install.yaml validation opa-test test-alert-rules kustomize-check
-	test -z "$$(gofmt -s -l . | grep -v '^vendor' | tee /dev/stderr)"
+	test -z "$$(gofmt -s -l . | grep -v -E '^(vendor|neco-apps)' | tee /dev/stderr)"
 	test -z "$$(golint $$(go list ./... | grep -v /vendor/) | grep -v '/mtest/.*: should not use dot imports' | tee /dev/stderr)"
 	test -z "$$(nilerr ./... 2>&1 | tee /dev/stderr)"
 	test -z "$$(restrictpkg -packages=html/template,log ./... 2>&1 | tee /dev/stderr)"
@@ -66,6 +66,8 @@ setup:
 	curl -sSLf -O https://github.com/argoproj/argo-cd/releases/download/v$(ARGOCD_VERSION)/argocd-linux-amd64
 	$(SUDO) mv argocd-linux-amd64 /usr/local/bin/argocd
 	chmod +x /usr/local/bin/argocd
+	env GOFLAGS= GO111MODULE=off go get github.com/gostaticanalysis/nilerr/cmd/nilerr
+	env GOFLAGS= GO111MODULE=off go get github.com/cybozu/neco-containers/golang/restrictpkg/cmd/restrictpkg
 
 clean:
 	rm -f install.yaml

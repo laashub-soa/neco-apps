@@ -134,6 +134,7 @@ spec:
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			svc := new(corev1.Service)
 			err = json.Unmarshal(stdout, svc)
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s", stdout)
 			stdout, stderr, err = ExecAt(boot0,
 				"docker", "exec", "-i", "kindtest-worker", "curl", "-u", "elastic:"+password, "-k", "https://"+svc.Spec.ClusterIP+":9200")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
