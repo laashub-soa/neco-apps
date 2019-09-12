@@ -5,6 +5,15 @@ metadata:
   labels:
     app.kubernetes.io/name: prometheus
 spec:
+  template:
+    spec:
+      containers:
+        - name: prometheus
+          args:
+            - --config.file=/etc/prometheus/prometheus.yaml
+            - --storage.tsdb.path=/prometheus/data/
+            - --storage.tsdb.size=4GB
+            - --web.enable-admin-api
   volumeClaimTemplates:
     - metadata:
         name: prometheus-storage-volume
