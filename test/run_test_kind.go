@@ -18,6 +18,8 @@ type sshAgent struct {
 }
 
 func prepare() {
+	issueKubeconfig()
+
 	resources := []string{
 		"https://raw.githubusercontent.com/cybozu-go/cke/master/static/pod-security-policy.yml",
 		"https://raw.githubusercontent.com/cybozu-go/cke/master/static/rbac.yml",
