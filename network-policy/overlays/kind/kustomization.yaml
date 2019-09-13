@@ -5,3 +5,5 @@ bases:
 patchesStrategicMerge:
   - calico/daemonset.yaml
   - global-policies/network-set.yaml
+resources:
+  - global-policies/egress-internet-deny.yaml
