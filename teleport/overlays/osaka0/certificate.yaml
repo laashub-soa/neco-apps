@@ -1,0 +1,11 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: teleport-proxy-tls
+  namespace: teleport
+spec:
+  secretName: teleport-proxy-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: clouddns
+  commonName: teleport.osaka0.cybozu-ne.co
