@@ -40,6 +40,9 @@ var _ = Describe("Test applications", func() {
 	if doBootstrap {
 		return
 	}
+	if doReboot {
+		Context("reboot", testRebootAllNodes)
+	}
 	Context("gatekeeper", testGatekeeper)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)

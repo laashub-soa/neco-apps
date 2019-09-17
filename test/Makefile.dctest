@@ -7,7 +7,7 @@ dctest-upgrade:
 	cd /tmp/neco-apps/test; make test-apps BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH)
 	UPGRADE=1 ./test.sh
 
-dctest: install.yaml
-	./test.sh
+dctest-reboot: install.yaml
+	REBOOT=1 ./test.sh
 
 .PHONY: dctest dctest-upgrade
