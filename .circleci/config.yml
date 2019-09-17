@@ -257,11 +257,11 @@ workflows:
             branches:
               only:
                 - master
-      - bootstrap:
-      - upgrade-master:
-      - upgrade-release:
-      - update-stage:
     jobs:
+      - bootstrap
+      - upgrade-master
+      - upgrade-release
+      - update-stage
 
   production-release:
     jobs:
