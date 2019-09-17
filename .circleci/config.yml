@@ -261,7 +261,11 @@ workflows:
       - bootstrap
       - upgrade-master
       - upgrade-release
-      - update-stage
+      - update-stage:
+          requires:
+            - bootstrap
+            - upgrade-master
+            - upgrade-release
 
   production-release:
     jobs:
