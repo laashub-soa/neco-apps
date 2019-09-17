@@ -113,7 +113,7 @@ jobs:
           name: Bootstrap neco-apps at master
           command: |
             export NECO_DIR=$(pwd)/neco
-            TARGET=test-upgrade ./bin/run-test.sh
+            TARGET=dctest-upgrade ./bin/run-test.sh
           no_output_timeout: 20m
       - run:
           name: Remove instance
@@ -132,7 +132,7 @@ jobs:
           name: Bootstrap neco-apps at release
           command: |
             export NECO_DIR=$(pwd)/neco
-            TARGET=test-upgrade BASE_BRANCH=release ./bin/run-test.sh
+            TARGET=dctest-upgrade BASE_BRANCH=release ./bin/run-test.sh
           no_output_timeout: 20m
       - run:
           name: Remove instance
