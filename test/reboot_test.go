@@ -94,14 +94,18 @@ func testRebootAllNodes() {
 		var machines []sabakan.Machine
 		err = json.Unmarshal(stdout, &machines)
 		Expect(err).ShouldNot(HaveOccurred())
+		// Skip reboot vm on rack-3 because IPMI is not initialized
 		for _, m := range machines {
-			if m.Spec.Role == "boot" {
+			if m.Spec.Role == "boot" || m.Spec.Rack == 3 {
 				continue
 			}
 			stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "stop", m.Spec.IPv4[0])
 			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
 		for _, m := range machines {
+			if m.Spec.Rack == 3 {
+				continue
+			}
 			stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "start", m.Spec.IPv4[0])
 			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
