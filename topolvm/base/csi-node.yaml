@@ -48,6 +48,8 @@ spec:
       labels:
         app.kubernetes.io/name: csi-topolvm-node
     spec:
+      nodeSelector:
+        cke.cybozu.com/role: cs
       serviceAccountName: csi-topolvm-node
       containers:
         - name: node
