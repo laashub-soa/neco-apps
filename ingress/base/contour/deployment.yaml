@@ -94,7 +94,7 @@ spec:
         command: ["contour"]
         args:
         - bootstrap
-        - /config/contour.json
+        - /config/envoy.json
         volumeMounts:
         - name: envoy-config
           mountPath: /config
