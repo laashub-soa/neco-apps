@@ -275,6 +275,12 @@ workflows:
       - bootstrap:
           requires:
             - hold
+      # If branch name has specified prefix("with-neco-branch-hoge-piyo"), testing with the specified neco branch("hoge-piyo").
+      - bootstrap:
+          neco-release-branch: false
+          filters:
+            branches:
+              only: /^with-neco-branch-.*$/
       - upgrade-master:
           requires:
             - hold
