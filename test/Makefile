@@ -78,4 +78,4 @@ setup:
 clean:
 	rm -f install.yaml
 
-.PHONY:	validation opa-test test-alert-rules kustomize-check test setup clean
+.PHONY:	validation opa-test test-alert-rules kustomize-check test test-apps setup clean
