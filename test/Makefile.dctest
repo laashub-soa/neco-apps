@@ -1,5 +1,11 @@
 include Makefile
 
+dctest: install.yaml
+	./test.sh
+
+dctest-reboot: install.yaml
+	REBOOT=1 ./test.sh
+
 dctest-upgrade:
 	-git worktree remove /tmp/neco-apps
 	git worktree add /tmp/neco-apps $(BASE_BRANCH)
@@ -7,7 +13,4 @@ dctest-upgrade:
 	cd /tmp/neco-apps/test; make test-apps BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH)
 	UPGRADE=1 ./test.sh
 
-dctest: install.yaml
-	./test.sh
-
-.PHONY: dctest dctest-upgrade
+.PHONY: dctest dctest-reboot dctest-upgrade
