@@ -122,6 +122,25 @@ jobs:
             . bin/env
             $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
 
+  upgrade-stage:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - boot-dctest
+      - run:
+          name: Bootstrap neco-apps at stage
+          command: |
+            export NECO_DIR=$(pwd)/neco
+            TARGET=dctest-upgrade BASE_BRANCH=stage ./bin/run-test.sh
+          no_output_timeout: 20m
+      - run:
+          name: Remove instance
+          command: |
+            cd neco
+            . bin/env
+            $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
+
   upgrade-release:
     docker:
       - image: google/cloud-sdk
@@ -249,6 +268,44 @@ workflows:
             branches:
               ignore: ["master", "stage", "release"]
 
+  manual-dctest:
+    jobs:
+      - hold:
+          type: approval
+      - bootstrap:
+          requires:
+            - hold
+      - upgrade-master:
+          requires:
+            - hold
+          filters:
+            branches:
+              ignore:
+                - master
+      - upgrade-release:
+          requires:
+            - hold
+      - upgrade-stage:
+          requires:
+            - hold
+          filters:
+            branches:
+              only:
+                - master
+      - hold-update-stage:
+          type: approval
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - bootstrap
+            - upgrade-stage
+            - upgrade-release
+      - update-stage:
+          requires:
+            - hold-update-stage
+
   daily:
     triggers:
       - schedule:
@@ -259,12 +316,12 @@ workflows:
                 - master
     jobs:
       - bootstrap
-      - upgrade-master
+      - upgrade-stage
       - upgrade-release
       - update-stage:
           requires:
             - bootstrap
-            - upgrade-master
+            - upgrade-stage
             - upgrade-release
 
   production-release:
