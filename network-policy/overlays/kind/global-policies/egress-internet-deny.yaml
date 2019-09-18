@@ -12,7 +12,7 @@ spec:
   egress:
     - action: Log
       destination:
-        selector: role != 'cluster'
+        notSelector: role == 'cluster'
     - action: Deny
       destination:
-        selector: role != 'cluster'
+        notSelector: role == 'cluster'
