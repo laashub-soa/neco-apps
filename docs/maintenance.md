@@ -75,13 +75,36 @@ cd metallb
 git diff vA.B.C...vX.Y.Z manifests
 ```
 
-prometheus
-----------
+prometheus, alertmanager, grafana
+---------------------------------
 
-Check diffs of coreos/kube-prometheus files as follows:
+There is no official kubernetes manifests for prometheus.
+So, check changes in release notes for both prometheus and alertmanager and make necessary actions.
+
+
+calico
+------
+
+To check diffs between minor versions, download and compare manifests as follows:
 
 ```console
-git clone https://github.com/coreos/kube-prometheus
-cd kube-prometheus
-git diff vA.B.C...vX.Y.Z manifests
+wget https://docs.projectcalico.org/vX.Y/manifests/calico-policy-only.yaml -O vX.Y.yaml
+wget https://docs.projectcalico.org/vA.B/manifests/calico-policy-only.yaml -O vA.B.yaml
+diff -u vX.Y.yaml vA.B.yaml
+```
+
+teleport
+--------
+
+TBD
+
+topolvm
+-------
+
+Check diffs of cybozu-go/topolvm files as follows:
+
+```console
+git clone https://github.com/cybozu-go/topolvm
+cd topolvm 
+git diff vA.B.C...vX.Y.Z deploy
 ```
