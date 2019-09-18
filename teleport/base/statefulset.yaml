@@ -26,7 +26,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: teleport-auth
-        image: "quay.io/cybozu/teleport:4.0.2.2"
+        image: "quay.io/gravitational/teleport-ent:4.0.9"
         imagePullPolicy: IfNotPresent
         env:
         - name: NO_PROXY
@@ -67,6 +67,9 @@ spec:
           name: teleport-storage
         - mountPath: /tmp
           name: tmp
+        - mountPath: /var/lib/teleport
+          name: teleport-enterprise-license
+          subPath: license.pem
       securityContext:
         runAsUser: 10000
         runAsGroup: 10000
@@ -80,6 +83,9 @@ spec:
           secretName: teleport-auth-secret
       - name: tmp
         emptyDir: {}
+      - name: teleport-enterprise-license
+        secret:
+          secretName: teleport-enterprise-license
       serviceAccountName: teleport
   volumeClaimTemplates:
   - metadata:
