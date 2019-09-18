@@ -132,7 +132,7 @@ jobs:
           name: Bootstrap neco-apps at stage
           command: |
             export NECO_DIR=$(pwd)/neco
-            TARGET=dctest-upgrade BASE_BRANC=stage ./bin/run-test.sh
+            TARGET=dctest-upgrade BASE_BRANCH=stage ./bin/run-test.sh
           no_output_timeout: 20m
       - run:
           name: Remove instance
