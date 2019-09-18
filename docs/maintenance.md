@@ -33,6 +33,7 @@ wget https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-mana
 ```
 
 Compare each resource by your eyes.
+**Be warned that `cert-manager` namespaces must be replaced with `external-dns`.**
 
 external-dns
 ------------
