@@ -249,6 +249,33 @@ workflows:
             branches:
               ignore: ["master", "stage", "release"]
 
+  manual-dctest:
+    jobs:
+      - hold:
+          type: approval
+      - bootstrap:
+          requires:
+            - hold
+      - upgrade-master:
+          requires:
+            - hold
+      - upgrade-release:
+          requires:
+            - hold
+      - hold-update-stage:
+          type: approval
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - bootstrap
+            - upgrade-master
+            - upgrade-release
+      - update-stage:
+          requires:
+            - hold-update-stage
+
   daily:
     triggers:
       - schedule:

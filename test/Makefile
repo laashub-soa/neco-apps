@@ -50,6 +50,9 @@ test: install.yaml validation opa-test test-alert-rules kustomize-check
 	ineffassign .
 	go vet ./...
 
+test-apps:
+	$(MAKE) -f Makefile.dctest dctest
+
 setup:
 	curl -sSLf -O https://storage.googleapis.com/kubernetes-release/release/v$(KUBERNETES_VERSION)/bin/linux/amd64/kubectl
 	$(SUDO) mv kubectl /usr/local/bin/kubectl
