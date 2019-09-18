@@ -114,6 +114,17 @@ stringData:
         output: stderr
         severity: DEBUG
 `
+	teleportEnterpriseLicenseSecret = `
+apiVersion: v1
+kind: Secret
+metadata:
+  name: teleport-enterprise-license
+  namespace: teleport
+  labels:
+    app.kubernetes.io/name: teleport
+stringData:
+  license.pem: dummy license file
+`
 	elasticSecret = `
 apiVersion: v1
 kind: Secret
@@ -215,6 +226,9 @@ func testSetup() {
 				ExecSafeAt(boot0, "kubectl", "-n", "teleport", "create", "secret", "generic",
 					"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
 					"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
+
+				stdout, stderr, err = ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "create", "-f", "-")
+				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			}
 
 			By("creating namespace and secrets for elastic")
