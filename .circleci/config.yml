@@ -208,7 +208,7 @@ jobs:
             git config --global user.email "neco@cybozu.com"
             git config --global user.name "cybozu-neco"
       - run: git checkout stage
-      - run: git merge --no-commit origin/master
+      - run: git merge --no-commit ${CIRCLE_SHA1}
       - run:
           name: Check diff
           command: |
