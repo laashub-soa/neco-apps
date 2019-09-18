@@ -98,12 +98,12 @@ func testRebootAllNodes() {
 			if m.Spec.Role == "boot" {
 				continue
 			}
-			_, _, err = ExecAt(boot0, "neco", "ipmipower", "stop", m.Spec.IPv4[0])
-			Expect(err).ShouldNot(HaveOccurred())
+			stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "stop", m.Spec.IPv4[0])
+			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
 		for _, m := range machines {
-			_, _, err = ExecAt(boot0, "neco", "ipmipower", "start", m.Spec.IPv4[0])
-			Expect(err).ShouldNot(HaveOccurred())
+			stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "start", m.Spec.IPv4[0])
+			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
 
 		By("wait for start of rebooting")
