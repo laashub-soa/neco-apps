@@ -10,6 +10,7 @@ import (
 	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
 )
 
@@ -210,6 +211,29 @@ func testRebootAllNodes() {
 				}
 			}
 
+			return nil
+		}).Should(Succeed())
+	})
+
+	It("wait for Kubernetes cluster to become ready", func() {
+		By("waiting nodes")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "nodes", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			var nl corev1.NodeList
+			err = json.Unmarshal(stdout, &nl)
+			if err != nil {
+				return err
+			}
+
+			// control-plane-count + minimum-workers = 5
+			// https://github.com/cybozu-go/cke/blob/master/docs/sabakan-integration.md#initialization
+			if len(nl.Items) != 5 {
+				return fmt.Errorf("too few nodes: %d", len(nl.Items))
+			}
 			return nil
 		}).Should(Succeed())
 	})
