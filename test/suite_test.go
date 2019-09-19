@@ -46,7 +46,9 @@ var _ = Describe("Test applications", func() {
 	Context("gatekeeper", testGatekeeper)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)
-	Context("external-dns", testExternalDNS)
+	if !withKind {
+		Context("external-dns", testExternalDNS)
+	}
 	Context("cert-manager", testCertManager)
 	Context("contour", testContour)
 	if !withKind {

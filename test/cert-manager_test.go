@@ -40,6 +40,9 @@ func testCertManager() {
 		domainName := testID + "-cert-manager.gcp0.dev-ne.co"
 		By("deploying Certificate")
 		issuerName := "clouddns"
+		if withKind {
+			issuerName = "self-signed-issuer"
+		}
 		certificate := fmt.Sprintf(`
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
@@ -77,8 +80,12 @@ spec:
 			if status.Status != certmanagerv1alpha1.ConditionTrue {
 				return fmt.Errorf("Certificate status is not True: %s", status.Status)
 			}
-			if status.Reason != "ACMEAccountRegistered" {
-				return fmt.Errorf("ClusterIssuer reason not ACMEAccountRegistered: %s", status.Reason)
+			desiredReason := "ACMEAccountRegistered"
+			if withKind {
+				desiredReason = "IsReady"
+			}
+			if status.Reason != desiredReason {
+				return fmt.Errorf("ClusterIssuer reason not %s: %s", desiredReason, status.Reason)
 			}
 
 			return nil
