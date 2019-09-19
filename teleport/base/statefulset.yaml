@@ -67,7 +67,7 @@ spec:
           name: teleport-storage
         - mountPath: /tmp
           name: tmp
-        - mountPath: /var/lib/teleport
+        - mountPath: /var/lib/license
           name: teleport-enterprise-license
           subPath: license.pem
       securityContext:
