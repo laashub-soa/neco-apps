@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
 - namespace.yaml
 - cert-manager/apiservice.yaml
-- cert-manager/clouddns.yaml
+- cert-manager/clusterissuer.yaml
 - cert-manager/common.yaml
 - cert-manager/deployment.yaml
 - cert-manager/mutatingwebhookconfiguration.yaml

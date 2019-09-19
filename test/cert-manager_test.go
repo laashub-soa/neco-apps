@@ -39,6 +39,10 @@ func testCertManager() {
 	It("should issue certificate", func() {
 		domainName := testID + "-cert-manager.gcp0.dev-ne.co"
 		By("deploying Certificate")
+		issuerName := "clouddns"
+		if withKind {
+			issuerName = "self-signed-issuer"
+		}
 		certificate := fmt.Sprintf(`
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
@@ -49,15 +53,15 @@ spec:
   secretName: example-com-tls
   issuerRef:
     kind: ClusterIssuer
-    name: clouddns
+    name: %s
   commonName: %s
-`, domainName)
+`, issuerName, domainName)
 		_, stderr, err := ExecAtWithInput(boot0, []byte(certificate), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		By("checking CloudDNS ClusterIssuer has registered")
+		By("checking ClusterIssuer has registered")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=external-dns", "clusterissuers", "clouddns", "-o", "json")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=external-dns", "clusterissuers", issuerName, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}

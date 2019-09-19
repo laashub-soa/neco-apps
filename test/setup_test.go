@@ -171,8 +171,14 @@ func testSetup() {
 	if !doUpgrade {
 		It("should prepare secrets", func() {
 			By("loading account.json")
-			data, err := ioutil.ReadFile("account.json")
-			Expect(err).ShouldNot(HaveOccurred())
+			var data []byte
+			var err error
+			if withKind {
+				data = []byte("{}")
+			} else {
+				data, err = ioutil.ReadFile("account.json")
+				Expect(err).ShouldNot(HaveOccurred())
+			}
 
 			By("creating namespace and secrets for external-dns")
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
