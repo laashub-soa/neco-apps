@@ -188,23 +188,24 @@ spec:
 			return err
 		}).Should(Succeed())
 
-		By("accessing with curl: https")
-		if withKind {
-			ExecSafeAt("", "curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
-		} else {
-			ExecSafeAt(boot0, "HTTPS_PROXY=http://10.0.49.3:3128",
-				"curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
+		if !withKind {
+			By("accessing with curl: https")
+			if withKind {
+				ExecSafeAt("", "curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
+			} else {
+				ExecSafeAt(boot0, "HTTPS_PROXY=http://10.0.49.3:3128",
+					"curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
+			}
+			Eventually(func() error {
+				_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTPS+":443:"+targetIP,
+					"https://"+fqdnHTTPS+"/",
+					"-m", "5",
+					"--fail",
+					"--cacert", "lets.crt",
+				)
+				return err
+			}).Should(Succeed())
 		}
-
-		Eventually(func() error {
-			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTPS+":443:"+targetIP,
-				"https://"+fqdnHTTPS+"/",
-				"-m", "5",
-				"--fail",
-				"--cacert", "lets.crt",
-			)
-			return err
-		}).Should(Succeed())
 
 		By("redirecting to https")
 		Eventually(func() error {
