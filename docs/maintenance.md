@@ -80,7 +80,7 @@ prometheus, alertmanager, grafana
 ---------------------------------
 
 There is no official kubernetes manifests for prometheus.
-So, check changes in release notes for both prometheus and alertmanager and make necessary actions.
+So, check changes in release notes on github for both prometheus and alertmanager and make necessary actions.
 
 
 calico
@@ -97,7 +97,9 @@ diff -u vX.Y.yaml vA.B.yaml
 teleport
 --------
 
-TBD
+There is no official kubernetes manifests actively maintained for teleport.
+So, check changes in release notes on github.
+
 
 topolvm
 -------
@@ -106,6 +108,6 @@ Check diffs of cybozu-go/topolvm files as follows:
 
 ```console
 git clone https://github.com/cybozu-go/topolvm
-cd topolvm 
+cd topolvm
 git diff vA.B.C...vX.Y.Z deploy
 ```
