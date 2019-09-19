@@ -40,9 +40,6 @@ func testCertManager() {
 		domainName := testID + "-cert-manager.gcp0.dev-ne.co"
 		By("deploying Certificate")
 		issuerName := "clouddns"
-		if withKind {
-			issuerName = "self-signed-issuer"
-		}
 		certificate := fmt.Sprintf(`
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate

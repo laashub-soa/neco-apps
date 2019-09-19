@@ -10,10 +10,6 @@ spec:
         args:
         - --source=crd
         - --domain-filter=gcp0.dev-ne.co
-        - --provider=google
-        - --google-project=neco-test
-        - --registry=txt
-        - --txt-owner-id=$(POD_NAME)
         - --log-format=json
         env:
         - name: POD_NAME
