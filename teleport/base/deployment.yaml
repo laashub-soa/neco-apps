@@ -30,11 +30,8 @@ spec:
         image: "quay.io/gravitational/teleport-ent:4.0.9"
         imagePullPolicy: IfNotPresent
         args:
-        - start
         - --roles=proxy
         - --diag-addr=0.0.0.0:3020
-        - -c
-        - /etc/teleport/teleport.yaml
         livenessProbe:
           httpGet:
             port: 3020

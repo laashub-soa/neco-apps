@@ -36,11 +36,8 @@ spec:
         - name: HTTPS_PROXY
           value: http://squid.internet-egress.svc.cluster.local:3128
         args:
-        - start
         - --roles=auth
         - --diag-addr=0.0.0.0:3020
-        - -c
-        - /etc/teleport/teleport.yaml
         livenessProbe:
           httpGet:
             port: 3020
