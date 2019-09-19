@@ -168,10 +168,6 @@ func testRebootAllNodes() {
 		}).Should(Succeed())
 	})
 
-	It("re-enable CKE sabakan integration", func() {
-		ExecSafeAt(boot0, "ckecli", "sabakan", "enable")
-	})
-
 	It("fetch cluster nodes", func() {
 		Eventually(func() error {
 			afterNodes, err := fetchClusterNodes()
@@ -249,5 +245,9 @@ func testRebootAllNodes() {
 			}
 			return nil
 		}).Should(Succeed())
+	})
+
+	It("re-enable CKE sabakan integration", func() {
+		ExecSafeAt(boot0, "ckecli", "sabakan", "enable")
 	})
 }
