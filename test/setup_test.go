@@ -114,6 +114,17 @@ stringData:
         output: stderr
         severity: DEBUG
 `
+	teleportEnterpriseLicenseSecret = `
+apiVersion: v1
+kind: Secret
+metadata:
+  name: teleport-enterprise-license
+  namespace: teleport
+  labels:
+    app.kubernetes.io/name: teleport
+stringData:
+  license.pem: dummy license file
+`
 	elasticSecret = `
 apiVersion: v1
 kind: Secret
@@ -231,6 +242,14 @@ func testSetup() {
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		stdout, stderr, err = ExecAtWithInput(boot0, []byte(gatekeeperSecret), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+	})
+
+	It("should prepare secrets for teleport", func() {
+		//TODO: move into `if !doUpgrade {}` when the teleport enterprise is deployed
+		if !withKind {
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "create", "-f", "-")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		}
 	})
 
 	It("should checkout neco-apps repository@"+commitID, func() {
