@@ -208,7 +208,7 @@ jobs:
             git config --global user.email "neco@cybozu.com"
             git config --global user.name "cybozu-neco"
       - run: git checkout stage
-      - run: git merge --no-commit origin/master
+      - run: git merge --no-commit ${CIRCLE_SHA1}
       - run:
           name: Check diff
           command: |
@@ -273,8 +273,16 @@ workflows:
       - hold:
           type: approval
       - bootstrap:
+          name: bootstrap-1
           requires:
             - hold
+      # If branch name has specified prefix("with-neco-branch-hoge-piyo"), testing with the specified neco branch("hoge-piyo").
+      - bootstrap:
+          name: bootstrap-2
+          neco-release-branch: false
+          filters:
+            branches:
+              only: /^with-neco-branch-.*$/
       - upgrade-master:
           requires:
             - hold
@@ -299,7 +307,7 @@ workflows:
               only:
                 - master
           requires:
-            - bootstrap
+            - bootstrap-1
             - upgrade-stage
             - upgrade-release
       - update-stage:

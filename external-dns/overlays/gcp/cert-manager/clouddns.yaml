@@ -8,7 +8,10 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
-    - dns01:
+    - selector:
+        dnsZones:
+        - gcp0.dev-ne.co
+      dns01:
         clouddns:
           project: neco-test
           serviceAccountSecretRef:

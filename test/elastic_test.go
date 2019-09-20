@@ -11,16 +11,6 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// ckeCluster is part of cke.Cluster in github.com/cybozu-go/cke
-type ckeCluster struct {
-	Nodes []*ckeNode `json:"nodes"`
-}
-
-// ckeNode is part of cke.Node in github.com/cybozu-go/cke
-type ckeNode struct {
-	Address string `json:"address"`
-}
-
 func testElastic() {
 	It("should create test-ingress namespace", func() {
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-es", "--ignore-not-found=true")

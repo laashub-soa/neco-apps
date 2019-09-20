@@ -65,6 +65,8 @@ spec:
           readOnly: true
         - mountPath: /var/lib/teleport
           name: teleport-storage
+        - mountPath: /tmp
+          name: tmp
       securityContext:
         runAsUser: 10000
         runAsGroup: 10000
@@ -76,6 +78,8 @@ spec:
       - name: teleport-auth-secret
         secret:
           secretName: teleport-auth-secret
+      - name: tmp
+        emptyDir: {}
       serviceAccountName: teleport
   volumeClaimTemplates:
   - metadata:
