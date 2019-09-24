@@ -24,7 +24,7 @@ spec:
         - "20"
         - --operation-processors
         - "10"
-        image: quay.io/cybozu/argocd:v1.2.1.1
+        image: quay.io/cybozu/argocd:1.2.1.1
         livenessProbe:
           httpGet:
             path: /healthz
