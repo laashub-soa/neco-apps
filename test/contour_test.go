@@ -181,35 +181,6 @@ spec:
 			return nil
 		}).Should(Succeed())
 
-		By("confirming generated DNSEndpoint")
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "test-ingress", "dnsendpoint/root", "-o", "json")
-			if err != nil {
-				return err
-			}
-
-			var de struct {
-				Spec struct {
-					Endpoints []*struct {
-						Targets []string `json:"targets,omitempty"`
-					} `json:"endpoints,omitempty"`
-				} `json:"spec,omitempty"`
-			}
-			err = json.Unmarshal(stdout, &de)
-			if err != nil {
-				return err
-			}
-			if len(de.Spec.Endpoints) == 0 {
-				return errors.New("len(de.Spec.Endpoints) == 0")
-			}
-			actualIP := de.Spec.Endpoints[0].Targets[0]
-
-			if targetIP != actualIP {
-				return fmt.Errorf("expected IP is (%s), but actual is (%s)", targetIP, actualIP)
-			}
-			return nil
-		}).Should(Succeed())
-
 		By("accessing with curl: http")
 		Eventually(func() error {
 			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTP+":80:"+targetIP,
@@ -217,23 +188,20 @@ spec:
 			return err
 		}).Should(Succeed())
 
-		By("accessing with curl: https")
-		if withKind {
-			ExecSafeAt("", "curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
-		} else {
+		if !withKind {
+			By("accessing with curl: https")
 			ExecSafeAt(boot0, "HTTPS_PROXY=http://10.0.49.3:3128",
 				"curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
+			Eventually(func() error {
+				_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTPS+":443:"+targetIP,
+					"https://"+fqdnHTTPS+"/",
+					"-m", "5",
+					"--fail",
+					"--cacert", "lets.crt",
+				)
+				return err
+			}).Should(Succeed())
 		}
-
-		Eventually(func() error {
-			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTPS+":443:"+targetIP,
-				"https://"+fqdnHTTPS+"/",
-				"-m", "5",
-				"--fail",
-				"--cacert", "lets.crt",
-			)
-			return err
-		}).Should(Succeed())
 
 		By("redirecting to https")
 		Eventually(func() error {
