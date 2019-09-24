@@ -251,9 +251,8 @@ func testSetup() {
 	})
 
 	It("should prepare secrets for teleport", func() {
-		//TODO: move into `if !doUpgrade {}` when the teleport enterprise is deployed
 		if !withKind {
-			stdout, stderr, err := ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "create", "-f", "-")
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "apply", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
 	})
