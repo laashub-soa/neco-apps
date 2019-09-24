@@ -232,15 +232,15 @@ func testSetup() {
 				ExecSafeAt(boot0, "kubectl", "-n", "teleport", "create", "secret", "generic",
 					"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
 					"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
+
+				By("creating secrets for teleport")
+				stdout, stderr, err = ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "create", "-f", "-")
+				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			}
 
 			By("creating namespace and secrets for elastic")
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "elastic-system")
 			stdout, stderr, err = ExecAtWithInput(boot0, []byte(elasticSecret), "kubectl", "--namespace=elastic-system", "create", "-f", "-")
-			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
-			By("creating secrets for teleport")
-			stdout, stderr, err = ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "create", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		})
 	}
