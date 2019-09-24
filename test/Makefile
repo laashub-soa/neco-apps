@@ -17,13 +17,13 @@ export GOFLAGS
 
 # Follow Argo CD installed kustomize version
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L32
-KUSTOMIZE_VERSION = 2.0.3
+KUSTOMIZE_VERSION = 3.2.0
 OPA_VERSION = 0.12.0
 PROMTOOL_VERSION := 2.9.2
-TELEPORT_VERSION := 4.0.2
-KUBERNETES_VERSION = 1.15.3
+TELEPORT_VERSION := 4.0.9
+KUBERNETES_VERSION = 1.15.4
 KIND_VERSION = 0.5.1
-ARGOCD_VERSION = 1.1.2
+ARGOCD_VERSION = 1.2.1
 REGO_FILES = $(shell find .. -path ../vendor -prune -o -name '*.rego' -print)
 
 install.yaml: $(shell find ../argocd/base)
