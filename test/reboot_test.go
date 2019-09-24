@@ -245,6 +245,24 @@ func testRebootAllNodes() {
 			}
 			return nil
 		}).Should(Succeed())
+		By("confirming that pods can be deployed")
+		testhttpdYAML := `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: testhttpd-reboot
+spec:
+  containers:
+  - name: testhttpd
+    image: quay.io/cybozu/testhttpd:0
+`
+		Eventually(func() error {
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(testhttpdYAML), "kubectl", "apply", "-f", "-")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 	})
 
 	It("re-enable CKE sabakan integration", func() {

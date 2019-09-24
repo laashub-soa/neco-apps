@@ -20,9 +20,8 @@ dctest
 kindtest
 --------
 
-1. Place `account.json` file for GCP Cloud DNS in this directory.
-2. Push the current feature branch to GitHub.
-3. Run following commands to setup Argo CD and run tests.
+1. Push the current feature branch to GitHub.
+2. Run following commands to setup Argo CD and run tests.
 
     ```console
     cd test

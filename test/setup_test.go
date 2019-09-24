@@ -182,8 +182,14 @@ func testSetup() {
 	if !doUpgrade {
 		It("should prepare secrets", func() {
 			By("loading account.json")
-			data, err := ioutil.ReadFile("account.json")
-			Expect(err).ShouldNot(HaveOccurred())
+			var data []byte
+			var err error
+			if withKind {
+				data = []byte("{}")
+			} else {
+				data, err = ioutil.ReadFile("account.json")
+				Expect(err).ShouldNot(HaveOccurred())
+			}
 
 			By("creating namespace and secrets for external-dns")
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
@@ -245,9 +251,8 @@ func testSetup() {
 	})
 
 	It("should prepare secrets for teleport", func() {
-		//TODO: move into `if !doUpgrade {}` when the teleport enterprise is deployed
 		if !withKind {
-			stdout, stderr, err := ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "create", "-f", "-")
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "apply", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
 	})
