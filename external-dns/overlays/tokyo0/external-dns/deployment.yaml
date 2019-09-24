@@ -8,7 +8,8 @@ spec:
       containers:
       - name: external-dns
         args:
-        - --source=crd
+        - --source=contour-ingressroute
+        - --contour-load-balancer=ingress/contour-global
         - --domain-filter=tokyo0.cybozu-ne.co
         - --provider=google
         - --google-project=cybozu-neco

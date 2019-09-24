@@ -4,13 +4,13 @@ metadata:
   name: clouddns
 spec:
   acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-      name: letsencrypt-staging
     solvers:
-    - dns01:
+    - selector:
+        dnsZones:
+        - osaka0.cybozu-ne.co
+      dns01:
         clouddns:
-          project: neco-test
+          project: cybozu-neco
           serviceAccountSecretRef:
             name: external-dns
             key: account.json
