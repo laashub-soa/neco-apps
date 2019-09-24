@@ -232,10 +232,6 @@ func testSetup() {
 				ExecSafeAt(boot0, "kubectl", "-n", "teleport", "create", "secret", "generic",
 					"teleport-etcd-certs", "--from-file=ca.crt=etcd-ca.crt",
 					"--from-file=tls.crt=etcd-teleport.crt", "--from-file=tls.key=etcd-teleport.key")
-
-				By("creating secrets for teleport")
-				stdout, stderr, err = ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "create", "-f", "-")
-				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			}
 
 			By("creating namespace and secrets for elastic")
@@ -252,6 +248,13 @@ func testSetup() {
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		stdout, stderr, err = ExecAtWithInput(boot0, []byte(gatekeeperSecret), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+	})
+
+	It("should prepare secrets for teleport", func() {
+		if !withKind {
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(teleportEnterpriseLicenseSecret), "kubectl", "apply", "-f", "-")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		}
 	})
 
 	It("should checkout neco-apps repository@"+commitID, func() {
