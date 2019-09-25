@@ -42,7 +42,7 @@ This repository has 4 CircleCI workflows, `main`, `daily`, `manual-dctest` and `
 | `bootstrap`       | Bootstrap test on GCP instances                     | `master`      |
 | `upgrade-stage`   | Upgrade test from `stage` branch (staging env)      | `master`      |
 | `upgrade-release` | Upgrade test from `release` branch (production env) | `master`      |
-| `update-stage`    | Merge `master` to `stage`                           | `master`      |
+| `merge-stage`     | Merge `master` to `stage`, and create/push a tag    | `master`      |
 
 `update-stage` is executed only if 3 other jobs succeeded.
 
@@ -52,14 +52,14 @@ This repository has 4 CircleCI workflows, `main`, `daily`, `manual-dctest` and `
 
 This consists of the following 6 jobs.
 
-| job name          | description                                         | target branch                |
-| ----------------- | --------------------------------------------------- | ---------------------------- |
-| `bootstrap-1`     | Bootstrap test on GCP instances                     | all branches                 |
-| `bootstrap-2`     | Bootstrap test with `neco`'s feature branch         | `with-neco-branch-*` branch  |
-| `upgrade-master`  | Upgrade test from `master` branch                   | all branches except `master` |
-| `upgrade-stage`   | Upgrade test from `stage` branch (staging env)      | `master`                     |
-| `upgrade-release` | Upgrade test from `release` branch (production env) | all branches                 |
-| `update-stage`    | Merge `master` to `stage`                           | `master`                     |
+| job name                     | description                                         | target branch                        |
+| ---------------------------- | --------------------------------------------------- | ------------------------------------ |
+| `bootstrap`                  | Bootstrap test on GCP instances                     | all branches                         |
+| `bootstrap-with-neco-branch` | Bootstrap test with `neco`'s feature branch         | `with-neco-branch-*` branch          |
+| `upgrade-master`             | Upgrade test from `master` branch                   | all but `master`, `stage`, `release` |
+| `upgrade-stage`              | Upgrade test from `stage` branch (staging env)      | all branches                         |
+| `upgrade-release`            | Upgrade test from `release` branch (production env) | all branches                         |
+| `merge-stage`                | Merge `master` to `stage`, and create/push a tag    | `master`                             |
 
 `bootstrap-2` is tested with `neco`'s feature branch which extracted from `neco-apps`'s branch name.
 For example, when `with-neco-branch-foo-bar` branch of `neco-apps`, it's tested with `foo-bar` branch of `neco`.
