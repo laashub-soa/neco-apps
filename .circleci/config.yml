@@ -194,7 +194,7 @@ jobs:
             make -f Makefile.kindtest start
             make -f Makefile.kindtest kindtest
 
-  update-stage:
+  merge-stage:
     docker:
       - image: quay.io/cybozu/golang:1.12-bionic
     steps:
@@ -217,12 +217,7 @@ jobs:
             printf "%s\n" "$diffs"
       # Skip the following steps if there is no difference.
       - run:
-          name: Store github-token
-          command: |
-            if [ -f .skip ]; then exit 0; fi
-            echo "$NECO_GITHUB_TOKEN" > github-token
-      - run:
-          name: Commit and push to GitHub
+          name: Commit, tag and push to GitHub
           command: |
             if [ -f .skip ]; then exit 0; fi
             ./bin/commit-push.sh
@@ -232,12 +227,6 @@ jobs:
       - image: quay.io/cybozu/ubuntu-dev:18.04
     steps:
       - checkout
-      - run:
-          name: Install hub command
-          command: |
-            curl -sSLf https://github.com/github/hub/releases/download/v2.8.3/hub-linux-amd64-2.8.3.tgz | \
-            tar zxf - --strip-components=1 -C /tmp/ && \
-            mv /tmp/bin/hub /usr/local/bin/hub
       - run:
           name: Configure GIT
           command: |
@@ -273,12 +262,12 @@ workflows:
       - hold:
           type: approval
       - bootstrap:
-          name: bootstrap-1
+          name: bootstrap
           requires:
             - hold
       # If branch name has specified prefix("with-neco-branch-hoge-piyo"), testing with the specified neco branch("hoge-piyo").
       - bootstrap:
-          name: bootstrap-2
+          name: bootstrap-with-neco-branch
           neco-release-branch: false
           filters:
             branches:
@@ -288,31 +277,22 @@ workflows:
             - hold
           filters:
             branches:
-              ignore:
-                - master
+              ignore: ["master", "stage", "release"]
       - upgrade-release:
           requires:
             - hold
       - upgrade-stage:
           requires:
             - hold
-          filters:
-            branches:
-              only:
-                - master
-      - hold-update-stage:
-          type: approval
+      - merge-stage:
           filters:
             branches:
               only:
                 - master
           requires:
-            - bootstrap-1
+            - bootstrap
             - upgrade-stage
             - upgrade-release
-      - update-stage:
-          requires:
-            - hold-update-stage
 
   daily:
     triggers:
@@ -326,7 +306,7 @@ workflows:
       - bootstrap
       - upgrade-stage
       - upgrade-release
-      - update-stage:
+      - merge-stage:
           requires:
             - bootstrap
             - upgrade-stage
