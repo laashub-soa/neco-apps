@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contour
+  namespace: ingress
+spec:
+  template:
+    spec:
+      containers:
+        - name: contour-plus
+          env:
+            - name: CP_DEFAULT_ISSUER_NAME
+              value: self-signed-issuer
