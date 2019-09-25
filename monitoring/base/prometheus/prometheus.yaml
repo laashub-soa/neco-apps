@@ -90,7 +90,7 @@ scrape_configs:
         regex: "kube-state-metrics"
       - source_labels: [__meta_kubernetes_service_port_name]
         action: keep
-        regex: http-metrics
+        regex: (http-metrics|telemetry)
   - job_name: 'node-exporter'
     kubernetes_sd_configs:
       - role: endpoints
