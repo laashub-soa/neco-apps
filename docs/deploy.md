@@ -55,23 +55,11 @@ Production cluster
 
 ### Apply changes
 
-1. Deployment team confirms all changes the since last commit of `origin/release` branch are stable according to the CI result and the staging cluster deployment by `origin/stage`.
-2. Developer adds a git tag `release-YYYY.MM.DD-UNIQUE_ID` with `stage HEAD` branch, and push the tag.  
-    **TODO: This operation might be automated by the simple script**
-    ```console
-    $ git checkout stage
-    $ git pull
-    $ git tag release-$(date +%Y.%m.%d)-UNIQUE_ID
-    $ git push origin --tags
-    ```
-3. CI creates a new branch using its tag, then create a new PR which merges to `release` branch.
-4. Reviewer reviews it, and accept if LGTM.
-5. **Reviewer merges PR, and Argo CD synchronizes latest release HEAD.**
-
-Backup cluster
---------------
-
-**TBD**
+1. CircleCI has already prepared pull requests to merge changes in `stage` branch to `release` branch.
+    Review the latest pull request and confirm the stability of `staging0` data center.
+    If it looks good, merge it.  If not, close it.
+    Old pull requests should be closed.
+2. Argo CD synchronizes latest release HEAD.
 
 Glossary
 --------
