@@ -5,6 +5,17 @@ metadata:
   labels:
     app.kubernetes.io/name: prometheus
 spec:
+  template:
+    spec:
+      containers:
+        - name: prometheus
+          resources:
+            limits:
+              memory: 1Gi
+              cpu: 1
+            requests:
+              memory: 1Gi
+              cpu: 1
   volumeClaimTemplates:
     - metadata:
         name: prometheus-storage-volume
