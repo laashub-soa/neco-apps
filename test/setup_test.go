@@ -302,7 +302,7 @@ func testSetup() {
 			ExecSafeAt(boot0, "neco", "config", "set", "proxy", proxyURL)
 			ExecSafeAt(boot0, "neco", "config", "set", "node-proxy", proxyURL)
 
-			necoVersion := string(ExecSafeAt(boot0, "dpkg-query", "-W", "-f", "${Version}", "neco"))
+			necoVersion := string(ExecSafeAt(boot0, "dpkg-query", "-W", "-f", "'${Version}'", "neco"))
 			rolePaths := strings.Split(string(ExecSafeAt(boot0, "ls", "-1", "/usr/share/neco/ignitions/roles/*/site.yml")), "\n")
 			for _, rolePath := range rolePaths {
 				role := strings.Split(rolePath, "/")[6]
