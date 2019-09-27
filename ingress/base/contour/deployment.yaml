@@ -48,7 +48,7 @@ spec:
         name: contour-plus
         env:
         - name: CP_CRDS
-          value: Certificate
+          value: DNSEndpoint,Certificate
         - name: CP_SERVICE_NAME
           value: ingress/contour-global
         - name: CP_DEFAULT_ISSUER_NAME

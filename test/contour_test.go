@@ -181,6 +181,37 @@ spec:
 			return nil
 		}).Should(Succeed())
 
+		if !withKind {
+			By("confirming generated DNSEndpoint")
+			Eventually(func() error {
+				stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "test-ingress", "dnsendpoint/root", "-o", "json")
+				if err != nil {
+					return err
+				}
+
+				var de struct {
+					Spec struct {
+						Endpoints []*struct {
+							Targets []string `json:"targets,omitempty"`
+						} `json:"endpoints,omitempty"`
+					} `json:"spec,omitempty"`
+				}
+				err = json.Unmarshal(stdout, &de)
+				if err != nil {
+					return err
+				}
+				if len(de.Spec.Endpoints) == 0 {
+					return errors.New("len(de.Spec.Endpoints) == 0")
+				}
+				actualIP := de.Spec.Endpoints[0].Targets[0]
+
+				if targetIP != actualIP {
+					return fmt.Errorf("expected IP is (%s), but actual is (%s)", targetIP, actualIP)
+				}
+				return nil
+			}).Should(Succeed())
+		}
+
 		By("accessing with curl: http")
 		Eventually(func() error {
 			_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTP+":80:"+targetIP,

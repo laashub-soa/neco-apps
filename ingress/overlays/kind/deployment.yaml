@@ -9,5 +9,7 @@ spec:
       containers:
         - name: contour-plus
           env:
+            - name: CP_CRDS
+              value: Certificate
             - name: CP_DEFAULT_ISSUER_NAME
               value: self-signed-issuer
