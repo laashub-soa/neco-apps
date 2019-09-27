@@ -299,7 +299,7 @@ func testSetup() {
 			}).Should(Succeed())
 
 			proxyURL := fmt.Sprintf("http://%s:3128", proxyIP)
-			ExecSafeAt(boot0, "neco", "config" "set", "proxy", proxyURL)
+			ExecSafeAt(boot0, "neco", "config", "set", "proxy", proxyURL)
 			ExecSafeAt(boot0, "neco", "config", "set", "node-proxy", proxyURL)
 
 			necoVersion := string(ExecSafeAt(boot0, "dpkg-query", "-W", "-f", "${Version}", "neco"))
