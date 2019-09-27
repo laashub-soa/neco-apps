@@ -275,6 +275,42 @@ func testSetup() {
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications()
 	})
+
+	if !withKind {
+		It("should set HTTP proxy", func() {
+			var proxyIP string
+			Eventually(func() error {
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "get", "svc", "squid", "-o", "json")
+				if err != nil {
+					return fmt.Errorf("stdout: %v, stderr: %v, err: %v", stdout, stderr, err)
+				}
+
+				var svc corev1.Service
+				err = json.Unmarshal(stdout, &svc)
+				if err != nil {
+					return fmt.Errorf("stdout: %v, err: %v", stdout, err)
+				}
+
+				if len(svc.Status.LoadBalancer.Ingress) == 0 {
+					return errors.New("len(svc.Status.LoadBalancer.Ingress) == 0")
+				}
+				proxyIP = svc.Status.LoadBalancer.Ingress[0].IP
+				return nil
+			}).Should(Succeed())
+
+			proxyURL := fmt.Sprintf("http://%s:3128", proxyIP)
+			ExecSafeAt(boot0, "neco", "config" "set", "proxy", proxyURL)
+			ExecSafeAt(boot0, "neco", "config", "set", "node-proxy", proxyURL)
+
+			necoVersion := string(ExecSafeAt(boot0, "dpkg-query", "-W", "-f", "${Version}", "neco"))
+			rolePaths := strings.Split(string(ExecSafeAt(boot0, "ls", "-1", "/usr/share/neco/ignitions/roles/*/site.yml")), "\n")
+			for _, rolePath := range rolePaths {
+				role := strings.Split(rolePath, "/")[6]
+				ExecSafeAt(boot0, "sabactl", "ignitions", "delete", role, necoVersion)
+			}
+			ExecSafeAt(boot0, "neco", "init-data", "--ignitions-only")
+		})
+	}
 }
 
 func loadSyncOrder() []string {
