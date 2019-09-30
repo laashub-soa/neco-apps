@@ -29,10 +29,10 @@ scrape_configs:
         namespaces:
           names: ["monitoring"]
     relabel_configs:
-      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
         action: keep
         regex: alertmanager
-      - source_labels: [__address__]
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
         action: replace
         regex: ([^:]+)(?::\d+)?;(\d+)
         replacement: ${1}:${2}
