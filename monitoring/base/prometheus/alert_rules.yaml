@@ -61,12 +61,41 @@ groups:
         labels:
           severity: warning
         for: 10m
-  - name: all
+  - name: kubernetes-absent
     rules:
-      - alert: ExporterDown
-        expr: up == 0
-        labels:
-          severity: warning
-        for: 1h
+      - alert: AlertmanagerDown
         annotations:
-          summary: "{{ $labels.job }} in {{ $labels.instance }} is down"
+          message: Alertmanager has disappeared from Prometheus target discovery.
+          runbook_url: TBD
+        expr: |
+          absent(up{job="alertmanager-main",namespace="monitoring"} == 1)
+        for: 15m
+        labels:
+          severity: critical
+      - alert: KubeStateMetricsDown
+        annotations:
+          message: KubeStateMetrics has disappeared from Prometheus target discovery.
+          runbook_url: TBD
+        expr: |
+          absent(up{job="kube-state-metrics"} == 1)
+        for: 15m
+        labels:
+          severity: critical
+      - alert: NodeExporterDown
+        annotations:
+          message: NodeExporter has disappeared from Prometheus target discovery.
+          runbook_url: TBD
+        expr: |
+          absent(up{job="node-exporter"} == 1)
+        for: 15m
+        labels:
+          severity: critical
+      - alert: PrometheusDown
+        annotations:
+          message: Prometheus has disappeared from Prometheus target discovery.
+          runbook_url: TBD
+        expr: |
+          absent(up{job="prometheus"} == 1)
+        for: 15m
+        labels:
+          severity: critical
