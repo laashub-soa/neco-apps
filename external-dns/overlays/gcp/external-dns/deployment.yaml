@@ -8,8 +8,7 @@ spec:
       containers:
       - name: external-dns
         args:
-        - --source=contour-ingressroute
-        - --contour-load-balancer=ingress/contour-global
+        - --source=crd
         - --domain-filter=gcp0.dev-ne.co
         - --provider=google
         - --google-project=neco-test
