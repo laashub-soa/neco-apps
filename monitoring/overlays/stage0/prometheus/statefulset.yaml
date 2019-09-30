@@ -11,11 +11,11 @@ spec:
         - name: prometheus
           resources:
             limits:
-              memory: 1Gi
-              cpu: 1
+              memory: 8Gi
+              cpu: 2
             requests:
-              memory: 1Gi
-              cpu: 1
+              memory: 8Gi
+              cpu: 2
   volumeClaimTemplates:
     - metadata:
         name: prometheus-storage-volume
