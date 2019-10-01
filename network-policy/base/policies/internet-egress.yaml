@@ -24,9 +24,6 @@ spec:
   types:
     - Egress
   egress:
-    - action: Log
-      destination:
-        selector: role == 'private'
     - action: Deny
       destination:
         selector: role == 'private'
@@ -44,9 +41,6 @@ spec:
   types:
     - Egress
   egress:
-    - action: Log
-      destination:
-        selector: role == 'private'
     - action: Deny
       destination:
         selector: role == 'private'

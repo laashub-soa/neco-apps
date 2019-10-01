@@ -10,9 +10,6 @@ spec:
     - Egress
   selector: app.kubernetes.io/name != 'squid' && k8s-app != 'kube-dns'
   egress:
-    - action: Log
-      destination:
-        notSelector: role == 'cluster'
     - action: Deny
       destination:
         notSelector: role == 'cluster'
