@@ -1,5 +1,6 @@
 rule_files:
   - alert_rules.yaml
+  - kube_prometheus_alert_rules.yaml
 
 tests:
   - interval: 1m
