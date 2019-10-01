@@ -308,12 +308,12 @@ func applyAndWaitForApplications() {
 	Eventually(func() error {
 	OUTER:
 		for _, appName := range syncOrder {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
+			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
 			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
 			}
 			var app argocd.Application
-			err = json.Unmarshal(stdout, &app)
+			err = json.Unmarshal(appStdout, &app)
 			if err != nil {
 				return err
 			}
@@ -331,7 +331,7 @@ func applyAndWaitForApplications() {
 					continue OUTER
 				}
 			}
-			return errors.New(appName + " is not initialized")
+			return fmt.Errorf("%s is not initialized. argocd app get %s -o json: %s", appName, appName, appStdout)
 		}
 		return nil
 	}).Should(Succeed())
