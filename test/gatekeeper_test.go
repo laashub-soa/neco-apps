@@ -201,7 +201,7 @@ kind: Namespace
 metadata:
   name: bad
 `
-		stdout, stderr, err := ExecAtWithInput(boot0, []byte(badNSYAML), "kubectl", "apply", "-f", "-")
+		stdout, stderr, err = ExecAtWithInput(boot0, []byte(badNSYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("creating good Namespace")
