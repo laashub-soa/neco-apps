@@ -391,3 +391,69 @@ tests:
             exp_annotations:
               message: '1 Pods of DaemonSet kube-system/calico-node are not scheduled.'
               runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace="default",daemonset="test-ds"}'
+        values: 2+0x15
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeDaemonSetMisScheduled
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: default
+              job: kube-state-metrics
+              daemonset: test-ds
+            exp_annotations:
+              message: 2 Pods of DaemonSet default/test-ds are running where they are not supposed to run.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_cronjob_next_schedule_time{job="kube-state-metrics",namespace="default",cronjob="test-cronjob"}'
+        values: 0+0x130
+    alert_rule_test:
+      - eval_time: 2h10m
+        alertname: KubeCronJobRunning
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: default
+              job: kube-state-metrics
+              cronjob: test-cronjob
+            exp_annotations:
+              message: CronJob default/test-cronjob is taking more than 1h to complete.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_job_spec_completions{job="kube-state-metrics",namespace="default",job_name="test-job"}'
+        values: 3+0x70
+      - series: 'kube_job_status_succeeded{job="kube-state-metrics",namespace="default",job_name="test-job"}'
+        values: 1+0x70
+    alert_rule_test:
+      - eval_time: 1h10m
+        alertname: KubeJobCompletion
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: default
+              job: kube-state-metrics
+              job_name: test-job
+            exp_annotations:
+              message: Job default/test-job is taking more than one hour to complete.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_job_failed{job="kube-state-metrics",namespace="default",job_name="test-job"}'
+        values: 1+0x20
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: KubeJobFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: default
+              job: kube-state-metrics
+              job_name: test-job
+            exp_annotations:
+              message: Job default/test-job failed to complete.
+              runbook_url: TBD
