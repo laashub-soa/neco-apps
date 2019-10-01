@@ -275,6 +275,42 @@ func testSetup() {
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications()
 	})
+
+	if !withKind {
+		It("should set HTTP proxy", func() {
+			var proxyIP string
+			Eventually(func() error {
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "get", "svc", "squid", "-o", "json")
+				if err != nil {
+					return fmt.Errorf("stdout: %v, stderr: %v, err: %v", stdout, stderr, err)
+				}
+
+				var svc corev1.Service
+				err = json.Unmarshal(stdout, &svc)
+				if err != nil {
+					return fmt.Errorf("stdout: %v, err: %v", stdout, err)
+				}
+
+				if len(svc.Status.LoadBalancer.Ingress) == 0 {
+					return errors.New("len(svc.Status.LoadBalancer.Ingress) == 0")
+				}
+				proxyIP = svc.Status.LoadBalancer.Ingress[0].IP
+				return nil
+			}).Should(Succeed())
+
+			proxyURL := fmt.Sprintf("http://%s:3128", proxyIP)
+			ExecSafeAt(boot0, "neco", "config", "set", "proxy", proxyURL)
+			ExecSafeAt(boot0, "neco", "config", "set", "node-proxy", proxyURL)
+
+			necoVersion := string(ExecSafeAt(boot0, "dpkg-query", "-W", "-f", "'${Version}'", "neco"))
+			rolePaths := strings.Fields(string(ExecSafeAt(boot0, "ls", "/usr/share/neco/ignitions/roles/*/site.yml")))
+			for _, rolePath := range rolePaths {
+				role := strings.Split(rolePath, "/")[6]
+				ExecSafeAt(boot0, "sabactl", "ignitions", "delete", role, necoVersion)
+			}
+			ExecSafeAt(boot0, "neco", "init-data", "--ignitions-only")
+		})
+	}
 }
 
 func loadSyncOrder() []string {
@@ -308,12 +344,12 @@ func applyAndWaitForApplications() {
 	Eventually(func() error {
 	OUTER:
 		for _, appName := range syncOrder {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
+			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
 			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
 			}
 			var app argocd.Application
-			err = json.Unmarshal(stdout, &app)
+			err = json.Unmarshal(appStdout, &app)
 			if err != nil {
 				return err
 			}
@@ -331,7 +367,7 @@ func applyAndWaitForApplications() {
 					continue OUTER
 				}
 			}
-			return errors.New(appName + " is not initialized")
+			return fmt.Errorf("%s is not initialized. argocd app get %s -o json: %s", appName, appName, appStdout)
 		}
 		return nil
 	}).Should(Succeed())
