@@ -1,4 +1,21 @@
 groups:
+  - name: kube-apiserver.rules
+    rules:
+      - expr: |
+          histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers"}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.99"
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.9, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers"}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.9"
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.5, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers"}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.5"
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
   - name: kube-apiserver
     rules:
       - alert: K8sAPIServersDegraded
@@ -52,21 +69,12 @@ groups:
           summary: "{{ $labels.instance }}, {{ $labels.job }} of etcd DB space increases {{ $value | humanize }}B/h"
           runbook: "Please consider to find root causes, and solve the problems"
       - alert: CKEEtcdMissing
-        expr: absent(up{job="cke-etcd"})
+        expr: absent(up{job="cke-etcd"} == 1)
         labels:
-          severity: warning
+          severity: critical
         for: 10m
       - alert: BootserverEtcdMissing
-        expr: absent(up{job="bootserver-etcd"})
+        expr: absent(up{job="bootserver-etcd"} == 1)
         labels:
-          severity: warning
+          severity: critical
         for: 10m
-  - name: all
-    rules:
-      - alert: ExporterDown
-        expr: up == 0
-        labels:
-          severity: warning
-        for: 1h
-        annotations:
-          summary: "{{ $labels.job }} in {{ $labels.instance }} is down"
