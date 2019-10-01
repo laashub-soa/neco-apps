@@ -71,12 +71,12 @@ groups:
       - alert: CKEEtcdMissing
         expr: absent(up{job="cke-etcd"} == 1)
         labels:
-          severity: warning
+          severity: critical
         for: 10m
       - alert: BootserverEtcdMissing
         expr: absent(up{job="bootserver-etcd"} == 1)
         labels:
-          severity: warning
+          severity: critical
         for: 10m
   - name: kubernetes-absent
     rules:

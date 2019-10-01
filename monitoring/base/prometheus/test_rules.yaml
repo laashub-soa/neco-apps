@@ -137,8 +137,7 @@ tests:
         alertname: CKEEtcdMissing
         exp_alerts:
           - exp_labels:
-              job: cke-etcd
-              severity: warning
+              severity: critical
   - interval: 1m
     input_series:
       - series: 'up{job="foo"}'
@@ -148,8 +147,7 @@ tests:
         alertname: BootserverEtcdMissing
         exp_alerts:
           - exp_labels:
-              job: bootserver-etcd
-              severity: warning
+              severity: critical
   - interval: 1m
     input_series:
       - series: 'up{job="foo"}'
