@@ -457,3 +457,202 @@ tests:
             exp_annotations:
               message: Job default/test-job failed to complete.
               runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_node_status_condition{job="kube-state-metrics", condition="Ready", status="true", node="10.0.0.1"}'
+        values: '0+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeNodeNotReady
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              condition: Ready
+              job: kube-state-metrics
+              node: 10.0.0.1
+              status: true
+            exp_annotations:
+              message: '10.0.0.1 has been unready for more than 15 minutes.'
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kubernetes_build_info{job="kubernetes-nodes", gitVersion="v1.99.9", instance="10.0.0.1"}'
+        values: '1+0x15'
+      - series: 'kubernetes_build_info{job="kubernetes-nodes", gitVersion="v1.99.9", instance="10.0.0.2"}'
+        values: '1+0x15'
+      - series: 'kubernetes_build_info{job="kubernetes-nodes", gitVersion="v2.0.0", instance="10.0.0.3"}'
+        values: '1+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeVersionMismatch
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              message: There are 2 different semantic versions of Kubernetes components running.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'rest_client_requests_total{job="kubernetes-apiservers", instance="10.0.0.1", code="502"}'
+        values: '0+1x20'
+      - series: 'rest_client_requests_total{job="kubernetes-apiservers", instance="10.0.0.1", code="404"}'
+        values: '0+1x20'
+      - series: 'rest_client_requests_total{job="kubernetes-apiservers", instance="10.0.0.1", code="200"}'
+        values: '0+1x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: KubeClientErrors
+        exp_alerts:
+          - exp_labels:
+              job: kubernetes-apiservers
+              instance: 10.0.0.1
+              severity: warning
+            exp_annotations:
+              message: Kubernetes API server client 'kubernetes-apiservers/10.0.0.1' is experiencing 33% errors.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kubelet_running_pod_count{job="kubernetes-nodes", instance="10.0.0.1"}'
+        values: '96+0x15'
+      - series: 'kubelet_node_name{job="kubernetes-nodes", instance="10.0.0.1", node="node-a"}'
+        values: '1+0x15'
+      - series: 'kube_node_status_capacity_pods{job="kube-state-metrics", instance="10.0.0.1", node="node-a"}'
+        values: '100+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeletTooManyPods
+        exp_alerts:
+          - exp_labels:
+              node: node-a
+              severity: warning
+            exp_annotations:
+              message: Kubelet 'node-a' is running at 96% of its Pod capacity.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="kubernetes-apiservers",quantile="0.99",verb="GET",resource="foo"}'
+        values: '1.1+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeAPILatencyHigh
+        exp_alerts:
+          - exp_labels:
+              job: kubernetes-apiservers
+              quantile: 0.99
+              verb: GET
+              resource: foo
+              severity: warning
+            exp_annotations:
+              message: The API server has a 99th percentile latency of 1.1 seconds for GET foo.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="kubernetes-apiservers",quantile="0.99",verb="GET",resource="foo"}'
+        values: '4.1+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeAPILatencyHigh
+        exp_alerts:
+          - exp_labels:
+              job: kubernetes-apiservers
+              quantile: 0.99
+              verb: GET
+              resource: foo
+              severity: critical
+            exp_annotations:
+              message: The API server has a 99th percentile latency of 4.1 seconds for GET foo.
+              runbook_url: TBD
+          - exp_labels:
+              job: kubernetes-apiservers
+              quantile: 0.99
+              verb: GET
+              resource: foo
+              severity: warning
+            exp_annotations:
+              message: The API server has a 99th percentile latency of 4.1 seconds for GET foo.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: apiserver_request_total{job="kubernetes-apiservers",code="500",verb="GET",resource="foo",subresource="bar"}
+        values: '0+2x20'
+      - series: apiserver_request_total{job="kubernetes-apiservers",code="200",verb="GET",resource="foo",subresource="bar"}
+        values: '0+98x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: KubeAPIErrorsHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              message: API server is returning errors for 2% of requests.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: apiserver_request_total{job="kubernetes-apiservers",code="500",verb="GET",resource="foo",subresource="bar"}
+        values: '0+2x20'
+      - series: apiserver_request_total{job="kubernetes-apiservers",code="200",verb="GET",resource="foo",subresource="bar"}
+        values: '0+8x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: KubeAPIErrorsHigh
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              message: API server is returning errors for 20% of requests.
+              runbook_url: TBD
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              message: API server is returning errors for 20% of requests.
+              runbook_url: TBD
+          - exp_labels:
+              verb: GET
+              resource: foo
+              subresource: bar
+              severity: warning
+            exp_annotations:
+              message: API server is returning errors for 20% of requests for GET foo bar.
+              runbook_url: TBD
+          - exp_labels:
+              verb: GET
+              resource: foo
+              subresource: bar
+              severity: critical
+            exp_annotations:
+              message: API server is returning errors for 20% of requests for GET foo bar.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: apiserver_client_certificate_expiration_seconds_count{job="kubernetes-apiservers"}
+        values: '1+0x5'
+      - series: apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers", le="+Inf"}
+        values: '100+0x5'
+      - series: apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers", le="1.5552e+07"}
+        values: '80+0x5'
+      - series: apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers", le="2.592e+06"}
+        values: '80+0x5'
+      - series: apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers", le="172800"}
+        values: '80+0x5'
+      - series: apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers", le="21600"}
+        values: '80+0x5'
+      - series: apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers", le="1800"}
+        values: '80+0x5'
+      - series: apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers", le="0"}
+        values: '80+0x5'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: KubeClientCertificateExpiration
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: kubernetes-apiservers
+            exp_annotations:
+              message: A client certificate used to authenticate to the apiserver is expiring in less than 7.0 days.
+              runbook_url: TBD
+          - exp_labels:
+              severity: critical
+              job: kubernetes-apiservers
+            exp_annotations:
+              message: A client certificate used to authenticate to the apiserver is expiring in less than 24.0 hours.
+              runbook_url: TBD
