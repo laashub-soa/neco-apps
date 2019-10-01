@@ -116,7 +116,7 @@ spec:
         }
 `
 		stdout, stderr, err := ExecAtWithInput(boot0, []byte(constraintTemplete), "kubectl", "apply", "-f", "-")
-		Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("confirming that required labels constraint is established")
 		Eventually(func() error {
@@ -165,7 +165,7 @@ spec:
     labels: ["gatekeeper"]
 `
 		stdout, stderr, err = ExecAtWithInput(boot0, []byte(constraint), "kubectl", "apply", "-f", "-")
-		Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("waiting for constrains enforced")
 		Eventually(func() error {
