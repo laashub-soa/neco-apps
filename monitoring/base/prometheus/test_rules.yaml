@@ -394,9 +394,9 @@ tests:
   - interval: 1m
     input_series:
       - series: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace="default",daemonset="test-ds"}'
-        values: 2+0x15
+        values: 0+0x14 2+0x16
     alert_rule_test:
-      - eval_time: 15m
+      - eval_time: 30m
         alertname: KubeDaemonSetMisScheduled
         exp_alerts:
           - exp_labels:
@@ -410,9 +410,9 @@ tests:
   - interval: 1m
     input_series:
       - series: 'kube_cronjob_next_schedule_time{job="kube-state-metrics",namespace="default",cronjob="test-cronjob"}'
-        values: 0+0x130
+        values: 0+60x60 3600+0x130
     alert_rule_test:
-      - eval_time: 2h10m
+      - eval_time: 3h10m
         alertname: KubeCronJobRunning
         exp_alerts:
           - exp_labels:
@@ -426,11 +426,11 @@ tests:
   - interval: 1m
     input_series:
       - series: 'kube_job_spec_completions{job="kube-state-metrics",namespace="default",job_name="test-job"}'
-        values: 3+0x70
+        values: 1+0x60 3+0x70
       - series: 'kube_job_status_succeeded{job="kube-state-metrics",namespace="default",job_name="test-job"}'
-        values: 1+0x70
+        values: 1+0x130
     alert_rule_test:
-      - eval_time: 1h10m
+      - eval_time: 2h10m
         alertname: KubeJobCompletion
         exp_alerts:
           - exp_labels:
@@ -444,9 +444,9 @@ tests:
   - interval: 1m
     input_series:
       - series: 'kube_job_failed{job="kube-state-metrics",namespace="default",job_name="test-job"}'
-        values: 1+0x20
+        values: 0+0x14 1+0x16
     alert_rule_test:
-      - eval_time: 20m
+      - eval_time: 30m
         alertname: KubeJobFailed
         exp_alerts:
           - exp_labels:
