@@ -344,11 +344,12 @@ spec:
 			}
 
 			for _, d := range list.Items {
-				if d.Status.NumberReady != int32(expectedNodeNum) {
-					return fmt.Errorf(
-						"the number of pods should be equal to the number of nodes %d: %d",
-						expectedNodeNum, d.Status.NumberReady,
-					)
+				if d.Status.DesiredNumberScheduled <= 0 {
+					return fmt.Errorf("%s daemonset's desiredNumberScheduled is not updated", d.Name)
+				}
+
+				if d.Status.DesiredNumberScheduled != d.Status.NumberAvailable {
+					return fmt.Errorf("not all nodes running %s daemonset: %d", d.Name, d.Status.NumberAvailable)
 				}
 			}
 			return nil
