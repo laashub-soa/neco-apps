@@ -272,7 +272,7 @@ spec:
 	It("waits for Kubernetes resources to become ready", func() {
 		By("cofirming that deployment is ready")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "deployment", "-A")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "deployment", "-A", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -280,7 +280,7 @@ spec:
 			var list appsv1.DeploymentList
 			err = json.Unmarshal(stdout, &list)
 			if err != nil {
-				return err
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
 			}
 
 			for _, d := range list.Items {
@@ -302,7 +302,7 @@ spec:
 
 		By("cofirming that statefulset is ready")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "statefulset", "-A")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "statefulset", "-A", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -310,7 +310,7 @@ spec:
 			var list appsv1.StatefulSetList
 			err = json.Unmarshal(stdout, &list)
 			if err != nil {
-				return err
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
 			}
 
 			for _, d := range list.Items {
@@ -332,7 +332,7 @@ spec:
 
 		By("cofirming that daemonset is ready")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "daemonset", "-A")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "daemonset", "-A", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -340,7 +340,7 @@ spec:
 			var list appsv1.DaemonSetList
 			err = json.Unmarshal(stdout, &list)
 			if err != nil {
-				return err
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
 			}
 
 			for _, d := range list.Items {
