@@ -163,10 +163,49 @@ tests:
         values: '0+0x15'
     alert_rule_test:
       - eval_time: 15m
+        alertname: AlertmanagerDown
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              message: Alertmanager has disappeared from Prometheus target discovery.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'up{job="foo"}'
+        values: '0+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeStateMetricsDown
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              message: KubeStateMetrics has disappeared from Prometheus target discovery.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'up{job="foo"}'
+        values: '0+0x15'
+    alert_rule_test:
+      - eval_time: 15m
         alertname: NodeExporterDown
         exp_alerts:
           - exp_labels:
               severity: critical
             exp_annotations:
               message: NodeExporter has disappeared from Prometheus target discovery.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'up{job="foo"}'
+        values: '0+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: PrometheusDown
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              message: Prometheus has disappeared from Prometheus target discovery.
               runbook_url: TBD
