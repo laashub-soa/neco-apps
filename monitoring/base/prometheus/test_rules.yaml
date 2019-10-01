@@ -160,23 +160,13 @@ tests:
   - interval: 1m
     input_series:
       - series: 'up{job="foo"}'
-        values: '0+0x59'
+        values: '0+0x15'
     alert_rule_test:
-      - eval_time: 59m
-        alertname: ExporterDown
-  - interval: 1m
-    input_series:
-      - series: 'up{job="foo",instance="10.0.0.1"}'
-        values: '0+0x60'
-      - series: 'up{job="bar",instance="10.0.0.2"}'
-        values: '0+0x59 1'
-    alert_rule_test:
-      - eval_time: 1h
-        alertname: ExporterDown
+      - eval_time: 15m
+        alertname: NodeExporterDown
         exp_alerts:
           - exp_labels:
-              job: foo
-              instance: 10.0.0.1
-              severity: warning
+              severity: critical
             exp_annotations:
-              summary: "foo in 10.0.0.1 is down"
+              message: NodeExporter has disappeared from Prometheus target discovery.
+              runbook_url: TBD
