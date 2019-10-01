@@ -9,9 +9,6 @@ spec:
   types:
     - Egress
   egress:
-    - action: Log
-      destination:
-        selector: role == 'bmc'
     - action: Deny
       destination:
         selector: role == 'bmc'
@@ -27,9 +24,6 @@ spec:
   types:
     - Egress
   egress:
-    - action: Log
-      destination:
-        selector: role == 'node'
     - action: Deny
       destination:
         selector: role == 'node'
@@ -45,9 +39,6 @@ spec:
   types:
     - Egress
   egress:
-    - action: Log
-      destination:
-        selector: role == 'bastion'
     - action: Deny
       destination:
         selector: role == 'bastion'
@@ -63,9 +54,6 @@ spec:
   types:
     - Egress
   egress:
-    - action: Log
-      destination:
-        selector: role == 'switch'
     - action: Deny
       destination:
         selector: role == 'switch'
