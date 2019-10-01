@@ -209,3 +209,185 @@ tests:
             exp_annotations:
               message: Prometheus has disappeared from Prometheus target discovery.
               runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace="kube-system", pod="calico-node", container="unbound"}'
+        values: '1+1x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KubePodCrashLooping
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: kube-state-metrics
+              namespace: kube-system
+              pod: calico-node
+              container: unbound
+            exp_annotations:
+              message: Pod kube-system/calico-node (unbound) is restarting 5.00 times / 5 minutes.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_owner{owner_kind="DaemonSet", job="kube-state-metrics", namespace="kube-system", pod="calico-node"}'
+        values: '1+1x30'
+      - series: 'kube_pod_owner{owner_kind="Job", job="kube-state-metrics", namespace="monitoring", pod="machines-endpoints"}'
+        values: '1+1x30'
+      - series: 'kube_pod_status_phase{job="kube-state-metrics", phase="Failed", namespace="kube-system", pod="calico-node", container="unbound"}'
+        values: '1+1x30'
+      - series: 'kube_pod_status_phase{job="kube-state-metrics", phase="Failed", namespace="monitoring", pod="machines-endpoints", container="machines-endpoints"}'
+        values: '1+1x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KubePodNotReady
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              namespace: kube-system
+              pod: calico-node
+            exp_annotations:
+              message: Pod kube-system/calico-node has been in a non-ready state for longer than 15 minutes.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_deployment_status_observed_generation{job="kube-state-metrics", namespace="kube-system", deployment="a"}'
+        values: '1+0x30'
+      - series: 'kube_deployment_metadata_generation{job="kube-state-metrics", namespace="kube-system", deployment="a"}'
+        values: '1+0x14 2+0x16'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KubeDeploymentGenerationMismatch
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: kube-state-metrics
+              namespace: kube-system
+              deployment: a
+            exp_annotations:
+              message: Deployment generation for kube-system/a does not match, this indicates that the Deployment has failed but has not been rolled back.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_deployment_spec_replicas{job="kube-state-metrics", namespace="monitoring", deployment="alertmanager"}'
+        values: '2+0x30'
+      - series: 'kube_deployment_status_replicas_available{job="kube-state-metrics", namespace="monitoring", deployment="alertmanager"}'
+        values: '2+0x14 1+0x16'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KubeDeploymentReplicasMismatch
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: kube-state-metrics
+              namespace: monitoring
+              deployment: alertmanager
+            exp_annotations:
+              message: Deployment monitoring/alertmanager has not matched the expected number of replicas for longer than 15 minutes.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_statefulset_status_replicas{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
+        values: '2+0x30'
+      - series: 'kube_statefulset_status_replicas_ready{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
+        values: '2+0x14 1+0x16'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KubeStatefulSetReplicasMismatch
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: kube-state-metrics
+              namespace: monitoring
+              statefulset: prometheus
+            exp_annotations:
+              message: StatefulSet monitoring/prometheus has not matched the expected number of replicas for longer than 15 minutes.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_statefulset_status_observed_generation{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
+        values: '1+0x30'
+      - series: 'kube_statefulset_metadata_generation{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
+        values: '1+0x14 2+0x16'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KubeStatefulSetGenerationMismatch
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: kube-state-metrics
+              namespace: monitoring
+              statefulset: prometheus
+            exp_annotations:
+              message: StatefulSet generation for monitoring/prometheus does not match, this indicates that the StatefulSet has failed but has not been rolled back.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_statefulset_status_current_revision{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus", revision="prometheus-abc"}'
+        values: '1+0x15'
+      - series: 'kube_statefulset_status_update_revision{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus", revision="prometheus-abc"}'
+        values: '1+0x15'
+      - series: 'kube_statefulset_replicas{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
+        values: '2+0x15'
+      - series: 'kube_statefulset_status_replicas_updated{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
+        values: '1+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeStatefulSetUpdateNotRolledOut
+        exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'kube_statefulset_status_current_revision{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus", revision="prometheus-abc"}'
+        values: '1+0x15'
+      - series: 'kube_statefulset_status_update_revision{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus", revision="prometheus-def"}'
+        values: '1+0x15'
+      - series: 'kube_statefulset_replicas{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
+        values: '2+0x15'
+      - series: 'kube_statefulset_status_replicas_updated{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
+        values: '1+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeStatefulSetUpdateNotRolledOut
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: kube-state-metrics
+              namespace: monitoring
+              statefulset: prometheus
+            exp_annotations:
+              message: StatefulSet monitoring/prometheus update has not been rolled out.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_daemonset_status_number_ready{job="kube-state-metrics", namespace="kube-system", daemonset="calico-node"}'
+        values: '8+0x15'
+      - series: 'kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics", namespace="kube-system", daemonset="calico-node"}'
+        values: '10+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeDaemonSetRolloutStuck
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: kube-state-metrics
+              namespace: kube-system
+              daemonset: calico-node
+            exp_annotations:
+              message: Only 80% of the desired Pods of DaemonSet kube-system/calico-node are scheduled and ready.
+              runbook_url: TBD
+  - interval: 1m
+    input_series:
+      - series: 'kube_daemonset_status_current_number_scheduled{job="kube-state-metrics", namespace="kube-system", daemonset="calico-node"}'
+        values: '9+0x15'
+      - series: 'kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics", namespace="kube-system", daemonset="calico-node"}'
+        values: '10+0x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: KubeDaemonSetNotScheduled
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: kube-state-metrics
+              namespace: kube-system
+              daemonset: calico-node
+            exp_annotations:
+              message: '1 Pods of DaemonSet kube-system/calico-node are not scheduled.'
+              runbook_url: TBD
