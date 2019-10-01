@@ -69,12 +69,12 @@ groups:
           summary: "{{ $labels.instance }}, {{ $labels.job }} of etcd DB space increases {{ $value | humanize }}B/h"
           runbook: "Please consider to find root causes, and solve the problems"
       - alert: CKEEtcdMissing
-        expr: absent(up{job="cke-etcd"})
+        expr: absent(up{job="cke-etcd"} == 1)
         labels:
           severity: warning
         for: 10m
       - alert: BootserverEtcdMissing
-        expr: absent(up{job="bootserver-etcd"})
+        expr: absent(up{job="bootserver-etcd"} == 1)
         labels:
           severity: warning
         for: 10m
