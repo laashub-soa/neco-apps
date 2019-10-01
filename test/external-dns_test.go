@@ -90,7 +90,9 @@ spec:
 			// expected: xxx.gcp0.dev-ne.co. 300 IN A 10.0.5.9
 			fields := strings.Fields(string(bytes.TrimSpace(stdout)))
 			if len(fields) < 5 || fields[4] != "10.0.5.9" {
-				return errors.New("expected IP address is 10.0.5.9, but actual response is " + string(stdout))
+				output := ExecSafeAt(boot0, "kubectl", "get", "-n", "ingress", "dnsendpoint", "test-endpoint", "-o", "yaml")
+				output2 := ExecSafeAt(boot0, "kubectl", "-n", "external-dns", "logs", "-l", "app.kubernetes.io/name=external-dns", "--tail", "10000")
+				return fmt.Errorf("expected IP address is 10.0.5.9, but actual response is %s\ndump of DNSEndpoint: %s\nexternal-dns logs: %s\n", string(stdout), string(output), string(output2))
 			}
 			return nil
 		}).Should(Succeed())
