@@ -2,17 +2,17 @@ groups:
   - name: kube-apiserver.rules
     rules:
       - expr: |
-          histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{job="apiserver"}[5m])) without(instance, pod))
+          histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers"}[5m])) without(instance, pod))
         labels:
           quantile: "0.99"
         record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
       - expr: |
-          histogram_quantile(0.9, sum(rate(apiserver_request_duration_seconds_bucket{job="apiserver"}[5m])) without(instance, pod))
+          histogram_quantile(0.9, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers"}[5m])) without(instance, pod))
         labels:
           quantile: "0.9"
         record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
       - expr: |
-          histogram_quantile(0.5, sum(rate(apiserver_request_duration_seconds_bucket{job="apiserver"}[5m])) without(instance, pod))
+          histogram_quantile(0.5, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers"}[5m])) without(instance, pod))
         labels:
           quantile: "0.5"
         record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
@@ -311,7 +311,7 @@ groups:
             }}% of its Pod capacity.
           runbook_url: TBD
         expr: |
-          100 * max(max(kubelet_running_pod_count{job="kubelet"}) by(instance) * on(instance) group_left(node) kubelet_node_name{job="kubelet"}) by(node) / max(kube_node_status_capacity_pods{job="kube-state-metrics"}) by(node) > 95
+          100 * max(max(kubelet_running_pod_count{job="kubernetes-nodes"}) by(instance) * on(instance) group_left(node) kubelet_node_name{job="kubernetes-nodes"}) by(node) / max(kube_node_status_capacity_pods{job="kube-state-metrics"}) by(node) > 95
         for: 15m
         labels:
           severity: warning
@@ -321,7 +321,7 @@ groups:
             for {{ $labels.verb }} {{ $labels.resource }}.
           runbook_url: TBD
         expr: |
-          cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
+          cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="kubernetes-apiservers",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
         for: 10m
         labels:
           severity: warning
@@ -331,7 +331,7 @@ groups:
             for {{ $labels.verb }} {{ $labels.resource }}.
           runbook_url: TBD
         expr: |
-          cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4
+          cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="kubernetes-apiservers",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4
         for: 10m
         labels:
           severity: critical
@@ -340,9 +340,9 @@ groups:
           message: API server is returning errors for {{ $value }}% of requests.
           runbook_url: TBD
         expr: |
-          sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))
+          sum(rate(apiserver_request_total{job="kubernetes-apiservers",code=~"^(?:5..)$"}[5m]))
             /
-          sum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 3
+          sum(rate(apiserver_request_total{job="kubernetes-apiservers"}[5m])) * 100 > 3
         for: 10m
         labels:
           severity: critical
@@ -351,9 +351,9 @@ groups:
           message: API server is returning errors for {{ $value }}% of requests.
           runbook_url: TBD
         expr: |
-          sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))
+          sum(rate(apiserver_request_total{job="kubernetes-apiservers",code=~"^(?:5..)$"}[5m]))
             /
-          sum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 1
+          sum(rate(apiserver_request_total{job="kubernetes-apiservers"}[5m])) * 100 > 1
         for: 10m
         labels:
           severity: warning
@@ -363,9 +363,9 @@ groups:
             {{ $labels.verb }} {{ $labels.resource }} {{ $labels.subresource }}.
           runbook_url: TBD
         expr: |
-          sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
+          sum(rate(apiserver_request_total{job="kubernetes-apiservers",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
             /
-          sum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 10
+          sum(rate(apiserver_request_total{job="kubernetes-apiservers"}[5m])) by (resource,subresource,verb) * 100 > 10
         for: 10m
         labels:
           severity: critical
@@ -375,9 +375,9 @@ groups:
             {{ $labels.verb }} {{ $labels.resource }} {{ $labels.subresource }}.
           runbook_url: TBD
         expr: |
-          sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
+          sum(rate(apiserver_request_total{job="kubernetes-apiservers",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
             /
-          sum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 5
+          sum(rate(apiserver_request_total{job="kubernetes-apiservers"}[5m])) by (resource,subresource,verb) * 100 > 5
         for: 10m
         labels:
           severity: warning
@@ -387,7 +387,7 @@ groups:
             in less than 7.0 days.
           runbook_url: TBD
         expr: |
-          apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 604800
+          apiserver_client_certificate_expiration_seconds_count{job="kubernetes-apiservers"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers"}[5m]))) < 604800
         labels:
           severity: warning
       - alert: KubeClientCertificateExpiration
@@ -396,6 +396,6 @@ groups:
             in less than 24.0 hours.
           runbook_url: TBD
         expr: |
-          apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 86400
+          apiserver_client_certificate_expiration_seconds_count{job="kubernetes-apiservers"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers"}[5m]))) < 86400
         labels:
           severity: critical
