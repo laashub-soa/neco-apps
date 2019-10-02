@@ -208,48 +208,103 @@ spec:
 			Skip("does not make sense with kindtest")
 		}
 
-		By("deploying ubuntu for network commands in internet-egress NS")
-		createUbuntuDebugPod("internet-egress")
+		By("patching squid pods to add ubuntu-debug sidecar container")
+		stdout, stderr, err = ExecAt(boot0,
+			"kubectl", "patch", "-n=internet-egress", "deploy", "squid", "--type=json",
+			`-p='[{"op": "add", "path": "/spec/template/spec/containers/-", "value": { "image": "quay.io/cybozu/ubuntu-debug:18.04", "imagePullPolicy": "IfNotPresent", "name": "ubuntu", "command": ["pause"] }}]'`,
+		)
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-		By("labelling pod as squid")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name=squid")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		By("waiting deployment is ready")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "deployment", "-n=internet-egress", "squid", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			var deploy appsv1.Deployment
+			err = json.Unmarshal(stdout, &deploy)
+			if err != nil {
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
+			}
+
+			if deploy.Status.ReadyReplicas != 2 {
+				return fmt.Errorf("the number of replicas should be 2: %d", deploy.Status.ReadyReplicas)
+			}
+			return nil
+		}).Should(Succeed())
 
 		By("accessing DNS port of some node as squid")
-		stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
-		switch t := err.(type) {
-		case *ssh.ExitError:
-			// telnet command returns 124 when it times out
-			Expect(t.ExitStatus()).To(Equal(124))
-		case *exec.ExitError:
-			Expect(t.ExitCode()).To(Equal(124))
-		default:
-			Fail(fmt.Sprintf("telnet should fail with timeout: stdout: %s, stderr: %s", stdout, stderr))
-		}
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "-n=internet-egress", "-l=app.kubernetes.io/name=squid", "-o", "go-template='{{ (index .items 0).metadata.name }}'")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		podName := string(stdout)
 
-		By("removing label")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name-")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		Eventually(func() error {
+			stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", podName, "-c", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
+			switch t := err.(type) {
+			case *ssh.ExitError:
+				// telnet command returns 124 when it times out
+				if t.ExitStatus() != 124 {
+					return fmt.Errorf("exit status should be 124: %d", t.ExitStatus())
+				}
+			case *exec.ExitError:
+				if t.ExitCode() != 124 {
+					return fmt.Errorf("exit status should be 124: %d", t.ExitCode())
+				}
+			default:
+				return errors.New("telnet should fail with timeout")
+			}
+			return nil
+		}).Should(Succeed())
 
-		By("labelling pod as unbound")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "--overwrite", "pod", "ubuntu", "app.kubernetes.io/name=unbound")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		By("patching unbound pods to add ubuntu-debug sidecar container")
+		stdout, stderr, err = ExecAt(boot0,
+			"kubectl", "patch", "-n=internet-egress", "deploy", "unbound", "--type=json",
+			`-p='[{"op": "add", "path": "/spec/template/spec/containers/-", "value": { "image": "quay.io/cybozu/ubuntu-debug:18.04", "imagePullPolicy": "IfNotPresent", "name": "ubuntu", "command": ["pause"] }}]'`,
+		)
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+		By("waiting deployment is ready")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "deployment", "-n=internet-egress", "unbound", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			var deploy appsv1.Deployment
+			err = json.Unmarshal(stdout, &deploy)
+			if err != nil {
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
+			}
+
+			if deploy.Status.ReadyReplicas != 2 {
+				return fmt.Errorf("the number of replicas should be 2: %d", deploy.Status.ReadyReplicas)
+			}
+			return nil
+		}).Should(Succeed())
 
 		By("accessing DNS port of some node as unbound")
-		_, _, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
-		switch t := err.(type) {
-		case *ssh.ExitError:
-			// telnet command returns 124 when it times out
-			Expect(t.ExitStatus()).To(Equal(124))
-		case *exec.ExitError:
-			Expect(t.ExitCode()).To(Equal(124))
-		default:
-			Fail("telnet should fail with timeout")
-		}
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "-n=internet-egress", "-l=app.kubernetes.io/name=unbound", "-o", "go-template='{{ (index .items 0).metadata.name }}'")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		podName = string(stdout)
 
-		By("removing label")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "internet-egress", "label", "pod", "ubuntu", "app.kubernetes.io/name-")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		Eventually(func() error {
+			stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", podName, "-c", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
+			switch t := err.(type) {
+			case *ssh.ExitError:
+				// telnet command returns 124 when it times out
+				if t.ExitStatus() != 124 {
+					return fmt.Errorf("exit status should be 124: %d", t.ExitStatus())
+				}
+			case *exec.ExitError:
+				if t.ExitCode() != 124 {
+					return fmt.Errorf("exit status should be 124: %d", t.ExitCode())
+				}
+			default:
+				return errors.New("telnet should fail with timeout")
+			}
+			return nil
+		}).Should(Succeed())
 	})
 
 	It("should pass packets to node network for system services", func() {
@@ -265,20 +320,54 @@ spec:
 		stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", apiServerIP, "6443", "-e", "X")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-		By("deploying ubuntu for network commands in monitoring NS")
-		createUbuntuDebugPod("monitoring")
-
-		By("labelling pod as prometheus")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "monitoring", "label", "pod", "ubuntu", "app.kubernetes.io/name=prometheus")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
-
-		By("accessing node exporter port of some node as prometheus")
-		stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "monitoring", "exec", "-i", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "9100", "-e", "X")
+		By("patching prometheus pods to add ubuntu-debug sidecar container")
+		stdout, stderr, err = ExecAt(boot0,
+			"kubectl", "patch", "-n=monitoring", "statefulset", "prometheus", "--type=json",
+			`-p='[{"op": "add", "path": "/spec/template/spec/containers/-", "value": { "image": "quay.io/cybozu/ubuntu-debug:18.04", "imagePullPolicy": "IfNotPresent", "name": "ubuntu", "command": ["pause"] }}]'`,
+		)
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-		By("removing label")
-		_, stderr, err = ExecAt(boot0, "kubectl", "-n", "monitoring", "label", "pod", "ubuntu", "app.kubernetes.io/name-")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		By("waiting statefulset is ready")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "statefulset", "-n=monitoring", "prometheus", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			var ss appsv1.StatefulSet
+			err = json.Unmarshal(stdout, &ss)
+			if err != nil {
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
+			}
+
+			if ss.Status.ReadyReplicas != 1 {
+				return fmt.Errorf("the number of replicas should be 1: %d", ss.Status.ReadyReplicas)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("accessing DNS port of some node as prometheus")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "-n=monitoring", "-l=app.kubernetes.io/name=prometheus", "-o", "go-template='{{ (index .items 0).metadata.name }}'")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		podName := string(stdout)
+
+		Eventually(func() error {
+			stdout, stderr, err = ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "monitoring", "exec", "-i", podName, "-c", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "9100", "-e", "X")
+			switch t := err.(type) {
+			case *ssh.ExitError:
+				// telnet command returns 124 when it times out
+				if t.ExitStatus() != 124 {
+					return fmt.Errorf("exit status should be 124: %d", t.ExitStatus())
+				}
+			case *exec.ExitError:
+				if t.ExitCode() != 124 {
+					return fmt.Errorf("exit status should be 124: %d", t.ExitCode())
+				}
+			default:
+				return errors.New("telnet should fail with timeout")
+			}
+			return nil
+		}).Should(Succeed())
 	})
 
 	It("should filter icmp packets to BMC/Node/Bastion/switch networks", func() {
