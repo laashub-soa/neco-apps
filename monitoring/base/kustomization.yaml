@@ -27,6 +27,7 @@ configMapGenerator:
     files:
       - prometheus/prometheus.yaml
       - prometheus/alert_rules.yaml
+      - prometheus/kube_prometheus_alert_rules.yaml
   - name: alertmanager
     files:
       - alertmanager/neco.template

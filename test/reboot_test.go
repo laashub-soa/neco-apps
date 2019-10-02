@@ -10,6 +10,7 @@ import (
 	"github.com/cybozu-go/sabakan/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
 )
@@ -78,6 +79,10 @@ func getSerfMembers() (*serfMemberContainer, error) {
 // testRebootAllNodes tests all nodes stop scenario
 func testRebootAllNodes() {
 	var beforeNodes map[string]bool
+	// control-plane-count + minimum-workers = 5
+	// https://github.com/cybozu-go/cke/blob/master/docs/sabakan-integration.md#initialization
+	expectedNodeNum := 5
+
 	It("fetch cluster nodes", func() {
 		var err error
 		beforeNodes, err = fetchClusterNodes()
@@ -225,9 +230,7 @@ func testRebootAllNodes() {
 				return err
 			}
 
-			// control-plane-count + minimum-workers = 5
-			// https://github.com/cybozu-go/cke/blob/master/docs/sabakan-integration.md#initialization
-			if len(nl.Items) != 5 {
+			if len(nl.Items) != expectedNodeNum {
 				return fmt.Errorf("too few nodes: %d", len(nl.Items))
 			}
 		OUTER:
@@ -245,6 +248,7 @@ func testRebootAllNodes() {
 			}
 			return nil
 		}).Should(Succeed())
+
 		By("confirming that pods can be deployed")
 		testhttpdYAML := `
 apiVersion: v1
@@ -260,6 +264,93 @@ spec:
 			stdout, stderr, err := ExecAtWithInput(boot0, []byte(testhttpdYAML), "kubectl", "apply", "-f", "-")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+	})
+
+	It("waits for Kubernetes resources to become ready", func() {
+		By("cofirming that deployment is ready")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "deployment", "-A", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			var list appsv1.DeploymentList
+			err = json.Unmarshal(stdout, &list)
+			if err != nil {
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
+			}
+
+			for _, d := range list.Items {
+				// default value of replicas is 1
+				replicas := int32(1)
+				if d.Spec.Replicas != nil {
+					replicas = *d.Spec.Replicas
+				}
+
+				if replicas != d.Status.ReadyReplicas {
+					return fmt.Errorf(
+						"the number of replicas should be %d: %d",
+						replicas, d.Status.ReadyReplicas,
+					)
+				}
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("cofirming that statefulset is ready")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "statefulset", "-A", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			var list appsv1.StatefulSetList
+			err = json.Unmarshal(stdout, &list)
+			if err != nil {
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
+			}
+
+			for _, d := range list.Items {
+				// default value of replicas is 1
+				replicas := int32(1)
+				if d.Spec.Replicas != nil {
+					replicas = *d.Spec.Replicas
+				}
+
+				if replicas != d.Status.ReadyReplicas {
+					return fmt.Errorf(
+						"the number of replicas should be %d: %d",
+						replicas, d.Status.ReadyReplicas,
+					)
+				}
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("cofirming that daemonset is ready")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "daemonset", "-A", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			var list appsv1.DaemonSetList
+			err = json.Unmarshal(stdout, &list)
+			if err != nil {
+				return fmt.Errorf("err: %v, stdout: %s", err, stdout)
+			}
+
+			for _, d := range list.Items {
+				if d.Status.DesiredNumberScheduled <= 0 {
+					return fmt.Errorf("%s daemonset's desiredNumberScheduled is not updated", d.Name)
+				}
+
+				if d.Status.DesiredNumberScheduled != d.Status.NumberAvailable {
+					return fmt.Errorf("not all nodes running %s daemonset: %d", d.Name, d.Status.NumberAvailable)
+				}
 			}
 			return nil
 		}).Should(Succeed())
