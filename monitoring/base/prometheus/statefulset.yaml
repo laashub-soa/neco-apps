@@ -27,6 +27,18 @@ spec:
             - --web.enable-admin-api
           ports:
             - containerPort: 9090
+          readinessProbe:
+            httpGet:
+              path: http://prometheus:9090/-/ready
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: http://prometheus:9090/-/healthy
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
           volumeMounts:
             - name: prometheus-config-volume
               mountPath: /etc/prometheus/
