@@ -29,7 +29,7 @@ spec:
             - containerPort: 9090
           readinessProbe:
             httpGet:
-              path: http://prometheus:9090/-/ready
+              path: /-/ready
               port: 9090
             initialDelaySeconds: 30
             timeoutSeconds: 30
