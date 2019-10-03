@@ -126,7 +126,6 @@ spec:
 `, fqdnHTTPS, fqdnHTTP)
 		_, stderr, err = ExecAtWithInput(boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
-
 		By("deploying ubuntu for network commands")
 		createUbuntuDebugPod("default")
 	})
@@ -135,6 +134,8 @@ spec:
 	nodeList := new(corev1.NodeList)
 	var nodeIP string
 	var apiServerIP string
+
+	patchUbuntu := `-p='[{"op": "add", "path": "/spec/template/spec/containers/-", "value": { "image": "quay.io/cybozu/ubuntu-debug:18.04", "imagePullPolicy": "IfNotPresent", "name": "ubuntu", "command": ["pause"], "securityContext": { "readOnlyRootFilesystem": true, "runAsGroup": 10000, "runAsUser": 10000 }}}]'`
 
 	It("should get pod/node list", func() {
 
@@ -209,10 +210,7 @@ spec:
 		}
 
 		By("patching squid pods to add ubuntu-debug sidecar container")
-		stdout, stderr, err = ExecAt(boot0,
-			"kubectl", "patch", "-n=internet-egress", "deploy", "squid", "--type=json",
-			`-p='[{"op": "add", "path": "/spec/template/spec/containers/-", "value": { "image": "quay.io/cybozu/ubuntu-debug:18.04", "imagePullPolicy": "IfNotPresent", "name": "ubuntu", "command": ["pause"] }}]'`,
-		)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "patch", "-n=internet-egress", "deploy", "squid", "--type=json", patchUbuntu)
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		var podName string
@@ -252,9 +250,7 @@ spec:
 
 		By("patching unbound pods to add ubuntu-debug sidecar container")
 		stdout, stderr, err = ExecAt(boot0,
-			"kubectl", "patch", "-n=internet-egress", "deploy", "unbound", "--type=json",
-			`-p='[{"op": "add", "path": "/spec/template/spec/containers/-", "value": { "image": "quay.io/cybozu/ubuntu-debug:18.04", "imagePullPolicy": "IfNotPresent", "name": "ubuntu", "command": ["pause"] }}]'`,
-		)
+			"kubectl", "patch", "-n=internet-egress", "deploy", "unbound", "--type=json", patchUbuntu)
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("waiting for pods to be ready")
@@ -306,10 +302,7 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("patching prometheus pods to add ubuntu-debug sidecar container")
-		stdout, stderr, err = ExecAt(boot0,
-			"kubectl", "patch", "-n=monitoring", "statefulset", "prometheus", "--type=json",
-			`-p='[{"op": "add", "path": "/spec/template/spec/containers/-", "value": { "image": "quay.io/cybozu/ubuntu-debug:18.04", "imagePullPolicy": "IfNotPresent", "name": "ubuntu", "command": ["pause"] }}]'`,
-		)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "patch", "-n=monitoring", "statefulset", "prometheus", "--type=json", patchUbuntu)
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		var podName string
@@ -328,21 +321,11 @@ spec:
 			return nil
 		}).Should(Succeed())
 
-		By("accessing DNS port of some node as prometheus")
+		By("accessing node-expoter port of some node as prometheus")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "monitoring", "exec", "-i", podName, "-c", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "9100", "-e", "X")
-			switch t := err.(type) {
-			case *ssh.ExitError:
-				// telnet command returns 124 when it times out
-				if t.ExitStatus() != 124 {
-					return fmt.Errorf("exit status should be 124: %d, stdout: %s, stderr: %s, err: %v", t.ExitStatus(), stdout, stderr, err)
-				}
-			case *exec.ExitError:
-				if t.ExitCode() != 124 {
-					return fmt.Errorf("exit status should be 124: %d, stdout: %s, stderr: %s, err: %v", t.ExitCode(), stdout, stderr, err)
-				}
-			default:
-				return fmt.Errorf("telnet should fail with timeout; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			return nil
 		}).Should(Succeed())
