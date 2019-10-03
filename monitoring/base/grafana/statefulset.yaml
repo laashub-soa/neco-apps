@@ -105,6 +105,10 @@ spec:
               mountPath: /var/lib/grafana/dashboards/kubernetes-cluster
             - name: dashboard-memory-usage-volume
               mountPath: /var/lib/grafana/dashboards/memory-usage
+            - name: dashboard-cpu-usage-volume
+              mountPath: /var/lib/grafana/dashboards/cpu-usage
+            - name: dashboard-all-nodes-volume
+              mountPath: /var/lib/grafana/dashboards/all-nodes
             - name: dashboard-node-exporter-volume
               mountPath: /var/lib/grafana/dashboards/node-exporter
             - name: dashboard-provider
@@ -145,6 +149,12 @@ spec:
         - name: dashboard-memory-usage-volume
           configMap:
             name: dashboard-memory-usage
+        - name: dashboard-cpu-usage-volume
+          configMap:
+            name: dashboard-cpu-usage
+        - name: dashboard-all-nodes-volume
+          configMap:
+            name: dashboard-all-nodes
         - name: dashboard-node-exporter-volume
           emptyDir: {}
         - name: dashboard-provider
