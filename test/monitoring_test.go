@@ -260,7 +260,6 @@ func testGrafana() {
 			if adminStats.Dashboards == 0 {
 				return fmt.Errorf("no dashboards")
 			}
-			return nil
 
 			By("confirming all dashboards are successfully registered")
 			stdout, stderr, err = ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/search")
