@@ -2,14 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - argocd.yaml
-- elastic.yaml
 - external-dns.yaml
-- ingress.yaml
+- gatekeeper.yaml
+- kube-system.yaml
 - metallb.yaml
 - monitoring.yaml
-- network-policy.yaml
-- gatekeeper.yaml
 - teleport.yaml
-- topolvm.yaml
-- team-management.yaml
-- namespaces.yaml
