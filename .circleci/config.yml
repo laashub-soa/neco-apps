@@ -247,6 +247,19 @@ jobs:
           command: |
             hub pull-request --message="[CI] Release ${CIRCLE_TAG}" --base=cybozu-go:release --head=cybozu-go:op-${CIRCLE_TAG}
 
+  clean-dns:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - run:
+          name: Store Service Account
+          command: |
+            echo $GCLOUD_SERVICE_ACCOUNT > account.json
+            gcloud auth activate-service-account --key-file=account.json
+      - run:
+          name: Delete DNS records
+          command: gcloud --project=neco-test dns record-sets import --zone=gcp0 --delete-all-existing /dev/null
+
 workflows:
   version: 2
   main:
@@ -297,12 +310,13 @@ workflows:
   daily:
     triggers:
       - schedule:
-          cron: "0 18 * * 1-5"
+          cron: "10 15 * * 1-5"
           filters:
             branches:
               only:
                 - master
     jobs:
+      - clean-dns
       - bootstrap
       - upgrade-stage
       - upgrade-release
