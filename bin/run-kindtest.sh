@@ -9,7 +9,7 @@ $GCLOUD compute instances create ${INSTANCE_NAME} \
   --machine-type ${MACHINE_TYPE} \
   --image vmx-enabled \
   --boot-disk-type ${DISK_TYPE} \
-  --boot-disk-size ${BOOT_DISK_SIZE} \
+  --boot-disk-size 40GB \
   --local-ssd interface=scsi
 
 # Run data center test
@@ -32,6 +32,7 @@ git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAM
 cd \$HOME/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
 git checkout -qf ${CIRCLE_SHA1}
 
+# Overwrite daemon.json for using default docker0 IP address
 cat >/etc/docker/daemon.json << EOF2
 {
     "bip": "172.17.0.1/16"
@@ -48,7 +49,7 @@ EOF
 chmod +x run.sh
 
 # Clean old CI files
-$GCLOUD compute scp --zone=${ZONE} run.sh .bash_profile account.json cybozu@${INSTANCE_NAME}:
+$GCLOUD compute scp --zone=${ZONE} run.sh account.json cybozu@${INSTANCE_NAME}:
 $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="sudo -H /home/cybozu/run.sh"
 
 exit $?
