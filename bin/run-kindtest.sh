@@ -6,7 +6,7 @@
 $GCLOUD compute instances delete ${INSTANCE_NAME} --zone ${ZONE} --quiet || true
 $GCLOUD compute instances create ${INSTANCE_NAME} \
   --zone ${ZONE} \
-  --machine-type ${MACHINE_TYPE} \
+  --machine-type n1-standard-4 \
   --image vmx-enabled \
   --boot-disk-type ${DISK_TYPE} \
   --boot-disk-size 40GB \
@@ -38,10 +38,9 @@ cat >/etc/docker/daemon.json << EOF2
     "bip": "172.17.0.1/16"
 }
 EOF2
-sudo systemctl restart docker.service
+systemctl restart docker.service
 
 cd test
-cp /home/cybozu/account.json ./
 make setup
 make -f Makefile.kindtest start
 make -f Makefile.kindtest COMMIT_ID=${CIRCLE_SHA1} kindtest
@@ -49,7 +48,7 @@ EOF
 chmod +x run.sh
 
 # Clean old CI files
-$GCLOUD compute scp --zone=${ZONE} run.sh account.json cybozu@${INSTANCE_NAME}:
+$GCLOUD compute scp --zone=${ZONE} run.sh cybozu@${INSTANCE_NAME}:
 $GCLOUD compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} --command="sudo -H /home/cybozu/run.sh"
 
 exit $?
