@@ -16,3 +16,10 @@ spec:
     automated:
       prune: false
       selfHeal: true
+  ignoreDifferences:
+  - group: core
+    kind: Secret
+    name: argocd-cm
+    namespace: argocd
+    jsonPointers:
+    - /data/repositories

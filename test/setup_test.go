@@ -149,6 +149,7 @@ func testSetup() {
 			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 			By("creating namespace and secrets for grafana")
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "monitoring")
 			stdout, stderr, err := ExecAtWithInput(boot0, []byte(grafanaSecret), "dd", "of=grafana.yaml")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			ExecSafeAt(boot0, "kubectl", "apply", "-f", "grafana.yaml")
