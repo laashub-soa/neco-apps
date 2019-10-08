@@ -3,4 +3,4 @@ kind: Kustomization
 bases:
   - ../../base
 resources:
-  - ingressroute.yaml
+  - certificate.yaml
