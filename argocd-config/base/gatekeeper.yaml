@@ -16,3 +16,11 @@ spec:
     automated:
       prune: false
       selfHeal: true
+  ignoreDifferences:
+  - group: core
+    kind: Secret
+    name: gatekeeper-webhook-server-secret
+    namespace: gatekeeper-system
+    jsonPointers:
+    - /data
+    - /type

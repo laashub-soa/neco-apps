@@ -16,3 +16,11 @@ spec:
     automated:
       prune: false
       selfHeal: true
+  ignoreDifferences:
+  - group: core
+    kind: Secret
+    name: webhook-server-secret
+    namespace: elastic-system
+    jsonPointers:
+    - /data
+    - /type
