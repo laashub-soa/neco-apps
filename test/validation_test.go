@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -135,7 +136,7 @@ func TestSecret(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	current, err := readSecret(currentSecretFile)
+	dummySecrets, err := readSecret(currentSecretFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,11 +144,51 @@ func TestSecret(t *testing.T) {
 OUTER:
 	for _, es := range expected {
 		name := es.Metadata.Name
-		for _, cs := range current {
+
+		rootDir := "../"
+		excludeDirs := []string{
+			filepath.Join(rootDir, "bin"),
+			filepath.Join(rootDir, "docs"),
+			filepath.Join(rootDir, "test"),
+			filepath.Join(rootDir, "vendor"),
+		}
+
+		var appeared bool
+		err = filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			for _, exDir := range excludeDirs {
+				if strings.HasPrefix(path, exDir) {
+					// Skip files in the directory
+					return filepath.SkipDir
+				}
+			}
+			if info.IsDir() || !strings.HasSuffix(path, ".yaml") {
+				return nil
+			}
+			str, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			if strings.Contains(string(str), "secretName: "+name) {
+				appeared = true
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatal("failed to walk manifest directories")
+		}
+		if !appeared {
+			t.Error("secret:", name, "was not found in any manifests")
+		}
+
+		for _, cs := range dummySecrets {
 			if cs.Metadata.Name == name {
 				continue OUTER
 			}
 		}
-		t.Error("secret:", name, "was not found in", current)
+		t.Error("secret:", name, "was not found in dummy secrets", dummySecrets)
 	}
 }
