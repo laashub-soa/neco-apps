@@ -30,6 +30,7 @@ install.yaml: $(shell find ../argocd/base)
 	kustomize build ../argocd/base/ > install.yaml
 
 validation:
+	./fetch-secret.sh
 	go test -v ./validation_test.go
 
 opa-test:

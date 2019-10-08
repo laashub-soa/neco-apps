@@ -15,12 +15,20 @@ import (
 )
 
 const (
-	manifestDir = "../"
+	manifestDir        = "../"
+	expectedSecretFile = "./expected-secret.yaml"
+	currentSecretFile  = "./current-secret.yaml"
 )
 
 type crdValidation struct {
 	Kind   string                                               `json:"kind"`
 	Status *apiextensionsv1beta1.CustomResourceDefinitionStatus `json:"status"`
+}
+
+type secret struct {
+	Metadata struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
 }
 
 func TestValidation(t *testing.T) {
@@ -87,5 +95,59 @@ func TestValidation(t *testing.T) {
 	})
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func readSecret(path string) ([]secret, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var secrets []secret
+	y := k8sYaml.NewYAMLReader(bufio.NewReader(f))
+	for {
+		data, err := y.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+
+		var s secret
+		err = yaml.Unmarshal(data, &s)
+		if err != nil {
+			return nil, err
+		}
+		secrets = append(secrets, s)
+	}
+	return secrets, nil
+}
+
+func TestSecret(t *testing.T) {
+	defer func() {
+		os.Remove(expectedSecretFile)
+		os.Remove(currentSecretFile)
+	}()
+
+	expected, err := readSecret(expectedSecretFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	current, err := readSecret(currentSecretFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+OUTER:
+	for _, es := range expected {
+		name := es.Metadata.Name
+		for _, cs := range current {
+			if cs.Metadata.Name == name {
+				continue OUTER
+			}
+		}
+		t.Error("secret:", name, "was not found in", current)
 	}
 }
