@@ -304,15 +304,11 @@ func applyAndWaitForApplications() {
 
 func setupArgoCD() {
 	By("installing Argo CD")
+	ExecSafeAt(boot0, "kubectl", "create", "namespace", "argocd")
 	data, err := ioutil.ReadFile("install.yaml")
 	Expect(err).ShouldNot(HaveOccurred())
-	Eventually(func() error {
-		stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "apply", "-n", "argocd", "-f", "-")
-		if err != nil {
-			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-		}
-		return nil
-	}).Should(Succeed())
+	_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "apply", "-n", "argocd", "-f", "-")
+	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 	By("waiting Argo CD comes up")
 	// admin password is same as pod name
