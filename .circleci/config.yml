@@ -208,6 +208,11 @@ jobs:
           command: |
             if [ -f .skip ]; then exit 0; fi
             ./bin/commit-push.sh
+      - run:
+          name: Merge neco-apps-secret
+          command: |
+            if [ -f .skip ]; then exit 0; fi
+            ./bin/run-neco-apps-secret-ci.sh
 
   create-pull-request:
     docker:
