@@ -21,6 +21,15 @@ const (
 	currentSecretFile  = "./current-secret.yaml"
 )
 
+var (
+	excludeDirs = []string{
+		filepath.Join(manifestDir, "bin"),
+		filepath.Join(manifestDir, "docs"),
+		filepath.Join(manifestDir, "test"),
+		filepath.Join(manifestDir, "vendor"),
+	}
+)
+
 type crdValidation struct {
 	Kind   string                                               `json:"kind"`
 	Status *apiextensionsv1beta1.CustomResourceDefinitionStatus `json:"status"`
@@ -32,20 +41,8 @@ type secret struct {
 	} `json:"metadata"`
 }
 
-func TestValidation(t *testing.T) {
-	rootDir, err := filepath.Abs(manifestDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	excludeDirs := []string{
-		filepath.Join(rootDir, "bin"),
-		filepath.Join(rootDir, "docs"),
-		filepath.Join(rootDir, "test"),
-		filepath.Join(rootDir, "vendor"),
-	}
-
-	err = filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+func TestCRDStatus(t *testing.T) {
+	err := filepath.Walk(manifestDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -126,7 +123,7 @@ func readSecret(path string) ([]secret, error) {
 	return secrets, nil
 }
 
-func TestSecret(t *testing.T) {
+func TestGeneratedSecretName(t *testing.T) {
 	defer func() {
 		os.Remove(expectedSecretFile)
 		os.Remove(currentSecretFile)
@@ -143,18 +140,8 @@ func TestSecret(t *testing.T) {
 
 OUTER:
 	for _, es := range expected {
-		name := es.Metadata.Name
-
-		rootDir := "../"
-		excludeDirs := []string{
-			filepath.Join(rootDir, "bin"),
-			filepath.Join(rootDir, "docs"),
-			filepath.Join(rootDir, "test"),
-			filepath.Join(rootDir, "vendor"),
-		}
-
 		var appeared bool
-		err = filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+		err = filepath.Walk(manifestDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
@@ -172,7 +159,7 @@ OUTER:
 				return err
 			}
 
-			if strings.Contains(string(str), "secretName: "+name) {
+			if strings.Contains(string(str), "secretName: "+es.Metadata.Name) {
 				appeared = true
 			}
 			return nil
@@ -181,14 +168,14 @@ OUTER:
 			t.Fatal("failed to walk manifest directories")
 		}
 		if !appeared {
-			t.Error("secret:", name, "was not found in any manifests")
+			t.Error("secret:", es.Metadata.Name, "was not found in any manifests")
 		}
 
 		for _, cs := range dummySecrets {
-			if cs.Metadata.Name == name {
+			if cs.Metadata.Name == es.Metadata.Name {
 				continue OUTER
 			}
 		}
-		t.Error("secret:", name, "was not found in dummy secrets", dummySecrets)
+		t.Error("secret:", es.Metadata.Name, "was not found in dummy secrets", dummySecrets)
 	}
 }

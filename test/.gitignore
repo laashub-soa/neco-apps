@@ -7,3 +7,5 @@ account.json
 /build
 /neco-apps
 /neco-apps-secret
+expected-secret.yaml
+current-secret.yaml
