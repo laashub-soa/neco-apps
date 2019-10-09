@@ -41,7 +41,9 @@ type secret struct {
 	} `json:"metadata"`
 }
 
-func TestCRDStatus(t *testing.T) {
+func testCRDStatus(t *testing.T) {
+	t.Parallel()
+
 	err := filepath.Walk(manifestDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -123,7 +125,9 @@ func readSecret(path string) ([]secret, error) {
 	return secrets, nil
 }
 
-func TestGeneratedSecretName(t *testing.T) {
+func testGeneratedSecretName(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		os.Remove(expectedSecretFile)
 		os.Remove(currentSecretFile)
@@ -178,4 +182,13 @@ OUTER:
 		}
 		t.Error("secret:", es.Metadata.Name, "was not found in dummy secrets", dummySecrets)
 	}
+}
+
+func TestValidation(t *testing.T) {
+	if os.Getenv("SSH_PRIVKEY") != "" {
+		t.Skip("SSH_PRIVKEY envvar is defined as running e2e test")
+	}
+
+	t.Run("CRDStatus", testCRDStatus)
+	t.Run("GeneratedSecretName", testGeneratedSecretName)
 }

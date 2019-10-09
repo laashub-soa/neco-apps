@@ -31,7 +31,7 @@ install.yaml: $(shell find ../argocd/base)
 
 validation:
 	./fetch-secret.sh
-	go test -v ./validation_test.go
+	env SSH_PRIVKEY= go test -v ./validation_test.go
 
 opa-test:
 	test -z "$$(opa fmt -l ../ | grep -v '^vendor' | tee /dev/stderr)"
