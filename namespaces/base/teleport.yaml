@@ -4,4 +4,3 @@ metadata:
   name: teleport
   labels:
     control-plane: "true"
-    topolvm.cybozu.com/webhook: ignore

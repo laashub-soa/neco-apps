@@ -63,7 +63,6 @@ spec:
             privileged: true
           command:
             - /topolvm-node
-            - --nodename=$(MY_NODE_NAME)
             - --lvmd-socket=/run/lvmd/lvmd.sock
           ports:
             - containerPort: 9808

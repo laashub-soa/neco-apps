@@ -4,7 +4,6 @@ metadata:
   name: monitoring
   labels:
     control-plane: "true"
-    topolvm.cybozu.com/webhook: ignore
 spec:
   finalizers:
     - kubernetes
