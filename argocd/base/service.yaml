@@ -77,6 +77,8 @@ metadata:
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
   name: argocd-server
+  annotations:
+    metallb.universe.tf/address-pool: bastion
 spec:
   ports:
     - name: http
@@ -89,4 +91,4 @@ spec:
       targetPort: 8080
   selector:
     app.kubernetes.io/name: argocd-server
-  type: NodePort
+  type: LoadBalancer
