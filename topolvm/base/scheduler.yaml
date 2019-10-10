@@ -26,9 +26,9 @@ roleRef:
   kind: Role
   name: psp:topolvm-scheduler
 subjects:
-- kind: ServiceAccount
-  namespace: topolvm-system
-  name: topolvm-scheduler
+  - kind: ServiceAccount
+    namespace: topolvm-system
+    name: topolvm-scheduler
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -50,7 +50,7 @@ spec:
       serviceAccountName: topolvm-scheduler
       containers:
         - name: topolvm-scheduler
-          image: quay.io/cybozu/topolvm:0.1.2
+          image: quay.io/cybozu/topolvm:0.2.0
           command:
             - /topolvm-scheduler
             - --listen=localhost:9251
@@ -71,5 +71,5 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: cke.cybozu.com/master
+                  - key: node-role.kubernetes.io/master
                     operator: Exists
