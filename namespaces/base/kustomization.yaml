@@ -8,3 +8,4 @@ resources:
 - metallb.yaml
 - monitoring.yaml
 - teleport.yaml
+- topolvm.yaml
