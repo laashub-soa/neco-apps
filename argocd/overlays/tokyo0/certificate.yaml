@@ -4,7 +4,7 @@ metadata:
   name: argocd-server-tls
   namespace: argocd
 spec:
-  secretName: argocd-secret-tls
+  secretName: argocd-server-tls
   issuerRef:
     kind: ClusterIssuer
     name: clouddns
