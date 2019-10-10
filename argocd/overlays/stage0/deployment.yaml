@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+spec:
+  template:
+    spec:
+      volumes:
+      - secret:
+          secretName: argocd-server-tls
+          items:
+            - key: tls.cert
+              path: argocd.stage0.cybozu-ne.co
+        name: tls-certs

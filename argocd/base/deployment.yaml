@@ -186,6 +186,6 @@ spec:
       - configMap:
           name: argocd-ssh-known-hosts-cm
         name: ssh-known-hosts
-      - configMap:
-          name: argocd-tls-certs-cm
+      - secret:
+          secretName: argocd-server-tls
         name: tls-certs

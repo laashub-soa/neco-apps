@@ -4,3 +4,5 @@ bases:
   - ../../base
 resources:
   - certificate.yaml
+patchesStrategicMerge:
+  - deployment.yaml
