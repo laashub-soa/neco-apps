@@ -12,10 +12,6 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: gatekeeper-system
-  syncPolicy:
-    automated:
-      prune: false
-      selfHeal: true
   ignoreDifferences:
   - group: core
     kind: Secret
