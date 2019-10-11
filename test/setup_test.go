@@ -197,6 +197,7 @@ func testSetup() {
 		It("should delete previous version TopoLVM", func() {
 			By("disabling argocd self healing")
 			ExecSafeAt(boot0, "argocd", "app", "set", "argocd", "--sync-policy", "none")
+			ExecSafeAt(boot0, "argocd", "app", "set", "topolvm", "--sync-policy", "none")
 			ExecSafeAt(boot0, "argocd", "app", "set", "monitoring", "--sync-policy", "none")
 			ExecSafeAt(boot0, "argocd", "app", "set", "teleport", "--sync-policy", "none")
 
@@ -295,6 +296,7 @@ func testSetup() {
 			By("enabling argocd self healing")
 			ExecSafeAt(boot0, "argocd", "app", "set", "teleport", "--sync-policy", "automated", "--auto-prune", "--self-heal")
 			ExecSafeAt(boot0, "argocd", "app", "set", "monitoring", "--sync-policy", "automated", "--auto-prune", "--self-heal")
+			ExecSafeAt(boot0, "argocd", "app", "set", "topolvm", "--sync-policy", "automated", "--auto-prune", "--self-heal")
 			ExecSafeAt(boot0, "argocd", "app", "set", "argocd", "--sync-policy", "automated", "--auto-prune", "--self-heal")
 		}
 	})
