@@ -98,6 +98,8 @@ stringData:
 `
 )
 
+var argoCDPassword string
+
 // testSetup tests setup of Argo CD
 func testSetup() {
 	if !withKind {
@@ -336,7 +338,7 @@ func setupArgoCD() {
 		return nil
 	}).Should(Succeed())
 
-	password := podList.Items[0].Name
+	argoCDPassword = podList.Items[0].Name
 
 	By("getting node address")
 	var nodeList corev1.NodeList
@@ -374,7 +376,7 @@ func setupArgoCD() {
 	By("logging in to Argo CD")
 	Eventually(func() error {
 		stdout, stderr, err := ExecAt(boot0, "argocd", "login", nodeAddress+":"+nodePort,
-			"--insecure", "--username", "admin", "--password", password)
+			"--insecure", "--username", "admin", "--password", argoCDPassword)
 		if err != nil {
 			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 		}
