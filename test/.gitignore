@@ -9,3 +9,4 @@ account.json
 /neco-apps-secret
 expected-secret.yaml
 current-secret.yaml
+argocd-password.txt

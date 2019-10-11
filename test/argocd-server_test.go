@@ -16,7 +16,6 @@ func testArgoCDServer() {
 	It("should create the LoadBalancer service for argocd-server", func() {
 		var lbIP string
 		var lbPort string
-		var password string
 
 		By("confirming that argocd-server service has external IP")
 		Eventually(func() error {
@@ -52,33 +51,10 @@ func testArgoCDServer() {
 			return nil
 		}).Should(Succeed())
 
-		By("fetching the password")
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n", "argocd",
-				"-l", "app.kubernetes.io/name=argocd-server", "-o", "json")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			var podList corev1.PodList
-			err = json.Unmarshal(stdout, &podList)
-			if err != nil {
-				return err
-			}
-			if podList.Items == nil {
-				return errors.New("podList.Items is nil")
-			}
-			if len(podList.Items) != 1 {
-				return fmt.Errorf("podList.Items is not 1: %d", len(podList.Items))
-			}
-
-			password = podList.Items[0].Name
-			return nil
-		}).Should(Succeed())
-
 		By("logging in to Argo CD via external IP")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "argocd", "login", lbIP+":"+lbPort,
-				"--insecure", "--username", "admin", "--password", password)
+				"--insecure", "--username", "admin", "--password", loadArgoCDPassword())
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
