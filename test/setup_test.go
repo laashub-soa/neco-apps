@@ -193,6 +193,45 @@ func testSetup() {
 		ExecSafeAt(boot0, "cd neco-apps; git checkout "+commitID)
 	})
 
+	if doUpgrade {
+		It("should delete previous version TopoLVM", func() {
+			By("disabling argocd self healing")
+			ExecSafeAt(boot0, "argocd-config", "app", "set", "argocd", "--sync-policy", "none")
+			ExecSafeAt(boot0, "argocd", "app", "set", "argocd", "--sync-policy", "none")
+
+			By("deleting relevant resources")
+			ExecSafeAt(boot0, "kubectl", "delete", "mutatingwebhookconfigurations", "topolvm-hook")
+			ExecSafeAt(boot0, "kubectl", "delete", "ns", "topolvm-system")
+			ExecSafeAt(boot0, "kubectl", "delete", "clusterolebindings,clusterroles", "topolvm-system:csi-topolvm-controller", "topolvm-system:csi-topolvm-node", "topolvm-system:topolvm-hook")
+			ExecSafeAt(boot0, "kubectl", "delete", "crds", "logicalvolumes.topolvm.cybozu.com")
+			ExecSafeAt(boot0, "kubectl", "delete", "csidrivers", "topolvm.cybozu.com")
+
+			Eventually(func() error {
+				_, _, err := ExecAt(boot0, "kubectl", "get", "mutatingwebhookconfigurations", "topolvm-hook")
+				if err == nil {
+					return errors.New("topolvm-hook mutatingwebhookconfigurations still exists")
+				}
+				_, _, err = ExecAt(boot0, "kubectl", "get", "ns", "topolvm-system")
+				if err == nil {
+					return errors.New("topolvm-system ns still exists")
+				}
+				_, _, err = ExecAt(boot0, "kubectl", "get", "clusterolebindings,clusterroles", "topolvm-system:csi-topolvm-controller", "topolvm-system:csi-topolvm-node", "topolvm-system:topolvm-hook")
+				if err == nil {
+					return errors.New("clusterolebindings and clusterroles still exist")
+				}
+				_, _, err = ExecAt(boot0, "kubectl", "get", "crds", "logicalvolumes.topolvm.cybozu.com")
+				if err == nil {
+					return errors.New("topolvm crd still exists")
+				}
+				_, _, err = ExecAt(boot0, "kubectl", "get", "csidrivers", "topolvm.cybozu.com")
+				if err == nil {
+					return errors.New("csidriver still exists")
+				}
+				return nil
+			}).Should(Succeed())
+		})
+	}
+
 	It("should setup applications", func() {
 		if !doUpgrade {
 			setupArgoCD()
