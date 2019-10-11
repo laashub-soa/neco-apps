@@ -126,9 +126,6 @@ metadata:
   namespace: topolvm-system
   name: external-provisioner-cfg
 rules:
-- apiGroups: [""]
-  resources: ["endpoints"]
-  verbs: ["get", "watch", "list", "delete", "update", "create"]
 - apiGroups: ["coordination.k8s.io"]
   resources: ["leases"]
   verbs: ["get", "watch", "list", "delete", "update", "create"]
@@ -184,9 +181,6 @@ metadata:
   namespace: topolvm-system
   name: external-attacher-cfg
 rules:
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "watch", "list", "delete", "update", "create"]
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
     verbs: ["get", "watch", "list", "delete", "update", "create"]

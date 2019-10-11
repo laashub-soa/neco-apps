@@ -196,7 +196,7 @@ func testSetup() {
 	if doUpgrade {
 		It("should delete previous version TopoLVM", func() {
 			By("disabling argocd self healing")
-			ExecSafeAt(boot0, "argocd-config", "app", "set", "argocd", "--sync-policy", "none")
+			ExecSafeAt(boot0, "argocd", "app", "set", "argocd-config", "--sync-policy", "none")
 			ExecSafeAt(boot0, "argocd", "app", "set", "argocd", "--sync-policy", "none")
 
 			By("deleting relevant resources")
