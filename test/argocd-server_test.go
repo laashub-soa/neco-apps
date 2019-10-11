@@ -54,7 +54,7 @@ func testArgoCDServer() {
 		By("logging in to Argo CD via external IP")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "argocd", "login", lbIP+":"+lbPort,
-				"--insecure", "--username", "admin", "--password", argoCDPassword)
+				"--insecure", "--username", "admin", "--password", loadArgoCDPassword())
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
