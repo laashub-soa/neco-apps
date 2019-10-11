@@ -196,7 +196,6 @@ func testSetup() {
 	if doUpgrade {
 		It("should delete previous version TopoLVM", func() {
 			By("disabling argocd self healing")
-			ExecSafeAt(boot0, "argocd", "app", "set", "argocd-config", "--sync-policy", "none")
 			ExecSafeAt(boot0, "argocd", "app", "set", "argocd", "--sync-policy", "none")
 
 			By("deleting relevant resources")
@@ -238,6 +237,9 @@ func testSetup() {
 		}
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications()
+
+		By("enabling argocd self healing")
+		ExecSafeAt(boot0, "argocd", "app", "set", "argocd", "--sync-policy", "automated", "--auto-prune", "--self-heal")
 	})
 
 	if !withKind {
