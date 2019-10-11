@@ -13,7 +13,7 @@ import (
 func testArgoCDServer() {
 	It("should login via IngressRoute", func() {
 		By("getting the ip address of the contour LoadBalancer")
-		stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=argocd", "get", "service/contour-bastion", "-o=json")
+		stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=ingress", "get", "service/contour-bastion", "-o=json")
 		Expect(err).ShouldNot(HaveOccurred())
 
 		svc := new(corev1.Service)
