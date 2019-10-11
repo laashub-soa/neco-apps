@@ -15,3 +15,4 @@ patchesStrategicMerge:
 - teleport.yaml
 - topolvm.yaml
 - team-management.yaml
+- namespaces.yaml
