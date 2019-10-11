@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	appSyncOrderFile = "../app-sync-order.txt"
+	appSyncOrderFile   = "../app-sync-order.txt"
+	argoCDPasswordFile = "./argocd-password.txt"
 
 	grafanaSecret = `apiVersion: v1
 kind: Secret
@@ -336,7 +337,7 @@ func setupArgoCD() {
 		return nil
 	}).Should(Succeed())
 
-	password := podList.Items[0].Name
+	saveArgoCDPassword(podList.Items[0].Name)
 
 	By("getting node address")
 	var nodeList corev1.NodeList
@@ -374,7 +375,7 @@ func setupArgoCD() {
 	By("logging in to Argo CD")
 	Eventually(func() error {
 		stdout, stderr, err := ExecAt(boot0, "argocd", "login", nodeAddress+":"+nodePort,
-			"--insecure", "--username", "admin", "--password", password)
+			"--insecure", "--username", "admin", "--password", loadArgoCDPassword())
 		if err != nil {
 			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 		}
