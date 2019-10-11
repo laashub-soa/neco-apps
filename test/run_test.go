@@ -173,3 +173,14 @@ func ExecSafeAt(host string, args ...string) []byte {
 	ExpectWithOffset(1, err).To(Succeed(), "[%s] %v, stdout: %s, stderr: %s", host, args, stdout, stderr)
 	return stdout
 }
+
+func loadArgoCDPassword() string {
+	password, err := ioutil.ReadFile(argoCDPasswordFile)
+	Expect(err).NotTo(HaveOccurred())
+	return string(password)
+}
+
+func saveArgoCDPassword(password string) {
+	err := ioutil.WriteFile(argoCDPasswordFile, []byte(password), os.FileMode(0644))
+	Expect(err).NotTo(HaveOccurred())
+}

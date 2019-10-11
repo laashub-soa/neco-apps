@@ -11,6 +11,8 @@ patchesStrategicMerge:
 - metallb.yaml
 - monitoring.yaml
 - network-policy.yaml
+- secrets.yaml
 - teleport.yaml
 - topolvm.yaml
 - team-management.yaml
+- namespaces.yaml
