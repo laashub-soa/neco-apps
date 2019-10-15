@@ -269,11 +269,7 @@ func applyAndWaitForApplications() {
 	Eventually(func() error {
 	OUTER:
 		for _, appName := range syncOrder {
-			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", appName)
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
-			}
-			appStdout, stderr, err = ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
+			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
 			}
