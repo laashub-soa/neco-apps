@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -23,11 +22,8 @@ func testArgoCDServer() {
 		lbIP := svc.Status.LoadBalancer.Ingress[0].IP
 
 		By("adding loadbalancer address entry to /etc/hosts")
-		f, err := os.OpenFile("/etc/hosts", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		Expect(err).ShouldNot(HaveOccurred())
-		_, err = f.Write([]byte(lbIP + " argocd.gcp0.dev-ne.co\n"))
-		Expect(err).ShouldNot(HaveOccurred())
-		f.Close()
+		_, stderr, err := ExecAt(boot0, "sudo", "bash", "-c", "'echo "+lbIP+" argocd.gcp0.dev-ne.co >> /etc/hosts'")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr: %s", stderr)
 
 		By("logging in to Argo CD")
 		Eventually(func() error {

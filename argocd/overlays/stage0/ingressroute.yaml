@@ -16,4 +16,4 @@ spec:
         request: 2m
       services:
         - name: argocd-server
-          port: 80
+          port: 443
