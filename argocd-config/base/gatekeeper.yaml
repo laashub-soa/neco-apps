@@ -20,3 +20,7 @@ spec:
     jsonPointers:
     - /data
     - /type
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
