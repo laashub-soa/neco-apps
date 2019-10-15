@@ -65,4 +65,7 @@ var _ = Describe("Test applications", func() {
 	}
 	Context("topolvm", testTopoLVM)
 	Context("elastic", testElastic)
+	if !withKind {
+		Context("argocd-ingress", testArgoCDIngress)
+	}
 })

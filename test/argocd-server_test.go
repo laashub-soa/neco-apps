@@ -9,7 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func testArgoCDServer() {
+func testArgoCDIngress() {
 	It("should login via IngressRoute", func() {
 		By("getting the ip address of the contour LoadBalancer")
 		stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=ingress", "get", "service/contour-bastion", "-o=json")
