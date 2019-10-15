@@ -11,6 +11,7 @@ dctest-upgrade:
 	git worktree add /tmp/neco-apps $(BASE_BRANCH)
 	cp account.json /tmp/neco-apps/test
 	cd /tmp/neco-apps/test; make test-apps BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH)
+	ln -s /tmp/neco-apps/test/argocd-password.txt
 	UPGRADE=1 ./test.sh
 
 .PHONY: dctest dctest-reboot dctest-upgrade
