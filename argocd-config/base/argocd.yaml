@@ -19,3 +19,7 @@ spec:
     namespace: argocd
     jsonPointers:
     - /data/repositories
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
