@@ -7,6 +7,7 @@ dctest-reboot: install.yaml
 	REBOOT=1 ./test.sh
 
 dctest-upgrade:
+	rm -f ./argocd-password.txt
 	-git worktree remove /tmp/neco-apps
 	git worktree add /tmp/neco-apps $(BASE_BRANCH)
 	cp account.json /tmp/neco-apps/test

@@ -144,16 +144,28 @@ func testSetup() {
 		}
 
 		By("creating namespace and secrets for external-dns")
-		ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
-		_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
-			"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "external-dns")
+		if err != nil {
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
+		}
+		_, _, err = ExecAt(boot0, "kubectl", "--namespace=external-dns", "get", "secret", "clouddns")
+		if err != nil {
+			_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
+				"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		}
 
 		By("creating namespace and secrets for cert-manager")
-		ExecSafeAt(boot0, "kubectl", "create", "namespace", "cert-manager")
-		_, stderr, err = ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
-			"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "cert-manager")
+		if err != nil {
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "cert-manager")
+		}
+		_, _, err = ExecAt(boot0, "kubectl", "--namespace=cert-manager", "get", "secret", "clouddns")
+		if err != nil {
+			_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
+				"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+		}
 	})
 
 	if !doUpgrade {
