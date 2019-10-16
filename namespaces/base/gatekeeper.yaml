@@ -5,6 +5,7 @@ metadata:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
     openpolicyagent.org/webhook: ignore
+    topolvm.cybozu.com/webhook: ignore
   name: gatekeeper-system
 spec:
   finalizers:

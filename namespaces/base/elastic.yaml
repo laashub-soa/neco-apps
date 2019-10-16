@@ -4,3 +4,4 @@ metadata:
   name: elastic-system
   labels:
     control-plane: "true"
+    topolvm.cybozu.com/webhook: ignore
