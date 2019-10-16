@@ -24,7 +24,7 @@ scrape_configs:
         regex: ([^:]+)(?::\d+)?;(\d+)
         replacement: ${1}
         target_label: __address__
-  - job_name: "alertmanager"
+  - job_name: "alertmanager-main"
     kubernetes_sd_configs:
       - role: pod
         namespaces:
