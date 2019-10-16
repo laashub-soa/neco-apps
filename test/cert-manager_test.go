@@ -14,7 +14,7 @@ import (
 func testCertManager() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=external-dns",
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=cert-manager",
 				"get", "deployment", "--selector=app.kubernetes.io/component=cert-manager", "-o=json")
 			if err != nil {
 				return err
@@ -48,7 +48,7 @@ apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
   name: test-certificate
-  namespace: external-dns
+  namespace: cert-manager
 spec:
   secretName: example-com-tls
   issuerRef:
@@ -61,7 +61,7 @@ spec:
 
 		By("checking ClusterIssuer has registered")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=external-dns", "clusterissuers", issuerName, "-o", "json")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=cert-manager", "clusterissuers", issuerName, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -93,7 +93,7 @@ spec:
 
 		By("checking certificate is issued for xxx.gcp0.dev-ne.co")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=external-dns", "certificate", "test-certificate", "-o", "json")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=cert-manager", "certificate", "test-certificate", "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -120,7 +120,7 @@ spec:
 		}).Should(Succeed())
 
 		By("checking certificate is issued for xxx.gcp0.dev-ne.co")
-		_, _, err = ExecAt(boot0, "kubectl", "get", "-n=external-dns", "secrets/example-com-tls")
+		_, _, err = ExecAt(boot0, "kubectl", "get", "-n=cert-manager", "secrets/example-com-tls")
 		Expect(err).NotTo(HaveOccurred())
 	})
 }

@@ -15,5 +15,5 @@ spec:
         clouddns:
           project: neco-test
           serviceAccountSecretRef:
-            name: external-dns
+            name: clouddns
             key: account.json

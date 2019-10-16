@@ -146,7 +146,13 @@ func testSetup() {
 			By("creating namespace and secrets for external-dns")
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
 			_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
-				"create", "secret", "generic", "external-dns", "--from-file=account.json=/dev/stdin")
+				"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+
+			By("creating namespace and secrets for cert-manager")
+			ExecSafeAt(boot0, "kubectl", "create", "namespace", "cert-manager")
+			_, stderr, err = ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
+				"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
 			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 			By("creating namespace and secrets for grafana")
