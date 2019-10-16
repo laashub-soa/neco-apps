@@ -3,10 +3,10 @@ kind: Kustomization
 resources:
 - certificates.yaml
 - crd.yaml
-- csi-controller.yaml
-- csi-node.yaml
+- controller.yaml
+- node.yaml
 - mutatingwebhooks.yaml
 - provisioner.yaml
 - psp.yaml
 - scheduler.yaml
-- topolvm-hook-pdb.yaml
+- pdb.yaml

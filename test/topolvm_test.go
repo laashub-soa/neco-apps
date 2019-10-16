@@ -12,10 +12,10 @@ import (
 )
 
 func testTopoLVM() {
-	It("should apply PodDisruptionBudget to topolvm-hook", func() {
-		By("checking PodDisruptionBudget for topolvm-hook Deployment")
+	It("should apply PodDisruptionBudget to controller", func() {
+		By("checking PodDisruptionBudget for controller Deployment")
 		pdb := policyv1beta1.PodDisruptionBudget{}
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "topolvm-hook-pdb", "-n", "topolvm-system", "-o", "json")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "controller-pdb", "-n", "topolvm-system", "-o", "json")
 		if err != nil {
 			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		}

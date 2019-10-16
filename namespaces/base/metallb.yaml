@@ -4,6 +4,7 @@ metadata:
   name: metallb-system
   labels:
     control-plane: "true"
+    topolvm.cybozu.com/webhook: ignore
 spec:
   finalizers:
     - kubernetes

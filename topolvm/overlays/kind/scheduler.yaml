@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  namespace: topolvm-system
+  name: topolvm-scheduler
+spec:
+  template:
+    spec:
+      tolerations:
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - key: node-role.kubernetes.io/master
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: Exists
