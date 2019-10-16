@@ -131,7 +131,7 @@ tests:
               runbook: "Please consider to find root causes, and solve the problems"
   - interval: 1m
     input_series:
-      - series: 'up{job="alertmanager-main"}'
+      - series: 'up{job="alertmanager"}'
         values: '0+0x15'
     alert_rule_test:
       - eval_time: 15m
