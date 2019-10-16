@@ -131,30 +131,33 @@ func testSetup() {
 		issueKubeconfig()
 	})
 
+	// TODO: This secret creation must move in "if !doUpgrade{}" sentence after the release
+	It("should create secrets of account.json", func() {
+		By("loading account.json")
+		var data []byte
+		var err error
+		if withKind {
+			data = []byte("{}")
+		} else {
+			data, err = ioutil.ReadFile("account.json")
+			Expect(err).ShouldNot(HaveOccurred())
+		}
+
+		By("creating namespace and secrets for external-dns")
+		ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
+		_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
+			"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+
+		By("creating namespace and secrets for cert-manager")
+		ExecSafeAt(boot0, "kubectl", "create", "namespace", "cert-manager")
+		_, stderr, err = ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
+			"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+	})
+
 	if !doUpgrade {
 		It("should prepare secrets", func() {
-			By("loading account.json")
-			var data []byte
-			var err error
-			if withKind {
-				data = []byte("{}")
-			} else {
-				data, err = ioutil.ReadFile("account.json")
-				Expect(err).ShouldNot(HaveOccurred())
-			}
-
-			By("creating namespace and secrets for external-dns")
-			ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
-			_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
-				"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
-			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-
-			By("creating namespace and secrets for cert-manager")
-			ExecSafeAt(boot0, "kubectl", "create", "namespace", "cert-manager")
-			_, stderr, err = ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
-				"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
-			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-
 			By("creating namespace and secrets for grafana")
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "monitoring")
 			stdout, stderr, err := ExecAtWithInput(boot0, []byte(grafanaSecret), "dd", "of=grafana.yaml")
