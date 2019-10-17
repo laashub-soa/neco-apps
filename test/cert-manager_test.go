@@ -61,7 +61,7 @@ spec:
 
 		By("checking ClusterIssuer has registered")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=cert-manager", "clusterissuers", issuerName, "-o", "json")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "clusterissuers", issuerName, "-o", "json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
