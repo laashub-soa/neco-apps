@@ -203,15 +203,6 @@
 groups:
   - name: kubernetes-absent
     rules:
-      - alert: AlertmanagerDown
-        annotations:
-          summary: Alertmanager has disappeared from Prometheus target discovery.
-          runbook: TBD
-        expr: |
-          absent(up{job="alertmanager",namespace="monitoring"} == 1)
-        for: 15m
-        labels:
-          severity: critical
       - alert: KubeStateMetricsDown
         annotations:
           summary: KubeStateMetrics has disappeared from Prometheus target discovery.
@@ -221,24 +212,24 @@ groups:
         for: 15m
         labels:
           severity: critical
-      - alert: NodeExporterDown
-        annotations:
-          summary: NodeExporter has disappeared from Prometheus target discovery.
-          runbook: TBD
+      - alert: KubernetesCAdvisorDown
         expr: |
-          absent(up{job="node-exporter"} == 1)
-        for: 15m
+          absent(up{job="kubernetes-cadvisor"} == 1)
         labels:
           severity: critical
-      - alert: PrometheusDown
+        for: 10m
         annotations:
-          summary: Prometheus has disappeared from Prometheus target discovery.
-          runbook: TBD
+          summary: KubernetesCAdvisor has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: KubernetesNodesDown
         expr: |
-          absent(up{job="prometheus"} == 1)
-        for: 15m
+          absent(up{job="kubernetes-nodes"} == 1)
         labels:
           severity: critical
+        for: 10m
+        annotations:
+          summary: KubernetesNodes has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
   - name: kubernetes-apps
     rules:
       - alert: KubePodCrashLooping
@@ -521,3 +512,19 @@ groups:
           apiserver_client_certificate_expiration_seconds_count{job="kubernetes-apiservers"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers"}[5m]))) < 86400
         labels:
           severity: critical
+      - alert: K8sAPIServersDegraded
+        expr: count(up{job="kubernetes-apiservers"} == 1) < 3
+        labels:
+          severity: warning
+        for: 10m
+        annotations:
+          summary: The number of kube-apiserver is less than 3.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: K8sAPIServersDegraded
+        expr: absent(up{job="kubernetes-apiservers"} == 1)
+        labels:
+          severity: critical
+        for: 10m
+        annotations:
+          summary: No kube-apiserver is running.
+          runbook: Please consider to find root causes, and solve the problems
