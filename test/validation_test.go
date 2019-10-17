@@ -2,6 +2,7 @@ package test
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"text/template"
 
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -184,6 +186,55 @@ OUTER:
 	}
 }
 
+// These struct types are copied from the following link:
+// https://github.com/prometheus/prometheus/blob/master/pkg/rulefmt/rulefmt.go
+
+type alertRuleGroups struct {
+	Groups []alertRuleGroup `json:"groups"`
+}
+
+type alertRuleGroup struct {
+	Name   string      `json:"name"`
+	Alerts []alertRule `json:"rules"`
+}
+
+type alertRule struct {
+	Record      string            `json:"record,omitempty"`
+	Alert       string            `json:"alert,omitempty"`
+	Expr        string            `json:"expr"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+func testAlertRules(t *testing.T, targetYAMLPath string) {
+	var groups alertRuleGroups
+	str, err := ioutil.ReadFile(targetYAMLPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = yaml.Unmarshal(str, &groups)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	str, err = ioutil.ReadFile("../monitoring/base/alertmanager/neco.template")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tmpl := template.Must(template.New("alert").Parse(string(str))).Option("missingkey=error")
+
+	for _, g := range groups.Groups {
+		t.Run(g.Name, func(t *testing.T) {
+			var buf bytes.Buffer
+			err := tmpl.ExecuteTemplate(&buf, "slack.neco.text", g)
+			if err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
 func TestValidation(t *testing.T) {
 	if os.Getenv("SSH_PRIVKEY") != "" {
 		t.Skip("SSH_PRIVKEY envvar is defined as running e2e test")
@@ -191,4 +242,8 @@ func TestValidation(t *testing.T) {
 
 	t.Run("CRDStatus", testCRDStatus)
 	t.Run("GeneratedSecretName", testGeneratedSecretName)
+	t.Run("AlertRules", func(t *testing.T) { testAlertRules(t, "../monitoring/base/prometheus/alert_rules.yaml") })
+	t.Run("KubePrometheusAlertRules", func(t *testing.T) {
+		testAlertRules(t, "../monitoring/base/prometheus/kube_prometheus_alert_rules.yaml")
+	})
 }
