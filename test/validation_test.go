@@ -203,7 +203,7 @@ type alertRule struct {
 	Alert       string            `json:"alert,omitempty"`
 	Expr        string            `json:"expr"`
 	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
+	Annotations map[string]string `json:"annotations"`
 }
 
 func testAlertRules(t *testing.T, targetYAMLPath string) {
@@ -226,6 +226,7 @@ func testAlertRules(t *testing.T, targetYAMLPath string) {
 
 	for _, g := range groups.Groups {
 		t.Run(g.Name, func(t *testing.T) {
+			t.Parallel()
 			var buf bytes.Buffer
 			err := tmpl.ExecuteTemplate(&buf, "slack.neco.text", g)
 			if err != nil {

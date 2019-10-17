@@ -8,6 +8,7 @@ groups:
         for: 10m
         annotations:
           summary: The number of kube-apiserver is less than 3.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: K8sAPIServersDegraded
         expr: absent(up{job="kubernetes-apiservers"} == 1)
         labels:
@@ -15,6 +16,7 @@ groups:
         for: 10m
         annotations:
           summary: No kube-apiserver is running.
+          runbook: Please consider to find root causes, and solve the problems
   - name: applications CD
     rules:
       - alert: AppOutOfSync
@@ -51,73 +53,111 @@ groups:
         annotations:
           summary: "{{ $labels.instance }}, {{ $labels.job }} of etcd DB space increases {{ $value | humanize }}B/h"
           runbook: "Please consider to find root causes, and solve the problems"
+      - alert: BootserverEtcdMissing
+        expr: absent(up{job="bootserver-etcd"} == 1)
+        labels:
+          severity: critical
+        for: 10m
+        annotations:
+          summary: BootserverEtcd has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: CKEEtcdMissing
+        expr: absent(up{job="cke-etcd"} == 1)
+        labels:
+          severity: critical
+        for: 10m
+        annotations:
+          summary: CKEEtcd has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+  - name: exporter
+    rules:
       - alert: ArgoCDDown
         expr: |
           absent(up{job="argocd"} == 1)
         labels:
           severity: critical
         for: 10m
-      - alert: BootserverEtcdMissing
-        expr: absent(up{job="bootserver-etcd"} == 1)
-        labels:
-          severity: critical
-        for: 10m
+        annotations:
+          summary: ArgoCD has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: CalicoNodeDown
         expr: |
           absent(up{job="calico-node"} == 1)
         labels:
           severity: critical
         for: 10m
-      - alert: CKEEtcdMissing
-        expr: absent(up{job="cke-etcd"} == 1)
-        labels:
-          severity: critical
-        for: 10m
+        annotations:
+          summary: CalicoNode has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: ContourDown
         expr: |
           absent(up{job="contour"} == 1)
         labels:
           severity: critical
         for: 10m
+        annotations:
+          summary: Contour has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: ExternalDNSDown
         expr: |
           absent(up{job="external-dns"} == 1)
         labels:
           severity: critical
         for: 10m
+        annotations:
+          summary: ExternalDNS has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: IngressDown
         expr: |
           absent(up{job="ingress"} == 1)
         labels:
           severity: critical
         for: 10m
+        annotations:
+          summary: Ingress has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: KubernetesCAdvisorDown
         expr: |
           absent(up{job="kubernetes-cadvisor"} == 1)
         labels:
           severity: critical
         for: 10m
+        annotations:
+          summary: KubernetesCAdvisor has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: KubernetesNodesDown
         expr: |
           absent(up{job="kubernetes-nodes"} == 1)
         labels:
           severity: critical
         for: 10m
+        annotations:
+          summary: KubernetesNodes has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: MetalLBDown
         expr: |
           absent(up{job="metallb"} == 1)
         labels:
           severity: critical
         for: 10m
+        annotations:
+          summary: MetalLB has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: MonitorHWDown
         expr: |
           absent(up{job="metallb"} == 1)
         labels:
           severity: critical
         for: 10m
+        annotations:
+          summary: MonitorHW has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
       - alert: TeleportDown
         expr: |
           absent(up{job="teleport"} == 1)
         labels:
           severity: critical
         for: 10m
+        annotations:
+          summary: Teleport has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
