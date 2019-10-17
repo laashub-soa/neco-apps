@@ -9,4 +9,5 @@ patchesStrategicMerge:
 - monitoring.yaml
 - network-policy.yaml
 - teleport.yaml
+- topolvm.yaml
 - secrets.yaml
