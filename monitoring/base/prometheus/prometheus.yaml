@@ -4,6 +4,7 @@ global:
 rule_files:
   - /etc/prometheus/alert_rules.yaml
   - /etc/prometheus/kube_prometheus_alert_rules.yaml
+  - /etc/prometheus/record_rules.yaml
 alerting:
   alertmanagers:
   - static_configs:
