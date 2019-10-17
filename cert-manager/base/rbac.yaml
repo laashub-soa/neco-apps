@@ -45,7 +45,7 @@ roleRef:
   name: cert-manager-cainjector
 subjects:
   - name: cert-manager-cainjector
-    namespace: "external-dns"
+    namespace: "cert-manager"
     kind: ServiceAccount
 ---
 # Source: cert-manager/templates/rbac.yaml
@@ -290,7 +290,7 @@ roleRef:
   name: cert-manager-leaderelection
 subjects:
   - name: cert-manager
-    namespace: "external-dns"
+    namespace: "cert-manager"
     kind: ServiceAccount
 
 ---
@@ -311,7 +311,7 @@ roleRef:
   name: cert-manager-controller-issuers
 subjects:
   - name: cert-manager
-    namespace: "external-dns"
+    namespace: "cert-manager"
     kind: ServiceAccount
 
 ---
@@ -332,7 +332,7 @@ roleRef:
   name: cert-manager-controller-clusterissuers
 subjects:
   - name: cert-manager
-    namespace: "external-dns"
+    namespace: "cert-manager"
     kind: ServiceAccount
 
 ---
@@ -353,7 +353,7 @@ roleRef:
   name: cert-manager-controller-certificates
 subjects:
   - name: cert-manager
-    namespace: "external-dns"
+    namespace: "cert-manager"
     kind: ServiceAccount
 
 ---
@@ -374,7 +374,7 @@ roleRef:
   name: cert-manager-controller-orders
 subjects:
   - name: cert-manager
-    namespace: "external-dns"
+    namespace: "cert-manager"
     kind: ServiceAccount
 
 ---
@@ -395,7 +395,7 @@ roleRef:
   name: cert-manager-controller-challenges
 subjects:
   - name: cert-manager
-    namespace: "external-dns"
+    namespace: "cert-manager"
     kind: ServiceAccount
 
 ---
@@ -416,7 +416,7 @@ roleRef:
   name: cert-manager-controller-ingress-shim
 subjects:
   - name: cert-manager
-    namespace: "external-dns"
+    namespace: "cert-manager"
     kind: ServiceAccount
 
 ---
@@ -482,7 +482,7 @@ subjects:
 - apiGroup: ""
   kind: ServiceAccount
   name: cert-manager-webhook
-  namespace: "external-dns"
+  namespace: "cert-manager"
 
 ---
 
@@ -508,7 +508,7 @@ subjects:
 - apiGroup: ""
   kind: ServiceAccount
   name: cert-manager-webhook
-  namespace: "external-dns"
+  namespace: "cert-manager"
 
 ---
 
