@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -206,33 +207,48 @@ type alertRule struct {
 	Annotations map[string]string `json:"annotations"`
 }
 
-func testAlertRules(t *testing.T, targetYAMLPath string) {
+func testAlertRules(t *testing.T) {
 	var groups alertRuleGroups
-	str, err := ioutil.ReadFile(targetYAMLPath)
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	err = yaml.Unmarshal(str, &groups)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	str, err = ioutil.ReadFile("../monitoring/base/alertmanager/neco.template")
+	str, err := ioutil.ReadFile("../monitoring/base/alertmanager/neco.template")
 	if err != nil {
 		t.Fatal(err)
 	}
 	tmpl := template.Must(template.New("alert").Parse(string(str))).Option("missingkey=error")
 
-	for _, g := range groups.Groups {
-		t.Run(g.Name, func(t *testing.T) {
-			t.Parallel()
-			var buf bytes.Buffer
-			err := tmpl.ExecuteTemplate(&buf, "slack.neco.text", g)
-			if err != nil {
-				t.Error(err)
-			}
-		})
+	err = filepath.Walk("../monitoring/base/prometheus/alert_rules", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+
+		str, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		err = yaml.Unmarshal(str, &groups)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal %s, err: %v", path, err)
+		}
+
+		for _, g := range groups.Groups {
+			t.Run(g.Name, func(t *testing.T) {
+				t.Parallel()
+				var buf bytes.Buffer
+				err := tmpl.ExecuteTemplate(&buf, "slack.neco.text", g)
+				if err != nil {
+					t.Error(err)
+				}
+			})
+		}
+
+		return nil
+	})
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -243,8 +259,5 @@ func TestValidation(t *testing.T) {
 
 	t.Run("CRDStatus", testCRDStatus)
 	t.Run("GeneratedSecretName", testGeneratedSecretName)
-	t.Run("AlertRules", func(t *testing.T) { testAlertRules(t, "../monitoring/base/prometheus/alert_rules.yaml") })
-	t.Run("KubePrometheusAlertRules", func(t *testing.T) {
-		testAlertRules(t, "../monitoring/base/prometheus/kube_prometheus_alert_rules.yaml")
-	})
+	t.Run("AlertRules", testAlertRules)
 }
