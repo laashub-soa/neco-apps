@@ -38,4 +38,4 @@ spec:
       volumes:
       - name: external-dns-secret-volume
         secret:
-          secretName: external-dns
+          secretName: clouddns

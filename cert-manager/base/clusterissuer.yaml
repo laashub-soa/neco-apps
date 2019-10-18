@@ -15,5 +15,5 @@ spec:
         clouddns:
           project: cybozu-neco
           serviceAccountSecretRef:
-            name: external-dns
+            name: clouddns
             key: account.json

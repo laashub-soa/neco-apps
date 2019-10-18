@@ -17,3 +17,4 @@ patchesStrategicMerge:
 - topolvm.yaml
 - team-management.yaml
 - namespaces.yaml
+- cert-manager.yaml
