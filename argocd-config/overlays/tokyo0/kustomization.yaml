@@ -8,3 +8,4 @@ patchesStrategicMerge:
 - metallb.yaml
 - monitoring.yaml
 - teleport.yaml
+- cert-manager.yaml
