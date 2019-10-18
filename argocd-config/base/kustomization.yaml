@@ -4,6 +4,7 @@ resources:
 - argocd.yaml
 - argocd-ingress.yaml
 - elastic.yaml
+- cert-manager.yaml
 - external-dns.yaml
 - ingress.yaml
 - metallb.yaml

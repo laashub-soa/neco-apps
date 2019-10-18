@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cert-manager
-  namespace: external-dns
+  namespace: cert-manager
   labels:
     app.kubernetes.io/name: cert-manager
 spec:
@@ -18,7 +18,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cert-manager-webhook
-  namespace: external-dns
+  namespace: cert-manager
   labels:
     app.kubernetes.io/name: webhook
   annotations:

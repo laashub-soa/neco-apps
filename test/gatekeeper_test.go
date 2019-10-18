@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func testGatekeeper() {
@@ -115,8 +116,25 @@ spec:
           msg := sprintf("you must provide labels: %v", [missing])
         }
 `
-		stdout, stderr, err := ExecAtWithInput(boot0, []byte(constraintTemplete), "kubectl", "apply", "-f", "-")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		Eventually(func() error {
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte(constraintTemplete), "kubectl", "apply", "-f", "-")
+			if err != nil {
+				crdStdout, _, err := ExecAt(boot0, "kubectl", "get", "crd", "constrainttemplates.templates.gatekeeper.sh", "-o", "json")
+
+				//TODO: this is debug code to check crd version
+				if err == nil {
+					var crd struct {
+						metav1.TypeMeta `json:",inline"`
+					}
+					err = json.Unmarshal(crdStdout, &crd)
+					if err == nil {
+						fmt.Printf("constrainttemplate version: %s\n", crd.APIVersion)
+					}
+				}
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 
 		By("confirming that required labels constraint is established")
 		Eventually(func() error {
@@ -164,7 +182,7 @@ spec:
   parameters:
     labels: ["gatekeeper"]
 `
-		stdout, stderr, err = ExecAtWithInput(boot0, []byte(constraint), "kubectl", "apply", "-f", "-")
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(constraint), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("waiting for constrains enforced")

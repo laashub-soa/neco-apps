@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cert-manager-cainjector
-  namespace: external-dns
+  namespace: cert-manager
   labels:
     app.kubernetes.io/name: cainjector
     app.kubernetes.io/component: cert-manager
@@ -41,7 +41,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cert-manager
-  namespace: external-dns
+  namespace: cert-manager
   labels:
     app.kubernetes.io/name: cert-manager
     app.kubernetes.io/component: cert-manager
@@ -77,7 +77,7 @@ spec:
           - --webhook-namespace=$(POD_NAMESPACE)
           - --webhook-ca-secret=cert-manager-webhook-ca
           - --webhook-serving-secret=cert-manager-webhook-tls
-          - --webhook-dns-names=cert-manager-webhook,cert-manager-webhook.external-dns,cert-manager-webhook.external-dns.svc
+          - --webhook-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc
           ports:
           - containerPort: 9402
           env:
@@ -100,7 +100,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cert-manager-webhook
-  namespace: external-dns
+  namespace: cert-manager
   labels:
     app.kubernetes.io/name: webhook
     app.kubernetes.io/component: cert-manager
