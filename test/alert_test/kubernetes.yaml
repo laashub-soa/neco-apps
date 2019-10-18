@@ -537,3 +537,40 @@ tests:
             exp_annotations:
               runbook: TBD
               summary: A client certificate used to authenticate to the apiserver is expiring in less than 24.0 hours.
+  - interval: 1m
+    input_series:
+      - series: kubelet_volume_stats_used_bytes{job="prometheus", persistentvolumeclaim="volume1", namespace="foo"}
+        values: '0 0 90 90 90 90'
+      - series: kubelet_volume_stats_capacity_bytes{job="prometheus", persistentvolumeclaim="volume1", namespace="foo"}
+        values: '100 100 100 100 100 100'
+      - series: kubelet_volume_stats_used_bytes{job="prometheus", persistentvolumeclaim="volume2", namespace="bar"}
+        values: '0 91 91 0 0 0'
+      - series: kubelet_volume_stats_capacity_bytes{job="prometheus", persistentvolumeclaim="volume2", namespace="bar"}
+        values: '100 100 100 100 100 100'
+      - series: kubelet_volume_stats_used_bytes{job="prometheus", persistentvolumeclaim="volume3", namespace="baz"}
+        values: '0 0 0 0 91 91'
+      - series: kubelet_volume_stats_capacity_bytes{job="prometheus", persistentvolumeclaim="volume3", namespace="baz"}
+        values: '100 100 100 100 100 100'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: PersistentVolumeSpaceExceeded
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: prometheus
+              namespace: bar
+              persistentvolumeclaim: volume2
+            exp_annotations:
+              runbook: Please consider resizing volume
+              summary: "volume2, bar of space uses more than 90%"
+      - eval_time: 5m
+        alertname: PersistentVolumeSpaceExceeded
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: prometheus
+              namespace: baz
+              persistentvolumeclaim: volume3
+            exp_annotations:
+              runbook: Please consider resizing volume
+              summary: "volume3, baz of space uses more than 90%"
