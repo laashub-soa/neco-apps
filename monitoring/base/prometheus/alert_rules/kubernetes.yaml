@@ -534,13 +534,13 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "{{ $labels.persistentvolumeclaim }}, {{ $labels.namespace }} of space uses more than 90%"
+          summary: Disk usage of `{{ $labels.persistentvolumeclaim }}, {{ $labels.namespace }}` is more than 90%.
           runbook: Please consider resizing volume
       - alert: PersistentVolumeUsageRapidIncrease
-        annotations:
-          summary: "{{ $labels.persistentvolumeclaim }}, {{ $labels.namespace }} increases more than 10 GiB in 15 minutes"
-          runbook: TBD
-        expr: delta(kubelet_volume_stats_used_bytes[15m]) / (1024 * 1024 * 1024) > 10
-        for: 15m
+        expr: delta(kubelet_volume_stats_used_bytes[10m]) / (1024 * 1024 * 1024) > 10
+        for: 1m
         labels:
           severity: critical
+        annotations:
+          summary: Disk usage of `{{ $labels.persistentvolumeclaim }}, {{ $labels.namespace }}` increases rapidly over 10GiB in 10 minutes.
+          runbook: TBD
