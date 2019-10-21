@@ -107,6 +107,8 @@ spec:
               mountPath: /var/lib/grafana/dashboards/memory-usage
             - name: dashboard-cpu-usage-volume
               mountPath: /var/lib/grafana/dashboards/cpu-usage
+            - name: dashboard-topolvm-volumegroup-volume
+              mountPath: /var/lib/grafana/dashboards/topolvm-volumegroup
             - name: dashboard-all-nodes-volume
               mountPath: /var/lib/grafana/dashboards/all-nodes
             - name: dashboard-node-exporter-volume
@@ -152,6 +154,9 @@ spec:
         - name: dashboard-cpu-usage-volume
           configMap:
             name: dashboard-cpu-usage
+        - name: dashboard-topolvm-volumegroup-volume
+          configMap:
+            name: dashboard-topolvm-volumegroup
         - name: dashboard-all-nodes-volume
           configMap:
             name: dashboard-all-nodes
