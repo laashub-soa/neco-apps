@@ -2,6 +2,7 @@ namespaces
 argocd
 secrets
 external-dns
+cert-manager
 gatekeeper
 metallb
 ingress

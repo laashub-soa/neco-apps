@@ -4,6 +4,7 @@ bases:
 - ../../base
 patchesStrategicMerge:
 - external-dns.yaml
+- cert-manager.yaml
 - ingress.yaml
 - metallb.yaml
 - monitoring.yaml
