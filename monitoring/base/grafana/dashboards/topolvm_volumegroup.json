@@ -200,11 +200,7 @@
     "list": [
       {
         "allValue": ".*",
-        "current": {
-          "tags": [],
-          "text": "kindtest-worker2",
-          "value": "kindtest-worker2"
-        },
+        "current": {},
         "datasource": "prometheus",
         "definition": "label_values(kube_node_info, node)",
         "hide": 0,
