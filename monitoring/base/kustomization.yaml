@@ -56,6 +56,9 @@ configMapGenerator:
   - name: dashboard-kubernetes-cluster
     files:
       - grafana/dashboards/kubernetes_cluster.json
+  - name: dashboard-kubernetes-persistence-volumes
+    files:
+      - grafana/dashboards/kubernetes-persistence-volumes.json
   - name: dashboard-memory-usage
     files:
       - grafana/dashboards/memory_usage.json

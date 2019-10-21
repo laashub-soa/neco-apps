@@ -103,6 +103,8 @@ spec:
               mountPath: /var/lib/grafana/dashboards/etcd
             - name: dashboard-kubernetes-cluster-volume
               mountPath: /var/lib/grafana/dashboards/kubernetes-cluster
+            - name: dashboard-kubernetes-cluster-volume
+              mountPath: /var/lib/grafana/dashboards/kubernetes-cluster
             - name: dashboard-memory-usage-volume
               mountPath: /var/lib/grafana/dashboards/memory-usage
             - name: dashboard-cpu-usage-volume
@@ -148,6 +150,9 @@ spec:
         - name: dashboard-kubernetes-cluster-volume
           configMap:
             name: dashboard-kubernetes-cluster
+        - name: dashboard-kubernetes-persistence-volumes-volume
+          configMap:
+            name: dashboard-kubernetes-persistence-volumes
         - name: dashboard-memory-usage-volume
           configMap:
             name: dashboard-memory-usage
