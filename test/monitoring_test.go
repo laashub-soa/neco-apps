@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"reflect"
+	"sort"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -276,7 +281,7 @@ func testGrafana() {
 
 			// NOTE: expectedNum is the number of JSON files under monitoring/base/grafana/dashboards + 1(Node Exporter Full).
 			// Node Exporter Full is downloaded every time from the Internet because too large to store into configMap.
-			expectedNum := 9
+			expectedNum := 11
 			if len(dashboards) != expectedNum {
 				return fmt.Errorf("len(dashboards) should be %d: %d", expectedNum, len(dashboards))
 			}
@@ -286,8 +291,9 @@ func testGrafana() {
 }
 
 func testMetrics() {
+	var podName string
+
 	It("should be up all scraping", func() {
-		var podName string
 		By("retrieving prometheus podName")
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
@@ -365,4 +371,116 @@ func testMetrics() {
 			return nil
 		}).Should(Succeed())
 	})
+
+	It("should be loaded all alert rules", func() {
+		var expected []string
+		var actual []string
+		err := filepath.Walk("../monitoring/base/prometheus/alert_rules", func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+
+			str, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var groups alertRuleGroups
+			err = yaml.Unmarshal(str, &groups)
+			if err != nil {
+				return fmt.Errorf("failed to unmarshal %s, err: %v", path, err)
+			}
+
+			for _, g := range groups.Groups {
+				for _, a := range g.Alerts {
+					if len(a.Alert) != 0 {
+						expected = append(expected, a.Alert)
+					}
+				}
+			}
+
+			return nil
+		})
+		Expect(err).NotTo(HaveOccurred())
+
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec", podName, "curl", "http://localhost:9090/api/v1/rules")
+		Expect(err).NotTo(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+
+		var response struct {
+			Rules promv1.RulesResult `json:"data"`
+		}
+		err = json.Unmarshal(stdout, &response)
+		Expect(err).NotTo(HaveOccurred())
+
+		for _, g := range response.Rules.Groups {
+			for _, r := range g.Rules {
+				rule, ok := r.(promv1.AlertingRule)
+				if !ok {
+					continue
+				}
+				if len(rule.Name) != 0 {
+					actual = append(actual, rule.Name)
+				}
+			}
+		}
+		sort.Strings(actual)
+		sort.Strings(expected)
+		Expect(len(actual)).NotTo(Equal(0))
+		Expect(len(expected)).NotTo(Equal(0))
+		Expect(reflect.DeepEqual(actual, expected)).To(BeTrue(),
+			"\nactual   = %v\nexpected = %v", actual, expected)
+	})
+
+	It("should be loaded all record rules", func() {
+		var expected []string
+		var actual []string
+		str, err := ioutil.ReadFile("../monitoring/base/prometheus/record_rules.yaml")
+		Expect(err).NotTo(HaveOccurred())
+
+		var groups recordRuleGroups
+		err = yaml.Unmarshal(str, &groups)
+		Expect(err).NotTo(HaveOccurred())
+
+		for _, g := range groups.Groups {
+			for _, r := range g.Records {
+				if len(r.Record) != 0 {
+					expected = append(expected, r.Record)
+				}
+			}
+		}
+
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec", podName, "curl", "http://localhost:9090/api/v1/rules")
+		Expect(err).NotTo(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+
+		var response struct {
+			Rules promv1.RulesResult `json:"data"`
+		}
+		err = json.Unmarshal(stdout, &response)
+		Expect(err).NotTo(HaveOccurred())
+
+		for _, g := range response.Rules.Groups {
+			if g.Name != "kube-apiserver.rules" {
+				continue
+			}
+			for _, r := range g.Rules {
+				rule, ok := r.(promv1.RecordingRule)
+				if !ok {
+					continue
+				}
+				if len(rule.Name) != 0 {
+					actual = append(actual, rule.Name)
+				}
+			}
+		}
+		sort.Strings(actual)
+		sort.Strings(expected)
+		Expect(len(actual)).NotTo(Equal(0))
+		Expect(len(expected)).NotTo(Equal(0))
+		Expect(reflect.DeepEqual(actual, expected)).To(BeTrue(),
+			"\nactual   = %v\nexpected = %v", actual, expected)
+	})
+
 }

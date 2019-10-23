@@ -5,19 +5,19 @@ rule_files:
   # Record rules
   - /etc/prometheus/record_rules.yaml
   # Alert rules
-  - /etc/prometheus/alert_rules/argocd.yaml
-  - /etc/prometheus/alert_rules/elastic.yaml
-  - /etc/prometheus/alert_rules/etcd.yaml
-  - /etc/prometheus/alert_rules/external-dns.yaml
-  - /etc/prometheus/alert_rules/gatekeeper.yaml
-  - /etc/prometheus/alert_rules/ingress.yaml
-  - /etc/prometheus/alert_rules/kubernetes.yaml
-  - /etc/prometheus/alert_rules/metallb.yaml
-  - /etc/prometheus/alert_rules/monitoring.yaml
-  - /etc/prometheus/alert_rules/network-policy.yaml
-  - /etc/prometheus/alert_rules/node.yaml
-  - /etc/prometheus/alert_rules/teleport.yaml
-  - /etc/prometheus/alert_rules/topolvm.yaml
+  - /etc/prometheus/argocd.yaml
+  - /etc/prometheus/elastic.yaml
+  - /etc/prometheus/etcd.yaml
+  - /etc/prometheus/external-dns.yaml
+  - /etc/prometheus/gatekeeper.yaml
+  - /etc/prometheus/ingress.yaml
+  - /etc/prometheus/kubernetes.yaml
+  - /etc/prometheus/metallb.yaml
+  - /etc/prometheus/monitoring.yaml
+  - /etc/prometheus/network-policy.yaml
+  - /etc/prometheus/node.yaml
+  - /etc/prometheus/teleport.yaml
+  - /etc/prometheus/topolvm.yaml
 alerting:
   alertmanagers:
   - static_configs:

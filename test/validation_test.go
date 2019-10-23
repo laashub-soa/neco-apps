@@ -207,6 +207,19 @@ type alertRule struct {
 	Annotations map[string]string `json:"annotations"`
 }
 
+type recordRuleGroups struct {
+	Groups []recordRuleGroup `json:"groups"`
+}
+
+type recordRuleGroup struct {
+	Name    string       `json:"name"`
+	Records []recordRule `json:"rules"`
+}
+
+type recordRule struct {
+	Record string `json:"record,omitempty"`
+}
+
 func testAlertRules(t *testing.T) {
 	var groups alertRuleGroups
 
