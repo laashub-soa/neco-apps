@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"reflect"
+	"sort"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -286,8 +291,9 @@ func testGrafana() {
 }
 
 func testMetrics() {
+	var podName string
+
 	It("should be up all scraping", func() {
-		var podName string
 		By("retrieving prometheus podName")
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
@@ -364,5 +370,67 @@ func testMetrics() {
 			}
 			return nil
 		}).Should(Succeed())
+	})
+
+	It("should be loaded all alert rules", func() {
+		var expectedAlertNames []string
+		var resultAlertNames []string
+		err := filepath.Walk("../monitoring/base/prometheus/alert_rules", func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+
+			str, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var groups alertRuleGroups
+			err = yaml.Unmarshal(str, &groups)
+			if err != nil {
+				return fmt.Errorf("failed to unmarshal %s, err: %v", path, err)
+			}
+
+			for _, g := range groups.Groups {
+				for _, a := range g.Alerts {
+					if len(a.Alert) != 0 {
+						expectedAlertNames = append(expectedAlertNames, a.Alert)
+					}
+				}
+			}
+
+			return nil
+		})
+		Expect(err).NotTo(HaveOccurred())
+
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec", podName, "curl", "http://localhost:9090/api/v1/rules")
+		Expect(err).NotTo(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+
+		var response struct {
+			Rules promv1.RulesResult `json:"data"`
+		}
+		err = json.Unmarshal(stdout, &response)
+		Expect(err).NotTo(HaveOccurred())
+
+		for _, g := range response.Rules.Groups {
+			for _, r := range g.Rules {
+				rule, ok := r.(promv1.AlertingRule)
+				if !ok {
+					continue
+				}
+				if len(rule.Name) != 0 {
+					resultAlertNames = append(resultAlertNames, rule.Name)
+				}
+			}
+		}
+		sort.Strings(resultAlertNames)
+		sort.Strings(expectedAlertNames)
+		Expect(len(resultAlertNames)).NotTo(Equal(0))
+		Expect(len(expectedAlertNames)).NotTo(Equal(0))
+		Expect(reflect.DeepEqual(resultAlertNames, expectedAlertNames)).To(BeTrue(),
+			"\nresult   = %v\nexpected = %v", resultAlertNames, expectedAlertNames)
 	})
 }
