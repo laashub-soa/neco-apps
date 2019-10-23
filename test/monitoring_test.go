@@ -373,8 +373,8 @@ func testMetrics() {
 	})
 
 	It("should be loaded all alert rules", func() {
-		var expectedAlertNames []string
-		var resultAlertNames []string
+		var expected []string
+		var actual []string
 		err := filepath.Walk("../monitoring/base/prometheus/alert_rules", func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -397,7 +397,7 @@ func testMetrics() {
 			for _, g := range groups.Groups {
 				for _, a := range g.Alerts {
 					if len(a.Alert) != 0 {
-						expectedAlertNames = append(expectedAlertNames, a.Alert)
+						expected = append(expected, a.Alert)
 					}
 				}
 			}
@@ -422,15 +422,65 @@ func testMetrics() {
 					continue
 				}
 				if len(rule.Name) != 0 {
-					resultAlertNames = append(resultAlertNames, rule.Name)
+					actual = append(actual, rule.Name)
 				}
 			}
 		}
-		sort.Strings(resultAlertNames)
-		sort.Strings(expectedAlertNames)
-		Expect(len(resultAlertNames)).NotTo(Equal(0))
-		Expect(len(expectedAlertNames)).NotTo(Equal(0))
-		Expect(reflect.DeepEqual(resultAlertNames, expectedAlertNames)).To(BeTrue(),
-			"\nresult   = %v\nexpected = %v", resultAlertNames, expectedAlertNames)
+		sort.Strings(actual)
+		sort.Strings(expected)
+		Expect(len(actual)).NotTo(Equal(0))
+		Expect(len(expected)).NotTo(Equal(0))
+		Expect(reflect.DeepEqual(actual, expected)).To(BeTrue(),
+			"\nactual   = %v\nexpected = %v", actual, expected)
 	})
+
+	It("should be loaded all record rules", func() {
+		var expected []string
+		var actual []string
+		str, err := ioutil.ReadFile("../monitoring/base/prometheus/record_rules.yaml")
+		Expect(err).NotTo(HaveOccurred())
+
+		var groups recordRuleGroups
+		err = yaml.Unmarshal(str, &groups)
+		Expect(err).NotTo(HaveOccurred())
+
+		for _, g := range groups.Groups {
+			for _, r := range g.Records {
+				if len(r.Record) != 0 {
+					expected = append(expected, r.Record)
+				}
+			}
+		}
+
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec", podName, "curl", "http://localhost:9090/api/v1/rules")
+		Expect(err).NotTo(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+
+		var response struct {
+			Rules promv1.RulesResult `json:"data"`
+		}
+		err = json.Unmarshal(stdout, &response)
+		Expect(err).NotTo(HaveOccurred())
+
+		for _, g := range response.Rules.Groups {
+			if g.Name != "kube-apiserver.rules" {
+				continue
+			}
+			for _, r := range g.Rules {
+				rule, ok := r.(promv1.RecordingRule)
+				if !ok {
+					continue
+				}
+				if len(rule.Name) != 0 {
+					actual = append(actual, rule.Name)
+				}
+			}
+		}
+		sort.Strings(actual)
+		sort.Strings(expected)
+		Expect(len(actual)).NotTo(Equal(0))
+		Expect(len(expected)).NotTo(Equal(0))
+		Expect(reflect.DeepEqual(actual, expected)).To(BeTrue(),
+			"\nactual   = %v\nexpected = %v", actual, expected)
+	})
+
 }
