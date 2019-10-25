@@ -66,4 +66,5 @@ var _ = Describe("Test applications", func() {
 	if !withKind {
 		Context("argocd-ingress", testArgoCDIngress)
 	}
+	Context("admission", testAdmission)
 })
