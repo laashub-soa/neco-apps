@@ -10,5 +10,6 @@ teleport
 monitoring
 elastic
 network-policy
+neco-admission
 team-management
 argocd-ingress
