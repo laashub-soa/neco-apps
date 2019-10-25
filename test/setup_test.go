@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	. "github.com/onsi/ginkgo"
@@ -278,13 +279,40 @@ func loadSyncOrder() []string {
 
 func applyAndWaitForApplications() {
 	By("creating Argo CD app")
+	_, _, err := ExecAt(boot0, "argocd", "app", "get", "gatekeeper")
 	if withKind {
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/kind")
 	} else {
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
 	}
 
+	// sometimes, ReplicaSet becomes not ready even though pods are running.
+	// to recover from this, all pods need to be deleted once.
+	ExecSafeAt(boot0, "kubectl", "-n", "argocd", "delete", "pods", "--all")
+	Eventually(func() error {
+		_, _, err := ExecAt(boot0, "argocd", "app", "list")
+		return err
+	}).Should(Succeed())
+
 	syncOrder := loadSyncOrder()
+
+	if err == nil {
+		By("purging gatekeeper")
+		ExecSafeAt(boot0, "argocd", "app", "delete", "gatekeeper")
+		time.Sleep(30 * time.Second)
+		Eventually(func() error {
+			_, stderr, err := ExecAt(boot0, "kubectl", "-n", "gatekeeper-system",
+				"patch", "constrainttemplates.templates.gatekeeper.sh", "networkpolicyorder",
+				"--type=json", "-p", `'[{"op":"replace","path":"/metadata/finalizers","value":[]}]'`)
+			if err != nil {
+				return fmt.Errorf("failed to patch: %s", string(stderr))
+			}
+			return nil
+		}, 30*time.Minute).Should(Succeed())
+		time.Sleep(2 * time.Second)
+		ExecSafeAt(boot0, "argocd", "app", "sync", "namespaces", "--prune")
+		ExecSafeAt(boot0, "kubectl", "delete", "validatingwebhookconfigurations", "validation.gatekeeper.sh")
+	}
 
 	By("waiting initialization")
 	Eventually(func() error {
