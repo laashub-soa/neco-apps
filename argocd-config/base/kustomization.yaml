@@ -10,7 +10,6 @@ resources:
 - metallb.yaml
 - monitoring.yaml
 - network-policy.yaml
-- gatekeeper.yaml
 - teleport.yaml
 - topolvm.yaml
 - team-management.yaml
