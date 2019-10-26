@@ -279,7 +279,6 @@ func loadSyncOrder() []string {
 
 func applyAndWaitForApplications() {
 	By("creating Argo CD app")
-	_, _, err := ExecAt(boot0, "argocd", "app", "get", "gatekeeper")
 	if withKind {
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/kind")
 	} else {
@@ -288,6 +287,8 @@ func applyAndWaitForApplications() {
 
 	// sometimes, ReplicaSet becomes not ready even though pods are running.
 	// to recover from this, all pods need to be deleted once.
+	_, _, _ = ExecAt(boot0, "argocd", "app", "sync", "argocd")
+	time.Sleep(30 * time.Second)
 	ExecSafeAt(boot0, "kubectl", "-n", "argocd", "delete", "pods", "--all")
 	Eventually(func() error {
 		_, _, err := ExecAt(boot0, "argocd", "app", "list")
@@ -296,6 +297,7 @@ func applyAndWaitForApplications() {
 
 	syncOrder := loadSyncOrder()
 
+	_, _, err := ExecAt(boot0, "argocd", "app", "get", "gatekeeper")
 	if err == nil {
 		By("purging gatekeeper")
 		ExecSafeAt(boot0, "argocd", "app", "delete", "gatekeeper")
@@ -309,7 +311,7 @@ func applyAndWaitForApplications() {
 			}
 			return nil
 		}, 30*time.Minute).Should(Succeed())
-		time.Sleep(2 * time.Second)
+		time.Sleep(5 * time.Second)
 		ExecSafeAt(boot0, "argocd", "app", "sync", "namespaces", "--prune")
 		ExecSafeAt(boot0, "kubectl", "delete", "validatingwebhookconfigurations", "validation.gatekeeper.sh")
 	}
