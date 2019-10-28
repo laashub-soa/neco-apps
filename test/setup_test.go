@@ -405,7 +405,7 @@ func setupArgoCD() {
 
 	By("getting node port")
 	var svc corev1.Service
-	data = ExecSafeAt(boot0, "kubectl", "get", "svc/argocd-server", "-n", "argocd", "-o", "json")
+	data = ExecSafeAt(boot0, "kubectl", "get", "svc/argocd-server-grpc", "-n", "argocd", "-o", "json")
 	err = json.Unmarshal(data, &svc)
 	Expect(err).ShouldNot(HaveOccurred(), "data=%s", string(data))
 	Expect(svc.Spec.Ports).ShouldNot(BeEmpty())

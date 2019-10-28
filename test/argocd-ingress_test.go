@@ -1,8 +1,10 @@
 package test
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -34,5 +36,32 @@ func testArgoCDIngress() {
 			}
 			return nil
 		}).Should(Succeed())
+	})
+
+	It("should communicate with http protocol", func() {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client := &http.Client{Transport: tr}
+
+		By("requesting to web UI")
+		resp, err := client.Get("https://argocd.gcp0.dev-ne.co")
+		Expect(err).ShouldNot(HaveOccurred())
+		defer resp.Body.Close()
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		contentType := resp.Header.Get("Content-type")
+		Expect(contentType).NotTo(BeEmpty())
+		Expect(contentType).NotTo(Equal("application/grpc"))
+		fmt.Printf("Status: %d, Content-type: %s\n", resp.StatusCode, contentType)
+
+		By("requesting to dex server via argocd-server")
+		resp, err = client.Get("https://argocd.gcp0.dev-ne.co/api/dex")
+		Expect(err).ShouldNot(HaveOccurred())
+		defer resp.Body.Close()
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		contentType = resp.Header.Get("Content-type")
+		Expect(contentType).NotTo(BeEmpty())
+		Expect(contentType).NotTo(Equal("application/grpc"))
+		fmt.Printf("Status: %d, Content-type: %s\n", resp.StatusCode, contentType)
 	})
 }
