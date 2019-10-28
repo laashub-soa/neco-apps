@@ -1,0 +1,49 @@
+# Create a selfsigned Issuer, in order to create a root CA certificate for
+# signing webhook serving certificates
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: webhook-selfsign
+  namespace: kube-system
+spec:
+  selfSigned: {}
+---
+# Generate a CA Certificate used to sign certificates for the webhook
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: webhook-ca
+  namespace: kube-system
+spec:
+  secretName: webhook-ca
+  duration: 87600h0m0s # 10y
+  issuerRef:
+    name: webhook-selfsign
+  commonName: "ca.webhook.kube-system"
+  isCA: true
+---
+# Create an Issuer that uses the above generated CA certificate to issue certs
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: webhook-ca
+  namespace: kube-system
+spec:
+  ca:
+    secretName: webhook-ca
+---
+# Finally, generate a serving certificate for the webhook to use
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: neco-admission
+  namespace: kube-system
+spec:
+  secretName: neco-admission-webhook
+  duration: 8760h0m0s # 1y
+  issuerRef:
+    name: webhook-ca
+  dnsNames:
+    - neco-admission
+    - neco-admission.kube-system
+    - neco-admission.kube-system.svc

@@ -240,11 +240,6 @@
                     },
                     {
                         "selected": false,
-                        "text": "gatekeeper-system",
-                        "value": "gatekeeper-system"
-                    },
-                    {
-                        "selected": false,
                         "text": "ingress",
                         "value": "ingress"
                     },

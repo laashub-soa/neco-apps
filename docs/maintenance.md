@@ -43,17 +43,6 @@ Read the following document and fix manifests as necessary.
 https://github.com/kubernetes-incubator/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md
 
 
-gatekeeper
-----------
-
-Check diffs of open-policy-agent/gatekeeper files as follows:
-
-```console
-git clone https://github.com/open-policy-agent/gatekeeper
-cd gatekeeper
-git diff vA.B.C...vX.Y.Z deploy
-```
-
 contour
 -------
 

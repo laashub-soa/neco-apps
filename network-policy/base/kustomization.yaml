@@ -20,4 +20,3 @@ resources:
   - global-policies/ingress-cluster-allow.yaml
   - global-policies/network-set.yaml
   - global-policies/node-dns.yaml
-  - validation/network-policy-order.yaml

@@ -1,25 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: gatekeeper
+  name: neco-admission
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/cybozu-go/neco-apps.git
     targetRevision: release
-    path: gatekeeper/base
+    path: neco-admission/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: gatekeeper-system
-  ignoreDifferences:
-  - group: core
-    kind: Secret
-    name: gatekeeper-webhook-server-secret
-    namespace: gatekeeper-system
-    jsonPointers:
-    - /data
-    - /type
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true

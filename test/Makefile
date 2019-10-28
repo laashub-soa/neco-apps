@@ -18,13 +18,11 @@ export GOFLAGS
 # Follow Argo CD installed kustomize version
 # https://github.com/cybozu/neco-containers/blob/master/argocd/Dockerfile#L32
 KUSTOMIZE_VERSION = 3.2.0
-OPA_VERSION = 0.12.0
 PROMTOOL_VERSION := 2.9.2
 TELEPORT_VERSION := 4.1.3
 KUBERNETES_VERSION = 1.15.4
 KIND_VERSION = 0.5.1
 ARGOCD_VERSION = 1.2.2
-REGO_FILES = $(shell find .. -path ../vendor -prune -o -name '*.rego' -print)
 
 install.yaml: $(shell find ../argocd/base)
 	kustomize build ../argocd/base/ > install.yaml
@@ -33,17 +31,13 @@ validation:
 	./fetch-secret.sh
 	env SSH_PRIVKEY= go test -v ./validation_test.go
 
-opa-test:
-	test -z "$$(opa fmt -l ../ | grep -v '^vendor' | tee /dev/stderr)"
-	opa test -v $(REGO_FILES)
-
 test-alert-rules:
 	promtool test rules alert_test/*.yaml
 
 kustomize-check:
 	./kustomize-check.sh
 
-test: install.yaml validation opa-test test-alert-rules kustomize-check
+test: install.yaml validation test-alert-rules kustomize-check
 	test -z "$$(gofmt -s -l . | grep -v -E '^(vendor|neco-apps)' | tee /dev/stderr)"
 	test -z "$$(golint $$(go list ./... | grep -v /vendor/) | grep -v '/mtest/.*: should not use dot imports' | tee /dev/stderr)"
 	test -z "$$(nilerr ./... 2>&1 | tee /dev/stderr)"
@@ -62,9 +56,6 @@ setup:
 	curl -sSLf -O https://github.com/kubernetes-sigs/kustomize/releases/download/v$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_linux_amd64
 	$(SUDO) mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 /usr/local/bin/kustomize
 	chmod +x /usr/local/bin/kustomize
-	curl -sSLf -O https://github.com/open-policy-agent/opa/releases/download/v$(OPA_VERSION)/opa_linux_amd64
-	$(SUDO) mv opa_linux_amd64 /usr/local/bin/opa
-	chmod +x /usr/local/bin/opa
 	go install github.com/onsi/ginkgo/ginkgo
 	curl -sSLf https://github.com/prometheus/prometheus/releases/download/v$(PROMTOOL_VERSION)/prometheus-$(PROMTOOL_VERSION).linux-amd64.tar.gz | tar -xzvf - --strip-components=1 prometheus-$(PROMTOOL_VERSION).linux-amd64/promtool
 	$(SUDO) mv promtool /usr/local/bin/promtool
@@ -81,4 +72,4 @@ setup:
 clean:
 	rm -f install.yaml
 
-.PHONY:	validation opa-test test-alert-rules kustomize-check test test-apps setup clean
+.PHONY:	validation test-alert-rules kustomize-check test test-apps setup clean
