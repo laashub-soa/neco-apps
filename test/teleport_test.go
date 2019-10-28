@@ -95,9 +95,14 @@ func testTeleport() {
 
 		By("accessing boot servers using tsh command")
 		for _, n := range []string{"boot-0", "boot-1", "boot-2"} {
-			cmd := exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu", "ssh", "cybozu@"+n, "date")
-			output, err := cmd.CombinedOutput()
-			Expect(err).ShouldNot(HaveOccurred(), "output=%s", output)
+			Eventually(func() error {
+				cmd := exec.Command("tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu", "ssh", "cybozu@"+n, "date")
+				output, err := cmd.CombinedOutput()
+				if err != nil {
+					return fmt.Errorf("tsh ssh failed for %s: %s", n, string(output))
+				}
+				return nil
+			})
 		}
 
 		By("clearing /etc/hosts")
