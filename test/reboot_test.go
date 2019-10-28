@@ -292,8 +292,8 @@ spec:
 
 				if replicas != d.Status.ReadyReplicas {
 					return fmt.Errorf(
-						"the number of replicas should be %d: %d",
-						replicas, d.Status.ReadyReplicas,
+						"the number of replicas of Deployment %s/%s should be %d: %d",
+						d.Namespace, d.Name, replicas, d.Status.ReadyReplicas,
 					)
 				}
 			}

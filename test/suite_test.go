@@ -43,7 +43,6 @@ var _ = Describe("Test applications", func() {
 	if doReboot {
 		Context("reboot", testRebootAllNodes)
 	}
-	Context("gatekeeper", testGatekeeper)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)
 	if !withKind {
@@ -67,4 +66,5 @@ var _ = Describe("Test applications", func() {
 	if !withKind {
 		Context("argocd-ingress", testArgoCDIngress)
 	}
+	Context("admission", testAdmission)
 })

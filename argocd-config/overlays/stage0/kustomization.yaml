@@ -7,10 +7,10 @@ patchesStrategicMerge:
 - argocd-ingress.yaml
 - elastic.yaml
 - external-dns.yaml
-- gatekeeper.yaml
 - ingress.yaml
 - metallb.yaml
 - monitoring.yaml
+- neco-admission.yaml
 - network-policy.yaml
 - secrets.yaml
 - teleport.yaml

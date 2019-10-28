@@ -9,7 +9,6 @@ rule_files:
   - /etc/prometheus/elastic.yaml
   - /etc/prometheus/etcd.yaml
   - /etc/prometheus/external-dns.yaml
-  - /etc/prometheus/gatekeeper.yaml
   - /etc/prometheus/ingress.yaml
   - /etc/prometheus/kubernetes.yaml
   - /etc/prometheus/metallb.yaml

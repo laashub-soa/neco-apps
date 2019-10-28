@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
 - argocd.yaml
 - external-dns.yaml
-- gatekeeper.yaml
 - kube-system.yaml
 - metallb.yaml
 - monitoring.yaml

@@ -371,31 +371,6 @@ spec:
 		Expect(eg.Wait()).Should(HaveOccurred())
 		// switch -- not tested for now because address range for switches is 10.0.1.0/24 in placemat env, not 10.72.0.0/20.
 	})
-
-	It("should deny network policy in non-system namespace with order <= 1000", func() {
-		By("creating invalid network policy")
-		policyYAML := `
-apiVersion: crd.projectcalico.org/v1
-kind: NetworkPolicy
-metadata:
-  name: ingress-httpdtest-high-prio
-  namespace: test-netpol
-spec:
-  order: 1000.0
-  selector: app.kubernetes.io/name == 'testhttpd'
-  types:
-    - Ingress
-  ingress:
-    - action: Allow
-      protocol: TCP
-      destination:
-        ports:
-          - 8000
-`
-		_, stderr, err := ExecAtWithInput(boot0, []byte(policyYAML), "kubectl", "apply", "-f", "-")
-		Expect(err).To(HaveOccurred())
-		Expect(string(stderr)).To(ContainSubstring("cannot create/update non-system NetworkPolicy with order <= 1000"))
-	})
 }
 
 func createUbuntuDebugPod(namespace string) {
