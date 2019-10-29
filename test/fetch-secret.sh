@@ -16,12 +16,12 @@ if [ -n "$SECRET_GITHUB_TOKEN" ]; then
     kustomize build ./neco-apps-secret/base > expected-secret.yaml
     kustomize build ../secrets/base > current-secret.yaml
 
-elif [ -n "$NECO_APPS_SECRET_DIR" ]; then
+elif [ -n "$SECRET_DIR" ]; then
     # By dir
-    kustomize build ${NECO_APPS_SECRET_DIR}/base > expected-secret.yaml
+    kustomize build ${SECRET_DIR}/base > expected-secret.yaml
     kustomize build ../secrets/base > current-secret.yaml
 
 else
-    echo "Error: Please set env of NECO_APPS_SECRET_DIR."
+    echo "Error: Please set env of SECRET_DIR."
     exit 2
 fi
