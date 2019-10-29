@@ -220,7 +220,7 @@ spec:
           name: static-files
       containers:
       - name: dex
-        image: quay.io/cybozu/dex:2.19.0.2
+        image: quay.io/cybozu/dex:2.19.0.3
         imagePullPolicy: IfNotPresent
         command: [/shared/argocd-util, rundex]
         env:
