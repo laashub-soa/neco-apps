@@ -1,0 +1,29 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: neco-admission
+  annotations:
+    certmanager.k8s.io/inject-ca-from: kube-system/neco-admission
+webhooks:
+- name: vnetworkpolicy.kb.io
+  namespaceSelector:
+    matchExpressions:
+    - key: control-plane
+      operator: NotIn
+      values: ["true"]
+  clientConfig:
+    service:
+      name: neco-admission
+      namespace: kube-system
+      path: /validate-projectcalico-org-networkpolicy
+  failurePolicy: Fail
+  rules:
+  - apiGroups:
+    - crd.projectcalico.org
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - networkpolicies
