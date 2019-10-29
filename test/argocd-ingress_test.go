@@ -43,13 +43,13 @@ func testArgoCDIngress() {
 		By("requesting to web UI")
 		stdout, stderr, err := ExecAt(boot0,
 			"curl", "-skI", "https://argocd.gcp0.dev-ne.co",
-			"-o", "/dev/nulll",
+			"-o", "/dev/null",
 			"-w", `'%{http_code}\n%{content_type}'`,
 		)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		s := strings.Split(string(stdout), "\n")
 		Expect(s[0]).To(Equal(strconv.Itoa(http.StatusOK)))
-		Expect(s[1]).To(Equal("application/grpc"))
+		Expect(s[1]).NotTo(Equal("application/grpc"))
 
 		By("requesting to dex server via argocd-server")
 		stdout, stderr, err = ExecAt(boot0,
@@ -60,6 +60,6 @@ func testArgoCDIngress() {
 		Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		s = strings.Split(string(stdout), "\n")
 		Expect(s[0]).To(Equal(strconv.Itoa(http.StatusOK)))
-		Expect(s[1]).To(Equal("application/grpc"))
+		Expect(s[1]).NotTo(Equal("application/grpc"))
 	})
 }
