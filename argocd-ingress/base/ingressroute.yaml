@@ -19,38 +19,37 @@ spec:
         request: 2m
     - match: /cluster
       services:
-      - name: argocd-server-grpc
+      - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
     - match: /session
       services:
-      - name: argocd-server-grpc
+      - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
     - match: /account
       services:
-      - name: argocd-server-grpc
+      - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
     - match: /repository
       services:
-      - name: argocd-server-grpc
+      - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
     - match: /repocreds
       services:
-      - name: argocd-server-grpc
+      - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
     - match: /application
       services:
-      - name: argocd-server-grpc
+      - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
-

@@ -74,9 +74,9 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/component: server
-    app.kubernetes.io/name: argocd-server-grpc
+    app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-  name: argocd-server-grpc
+  name: argocd-server
   annotations:
     contour.heptio.com/upstream-protocol.h2: 443,https
 spec:
