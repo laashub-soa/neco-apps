@@ -24,7 +24,7 @@ spec:
         - "20"
         - --operation-processors
         - "10"
-        image: quay.io/cybozu/argocd:1.2.5.1
+        image: quay.io/cybozu/argocd:1.2.5.2
         livenessProbe:
           httpGet:
             path: /healthz
@@ -93,7 +93,7 @@ spec:
         - argocd-repo-server
         - --redis
         - argocd-redis:6379
-        image: quay.io/cybozu/argocd:1.2.5.1
+        image: quay.io/cybozu/argocd:1.2.5.2
         livenessProbe:
           initialDelaySeconds: 5
           periodSeconds: 10
@@ -154,7 +154,7 @@ spec:
         - argocd-server
         - --staticassets
         - /shared/argocd/app
-        image: quay.io/cybozu/argocd:1.2.5.1
+        image: quay.io/cybozu/argocd:1.2.5.2
         livenessProbe:
           httpGet:
             path: /healthz
@@ -212,7 +212,7 @@ spec:
       serviceAccountName: argocd-dex-server
       initContainers:
       - name: copyutil
-        image: quay.io/cybozu/argocd:1.2.5.1
+        image: quay.io/cybozu/argocd:1.2.5.2
         imagePullPolicy: IfNotPresent
         command: [cp, /usr/local/argocd/bin/argocd-util, /shared]
         volumeMounts:
