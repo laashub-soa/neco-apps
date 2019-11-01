@@ -1,0 +1,87 @@
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: argocd-server
+  namespace: argocd
+  annotations:
+    contour-plus.cybozu.com/exclude: "true"
+spec:
+  virtualhost:
+    fqdn: argocd.gcp0.dev-ne.co
+    tls:
+      secretName: argocd-server-tls
+  routes:
+    # For static files
+    - match: /
+      services:
+      - name: argocd-server-https
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    # For gRPC API
+    - match: /account.AccountService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /application.ApplicationService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /certificate.CertificateService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /cluster.ClusterService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /cluster.SettingsService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /project.ProjectService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /repocreds.RepoCredsService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /repository.RepoServerService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /repository.RepositoryService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /session.SessionService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /version.VersionService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
