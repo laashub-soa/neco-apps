@@ -63,16 +63,19 @@ func testArgoCDIngress() {
 		Expect(s[1]).To(Equal("application/json"))
 
 		By("requesting to argocd-server with grpc")
-		// NOTE: These endpoints are fetched from below:
-		// https://github.com/argoproj/argo-cd/blob/8d5939f128b341ccfbf9aca564ff557a98005640/server/server.go#L418
 		// They are configured as routes in IngressRoute individually to communicate with grpc and should be tested.
 		endpoints := []string{
-			"/cluster.ClusterService",
-			"/session.SessionService",
 			"/account.AccountService",
-			"/repository.RepositoryService",
-			"/repocreds.RepoCredsService",
 			"/application.ApplicationService",
+			"/certificate.CertificateService",
+			"/cluster.ClusterService",
+			"/cluster.SettingsService",
+			"/project.ProjectService",
+			"/repocreds.RepoCredsService",
+			"/repository.RepoServerService",
+			"/repository.RepositoryService",
+			"/session.SessionService",
+			"/version.VersionService",
 		}
 		for _, e := range endpoints {
 			stdout, stderr, err = ExecAt(boot0,

@@ -18,6 +18,44 @@ cd argocd-cd
 git diff vA.B.C...vX.Y.Z manifests
 ```
 
+We register paths for gRPC API in `argocd-server` IngressRoute.
+So we have to keep watching changes in those paths by the following commands.
+
+```console
+$ git clone git@github.com:argoproj/argo-cd -b vX.Y.Z
+$ cd argo-cd
+$ git grep "Invoke(" | grep -v fake
+```
+
+Then you should apply the changes the following files.
+
+```console
+.
+├── argocd-ingress
+│   ├── base
+│   │   └── ingressroute.yaml # Base definition of the IngressRoute
+│   └── overlays
+│        └── ...
+└── test
+     └── argocd-ingress_test.go # Test for the IngressRoute
+```
+
+You can easily fetch those paths by the following command. **Do it at your own risk.**
+
+```console
+$ git grep "Invoke(" | grep -v fake | sed 's|^.*"\(.*\)/.*".*$|\1|' | sort | uniq
+/account.AccountService
+/application.ApplicationService
+/certificate.CertificateService
+/cluster.ClusterService
+/cluster.SettingsService
+/project.ProjectService
+/repository.RepoServerService
+/repository.RepositoryService
+/session.SessionService
+/version.VersionService
+```
+
 elastic cloud on Kubernetes
 ---------------------------
 
