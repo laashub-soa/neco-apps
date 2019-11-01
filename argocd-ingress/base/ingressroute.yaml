@@ -11,43 +11,75 @@ spec:
     tls:
       secretName: argocd-server-tls
   routes:
+    # For static files
     - match: /
       services:
       - name: argocd-server-https
         port: 443
       timeoutPolicy:
         request: 2m
-    - match: /cluster
+    # For gRPC API
+    - match: /account.AccountService
       services:
       - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
-    - match: /session
+    - match: /application.ApplicationService
       services:
       - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
-    - match: /account
+    - match: /certificate.CertificateService
       services:
       - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
-    - match: /repository
+    - match: /cluster.ClusterService
       services:
       - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
-    - match: /repocreds
+    - match: /cluster.SettingsService
       services:
       - name: argocd-server
         port: 443
       timeoutPolicy:
         request: 2m
-    - match: /application
+    - match: /project.ProjectService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /repocreds.RepoCredsService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /repository.RepoServerService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /repository.RepositoryService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /session.SessionService
+      services:
+      - name: argocd-server
+        port: 443
+      timeoutPolicy:
+        request: 2m
+    - match: /version.VersionService
       services:
       - name: argocd-server
         port: 443
