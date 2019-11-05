@@ -11,7 +11,7 @@ The application manifests are organized for [Kustomize](https://github.com/kuber
 Environments
 ------------
 
-Currently, following environments are defined:
+Currently, the following environments are defined:
 
 - `kind`: A light-weight testing environment on [Kubernetes IN Docker (kind)](https://kind.sigs.k8s.io/).
 - `gcp`: A fully virtualized data center built with [neco/dctest](https://github.com/cybozu-go/neco/tree/master/dctest).
