@@ -320,7 +320,13 @@ func applyAndWaitForApplications() {
 
 	for _, appName := range syncOrder {
 		By("syncing " + appName + " manually")
-		ExecSafeAt(boot0, "argocd", "app", "sync", "--prune", appName)
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 	}
 }
 
