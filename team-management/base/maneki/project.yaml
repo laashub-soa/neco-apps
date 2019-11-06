@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: maneki
+  namespace: argocd
+spec:
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: maneki
+    server: https://kubernetes.default.svc
+  namespaceResourceBlacklist:
+  - group: ''
+    kind: ResourceQuota
+  - group: ''
+    kind: LimitRange
+  - group: ''
+    kind: NetworkPolicy
+  orphanedResources:
+    warn: false
+  roles:
+  - name: admin
+    groups:
+    - cybozu-private:maneki
+    policies:
+    - p, proj:maneki:admin, applications, *, maneki/*, allow
