@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-	"time"
 
 	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	. "github.com/onsi/ginkgo"
@@ -285,36 +284,7 @@ func applyAndWaitForApplications() {
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
 	}
 
-	// sometimes, ReplicaSet becomes not ready even though pods are running.
-	// to recover from this, all pods need to be deleted once.
-	_, _, _ = ExecAt(boot0, "argocd", "app", "sync", "argocd")
-	time.Sleep(30 * time.Second)
-	ExecSafeAt(boot0, "kubectl", "-n", "argocd", "delete", "pods", "--all")
-	Eventually(func() error {
-		_, _, err := ExecAt(boot0, "argocd", "app", "list")
-		return err
-	}).Should(Succeed())
-
 	syncOrder := loadSyncOrder()
-
-	_, _, err := ExecAt(boot0, "argocd", "app", "get", "gatekeeper")
-	if err == nil {
-		By("purging gatekeeper")
-		ExecSafeAt(boot0, "argocd", "app", "delete", "gatekeeper")
-		time.Sleep(30 * time.Second)
-		Eventually(func() error {
-			_, stderr, err := ExecAt(boot0, "kubectl", "-n", "gatekeeper-system",
-				"patch", "constrainttemplates.templates.gatekeeper.sh", "networkpolicyorder",
-				"--type=json", "-p", `'[{"op":"replace","path":"/metadata/finalizers","value":[]}]'`)
-			if err != nil {
-				return fmt.Errorf("failed to patch: %s", string(stderr))
-			}
-			return nil
-		}, 30*time.Minute).Should(Succeed())
-		time.Sleep(5 * time.Second)
-		ExecSafeAt(boot0, "argocd", "app", "sync", "namespaces", "--prune")
-		ExecSafeAt(boot0, "kubectl", "delete", "validatingwebhookconfigurations", "validation.gatekeeper.sh")
-	}
 
 	By("waiting initialization")
 	Eventually(func() error {
@@ -350,7 +320,13 @@ func applyAndWaitForApplications() {
 
 	for _, appName := range syncOrder {
 		By("syncing " + appName + " manually")
-		ExecSafeAt(boot0, "argocd", "app", "sync", "--prune", appName)
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 	}
 }
 
