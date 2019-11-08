@@ -135,7 +135,7 @@ spec:
 	var nodeIP string
 	var apiServerIP string
 
-	patchUbuntu := `-p='[{"op":"add","path":"/spec/template/spec/containers/-","value":{"image":"quay.io/cybozu/ubuntu-debug:18.04","imagePullPolicy":"IfNotPresent","name":"ubuntu","command":["pause"],"securityContext":{"readOnlyRootFilesystem":true,"runAsGroup":10000,"runAsUser":10000},"readinessProbe":{"exec":{"command":["true"]},"initialDelaySeconds":5,"periodSeconds":5}}}]'`
+	patchUbuntu := `-p='[{"op": "add", "path": "/spec/template/spec/containers/-", "value": { "image": "quay.io/cybozu/ubuntu-debug:18.04", "imagePullPolicy": "IfNotPresent", "name": "ubuntu", "command": ["pause"], "securityContext": { "readOnlyRootFilesystem": true, "runAsGroup": 10000, "runAsUser": 10000 }}}]'`
 
 	It("should get pod/node list", func() {
 
