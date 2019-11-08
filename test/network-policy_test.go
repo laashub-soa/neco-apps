@@ -213,23 +213,33 @@ spec:
 		stdout, stderr, err = ExecAt(boot0, "kubectl", "patch", "-n=internet-egress", "deploy", "squid", "--type=json", patchUbuntu)
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-		var podName string
 		By("waiting for pods to be ready")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n=internet-egress", "-l=app.kubernetes.io/name=squid", "-o", "go-template='{{ (index .items 0).metadata.name }}'")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=internet-egress", "get", "deployment/squid", "-o=json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			podName = string(stdout)
 
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n=internet-egress", podName, "-c", "ubuntu", "true")
+			deployment := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deployment)
 			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				return err
 			}
+
+			if deployment.Status.ReadyReplicas != 2 {
+				return fmt.Errorf("squid deployment's ReadyReplicas is not 2: %d", int(deployment.Status.ReadyReplicas))
+			}
+			if deployment.Status.UpdatedReplicas != 2 {
+				return fmt.Errorf("squid deployment's UpdatedReplicas is not 2: %d", int(deployment.Status.UpdatedReplicas))
+			}
+
 			return nil
 		}).Should(Succeed())
 
 		By("accessing DNS port of some node as squid")
+		stdout, _, err = ExecAt(boot0, "kubectl", "get", "pods", "-n=internet-egress", "-l=app.kubernetes.io/name=squid", "-o", "go-template='{{ (index .items 0).metadata.name }}'")
+		Expect(err).NotTo(HaveOccurred())
+		podName := string(stdout)
 		Eventually(func() error {
 			stdout, stderr, err := ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", podName, "-c", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
 			switch t := err.(type) {

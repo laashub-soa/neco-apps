@@ -320,6 +320,12 @@ func applyAndWaitForApplications() {
 
 	for _, appName := range syncOrder {
 		By("syncing " + appName + " manually")
+		if appName != "cert-manager" {
+			ExecSafeAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			continue
+		}
+
+		// cert-manager often fails to synchronize due to unidentified reasons.
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
 			if err != nil {
