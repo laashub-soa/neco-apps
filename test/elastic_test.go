@@ -38,17 +38,16 @@ func testElastic() {
 		}).Should(Succeed())
 	})
 	It("should deploy Elasticsearch cluster", func() {
-		elasticYAML := `apiVersion: elasticsearch.k8s.elastic.co/v1alpha1
+		elasticYAML := `apiVersion: elasticsearch.k8s.elastic.co/v1beta1
 kind: Elasticsearch
 metadata:
   name: sample
   namespace: test-es
 spec:
-  version: 7.1.0
-  # it avoids sysctl command by initContainers under PSP
-  setVmMaxMapCount: false
-  nodes:
-  - nodeCount: 1
+  version: 7.4.2
+  nodeSets:
+  - count: 1
+    name: master-nodes
     config:
       node.master: true
       node.data: true
