@@ -169,6 +169,12 @@ func testSetup() {
 	})
 
 	if !doUpgrade {
+		It("should delete previous version ECK", func() {
+			By("disabling argocd auto-sync")
+			ExecSafeAt(boot0, "argocd", "app", "set", "elastic", "--sync-policy", "none")
+			ExecSafeAt(boot0, "kubectl", "delete", "ns", "elastic-system")
+		})
+
 		It("should prepare secrets", func() {
 			By("creating namespace and secrets for grafana")
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "monitoring")
@@ -231,6 +237,10 @@ func testSetup() {
 		}
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications()
+		if doUpgrade {
+			By("enabling argocd auto-sync")
+			ExecSafeAt(boot0, "argocd", "app", "set", "elastic", "--sync-policy", "automated", "--auto-prune", "--self-heal")
+		}
 	})
 
 	if !withKind {
