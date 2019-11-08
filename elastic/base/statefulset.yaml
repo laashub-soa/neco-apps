@@ -20,10 +20,9 @@ spec:
     spec:
       serviceAccountName: elastic-operator
       containers:
-        - image: docker.elastic.co/eck/eck-operator:0.9.0
+        - image: docker.elastic.co/eck/eck-operator:1.0.0-beta1
           name: manager
-          args:
-            ["manager", "--operator-roles", "all", "--enable-debug-logs=false"]
+          args: ["manager", "--operator-roles", "all", "--enable-debug-logs=false"]
           env:
             - name: OPERATOR_NAMESPACE
               valueFrom:
@@ -34,14 +33,14 @@ spec:
             - name: WEBHOOK_PODS_LABEL
               value: elastic-operator
             - name: OPERATOR_IMAGE
-              value: docker.elastic.co/eck/eck-operator:0.9.0
+              value: docker.elastic.co/eck/eck-operator:1.0.0-beta1
           resources:
             limits:
               cpu: 1
-              memory: 100Mi
+              memory: 150Mi
             requests:
               cpu: 100m
-              memory: 20Mi
+              memory: 50Mi
           ports:
             - containerPort: 9443
               name: webhook-server
@@ -49,13 +48,4 @@ spec:
             - containerPort: 8080
               name: metrics
               protocol: TCP
-          volumeMounts:
-            - mountPath: /tmp/cert
-              name: cert
-              readOnly: true
       terminationGracePeriodSeconds: 10
-      volumes:
-        - name: cert
-          secret:
-            defaultMode: 420
-            secretName: webhook-server-secret
