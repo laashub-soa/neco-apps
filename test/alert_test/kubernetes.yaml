@@ -109,6 +109,14 @@ tests:
               summary: Pod kube-system/calico-node (unbound) is restarting 5.00 times / 5 minutes.
   - interval: 1m
     input_series:
+      - series: 'kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace="maneki", pod="calico-node", container="unbound"}'
+        values: '1+1x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KubePodCrashLooping
+        exp_alerts: []
+  - interval: 1m
+    input_series:
       - series: 'kube_pod_owner{owner_kind="DaemonSet", job="kube-state-metrics", namespace="kube-system", pod="calico-node"}'
         values: '1+1x30'
       - series: 'kube_pod_owner{owner_kind="Job", job="kube-state-metrics", namespace="monitoring", pod="machines-endpoints"}'
