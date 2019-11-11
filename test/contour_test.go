@@ -20,10 +20,10 @@ func testContour() {
 
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=ingress",
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=ingress",
 				"get", "deployment/contour", "-o=json")
 			if err != nil {
-				return err
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 
 			deployment := new(appsv1.Deployment)
