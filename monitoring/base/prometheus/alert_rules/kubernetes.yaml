@@ -238,7 +238,7 @@ groups:
             }}) is restarting {{ printf "%.2f" $value }} times / 5 minutes.
           runbook: TBD
         expr: |
-          rate(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[15m]) * 60 * 5 > 0
+          rate(kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace!~"maneki|sandbox"}[15m]) * 60 * 5 > 0
         for: 15m
         labels:
           severity: critical
@@ -248,7 +248,7 @@ groups:
             state for longer than 15 minutes.
           runbook: TBD
         expr: |
-          sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown"} * on(namespace, pod) group_left(owner_kind) kube_pod_owner{owner_kind!="Job"}) > 0
+          sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown",namespace!~"maneki|sandbox"} * on(namespace, pod) group_left(owner_kind) kube_pod_owner{owner_kind!="Job"}) > 0
         for: 15m
         labels:
           severity: critical
@@ -259,9 +259,9 @@ groups:
             not been rolled back.
           runbook: TBD
         expr: |
-          kube_deployment_status_observed_generation{job="kube-state-metrics"}
+          kube_deployment_status_observed_generation{job="kube-state-metrics",namespace!~"maneki|sandbox"}
             !=
-          kube_deployment_metadata_generation{job="kube-state-metrics"}
+          kube_deployment_metadata_generation{job="kube-state-metrics",namespace!~"maneki|sandbox"}
         for: 15m
         labels:
           severity: critical
@@ -271,9 +271,9 @@ groups:
             matched the expected number of replicas for longer than 15 minutes.
           runbook: TBD
         expr: |
-          kube_deployment_spec_replicas{job="kube-state-metrics"}
+          kube_deployment_spec_replicas{job="kube-state-metrics",namespace!~"maneki|sandbox"}
             !=
-          kube_deployment_status_replicas_available{job="kube-state-metrics"}
+          kube_deployment_status_replicas_available{job="kube-state-metrics",namespace!~"maneki|sandbox"}
         for: 15m
         labels:
           severity: critical
@@ -283,9 +283,9 @@ groups:
             not matched the expected number of replicas for longer than 15 minutes.
           runbook: TBD
         expr: |
-          kube_statefulset_status_replicas_ready{job="kube-state-metrics"}
+          kube_statefulset_status_replicas_ready{job="kube-state-metrics",namespace!~"maneki|sandbox"}
             !=
-          kube_statefulset_status_replicas{job="kube-state-metrics"}
+          kube_statefulset_status_replicas{job="kube-state-metrics",namespace!~"maneki|sandbox"}
         for: 15m
         labels:
           severity: critical
@@ -296,9 +296,9 @@ groups:
             not been rolled back.
           runbook: TBD
         expr: |
-          kube_statefulset_status_observed_generation{job="kube-state-metrics"}
+          kube_statefulset_status_observed_generation{job="kube-state-metrics",namespace!~"maneki|sandbox"}
             !=
-          kube_statefulset_metadata_generation{job="kube-state-metrics"}
+          kube_statefulset_metadata_generation{job="kube-state-metrics",namespace!~"maneki|sandbox"}
         for: 15m
         labels:
           severity: critical
@@ -309,15 +309,15 @@ groups:
           runbook: TBD
         expr: |
           max without (revision) (
-            kube_statefulset_status_current_revision{job="kube-state-metrics"}
+            kube_statefulset_status_current_revision{job="kube-state-metrics",namespace!~"maneki|sandbox"}
               unless
-            kube_statefulset_status_update_revision{job="kube-state-metrics"}
+            kube_statefulset_status_update_revision{job="kube-state-metrics",namespace!~"maneki|sandbox"}
           )
             *
           (
-            kube_statefulset_replicas{job="kube-state-metrics"}
+            kube_statefulset_replicas{job="kube-state-metrics",namespace!~"maneki|sandbox"}
               !=
-            kube_statefulset_status_replicas_updated{job="kube-state-metrics"}
+            kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace!~"maneki|sandbox"}
           )
         for: 15m
         labels:
@@ -328,9 +328,9 @@ groups:
             }}/{{ $labels.daemonset }} are scheduled and ready.
           runbook: TBD
         expr: |
-          kube_daemonset_status_number_ready{job="kube-state-metrics"}
+          kube_daemonset_status_number_ready{job="kube-state-metrics",namespace!~"maneki|sandbox"}
             /
-          kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"} * 100 < 100
+          kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"} * 100 < 100
         for: 15m
         labels:
           severity: critical
@@ -340,9 +340,9 @@ groups:
           }} are not scheduled.'
           runbook: TBD
         expr: |
-          kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"}
+          kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"}
             -
-          kube_daemonset_status_current_number_scheduled{job="kube-state-metrics"} > 0
+          kube_daemonset_status_current_number_scheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"} > 0
         for: 10m
         labels:
           severity: warning
@@ -352,7 +352,7 @@ groups:
           }} are running where they are not supposed to run.'
           runbook: TBD
         expr: |
-          kube_daemonset_status_number_misscheduled{job="kube-state-metrics"} > 0
+          kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"} > 0
         for: 10m
         labels:
           severity: warning
@@ -362,7 +362,7 @@ groups:
             than 1h to complete.
           runbook: TBD
         expr: |
-          time() - kube_cronjob_next_schedule_time{job="kube-state-metrics"} > 3600
+          time() - kube_cronjob_next_schedule_time{job="kube-state-metrics",namespace!~"maneki|sandbox"} > 3600
         for: 1h
         labels:
           severity: warning
@@ -372,7 +372,7 @@ groups:
             than one hour to complete.
           runbook: TBD
         expr: |
-          kube_job_spec_completions{job="kube-state-metrics"} - kube_job_status_succeeded{job="kube-state-metrics"}  > 0
+          kube_job_spec_completions{job="kube-state-metrics",namespace!~"maneki|sandbox"} - kube_job_status_succeeded{job="kube-state-metrics",namespace!~"maneki|sandbox"}  > 0
         for: 1h
         labels:
           severity: warning
@@ -381,7 +381,7 @@ groups:
           summary: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete.
           runbook: TBD
         expr: |
-          kube_job_failed{job="kube-state-metrics"}  > 0
+          kube_job_failed{job="kube-state-metrics",namespace!~"maneki|sandbox"}  > 0
         for: 15m
         labels:
           severity: warning
