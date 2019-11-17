@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+. $(dirname $0)/env
+
+tail_once() {
+  # stern with env varibale
+  $GCLOUD 2>/dev/null compute ssh --zone=${ZONE} cybozu@${INSTANCE_NAME} -- \
+    sudo PATH=/root/go/bin:$PATH; export KUBECONFIG=$(kind get kubeconfig-path --name kindtest); stern --all-namespaces '\\.\\*'
+}
+
+tail_forever() {
+  while true; do
+    tail_once || continue
+    sleep 3
+  done
+}
+
+tail_forever | sed -e s/^/$(tput -Txterm setaf 1)/ &
+
+wait

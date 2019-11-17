@@ -163,6 +163,9 @@ jobs:
   kindtest:
     docker:
       - image: google/cloud-sdk
+        environment:
+            BINDIR: /usr/local/bin
+            STERN_VERSION: "1.11.0"
     steps:
       - checkout
       - run:
@@ -170,6 +173,19 @@ jobs:
           command: |
             echo $GCLOUD_SERVICE_ACCOUNT > account.json
             gcloud auth activate-service-account --key-file=account.json
+      - run:
+          name: Install stern
+          command: |
+            curl -o stern https://github.com/wercker/stern/releases/download/$(STERN_VERSION)/stern_linux_amd64
+            chmod +x stern
+            . ./bin/env
+            $GCLOUD compute scp --zone=${ZONE} stern cybozu@${INSTANCE_NAME}:${BINDIR}
+      - run:
+          name: Watch all pod logs
+          command: |
+            cd neco-apps
+            ./bin/watch_podlogs
+          background: true
       - run:
           name: Run test
           command: |
