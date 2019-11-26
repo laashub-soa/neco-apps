@@ -9,3 +9,5 @@ spec:
     kind: ClusterIssuer
     name: clouddns
   commonName: argocd.osaka0.cybozu-ne.co
+  dnsNames:
+    - argocd.osaka0.cybozu-ne.co

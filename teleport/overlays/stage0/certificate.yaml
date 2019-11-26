@@ -9,3 +9,5 @@ spec:
     kind: ClusterIssuer
     name: clouddns
   commonName: teleport.stage0.cybozu-ne.co
+  dnsNames:
+    - teleport.stage0.cybozu-ne.co

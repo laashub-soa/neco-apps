@@ -47,3 +47,5 @@ spec:
   issuerRef:
     name: teleport-proxy-ca
   commonName: teleport.gcp0.dev-ne.co
+  dnsNames:
+    - teleport.gcp0.dev-ne.co
