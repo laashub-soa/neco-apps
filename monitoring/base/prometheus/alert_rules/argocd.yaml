@@ -2,7 +2,7 @@ groups:
   - name: argocd-config
     rules:
       - alert: AppOutOfSync
-        expr: argocd_app_sync_status{sync_status="Synced"} == 0
+        expr: argocd_app_sync_status{sync_status="Synced",project="default"} == 0
         for: 20m
         labels:
           severity: page
