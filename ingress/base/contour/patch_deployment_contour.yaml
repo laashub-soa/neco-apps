@@ -2,6 +2,6 @@
   path: /metadata/namespace
   value: ingress
 - op: remove
-  path: /spec/template/spec/volumes/1
+  path: /spec/template/spec/volumes/2
 - op: remove
   path: /spec/template/spec/containers/0/volumeMounts/1

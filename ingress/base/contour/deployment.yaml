@@ -91,6 +91,8 @@ spec:
             exec:
               command: ["wget", "-qO-", "http://localhost:9001/healthcheck/fail"]
       volumes:
+        - name: envoy-config
+          emptyDir: {}
         - name: contourcert
           secret:
             secretName: contourcert
@@ -116,6 +118,9 @@ spec:
       app.kubernetes.io/name: envoy
   replicas: 3
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: envoy
     spec:
       containers:
         - image: quay.io/cybozu/envoy:1.11.1.1
