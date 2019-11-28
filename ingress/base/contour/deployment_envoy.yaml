@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/name: envoy
+  name: envoy
+  namespace: projectcontour
+spec:
+  updateStrategy:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: envoy
+  template:
+    spec:
+      containers:
+        - image: quay.io/cybozu/envoy:1.11.1.1
+          name: envoy
+      initContainers:
+        - image: quay.io/cybozu/contour:1.0.0.1
+          name: envoy-initconfig
+  replicas: 3
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: envoy
+            topologyKey: "cke.cybozu.com/rack"

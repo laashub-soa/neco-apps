@@ -1,0 +1,12 @@
+- op: replace
+  path: /kind
+  value: Deployment
+- op: replace
+  path: /metadata/namespace
+  value: ingress
+- op: remove
+  path: /spec/template/spec/volumes/2
+- op: remove
+  path: /spec/template/spec/containers/0/volumeMounts/2
+- op: remove
+  path: /spec/template/spec/initContainers/0/volumeMounts/2
