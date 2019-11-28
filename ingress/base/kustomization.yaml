@@ -10,8 +10,7 @@ resources:
   - contour/upstream/03-envoy.yaml
 patches:
   - contour/rbac_contour.yaml
-  - contour/deployment_contour.yaml
-  - contour/deployment_envoy.yaml
+  - contour/deployment.yaml
   - contour/service_contour.yaml
 patchesJson6902:
   - target:
