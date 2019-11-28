@@ -4,6 +4,7 @@ resources:
   - contour/upstream/02-rbac.yaml
   - contour/upstream/02-service-contour.yaml
   - contour/rbac_contour-plus.yaml
+  - contour/certificate.yaml
   - contour/service.yaml
   - contour/upstream/03-contour.yaml
   - contour/upstream/03-envoy.yaml
