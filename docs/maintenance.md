@@ -64,14 +64,14 @@ TBD
 cert-manager
 ------------
 
-Download manifests as follows:
+Download manifests and remove `Namespace` resource from it as follows:
 
 ```console
 wget https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
+sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: cert-manager//' cert-manager.yaml > cert-manager_nsremoved.yaml
 ```
 
-Compare each resource by your eyes.
-**Be warned that `cert-manager` namespaces must be replaced with `external-dns`.**
+Note that `cert-manager_nsremoved.yaml` is used for input of `kustomize build`.
 
 external-dns
 ------------
