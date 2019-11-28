@@ -46,6 +46,50 @@ spec:
             mountPath: /config
             readOnly: true
         name: contour
+      - image: quay.io/cybozu/contour-plus:0.3.0
+        name: contour-plus
+        env:
+          - name: CP_SERVICE_NAME
+            value: ingress/contour-global
+          - name: CP_DEFAULT_ISSUER_NAME
+            value: clouddns
+        - image: quay.io/cybozu/envoy:1.11.1.1
+          name: envoy
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 8443
+              name: https
+          command: ["envoy"]
+          args:
+            - --config-path /config/envoy.json
+            - --service-cluster $(CONTOUR_NAMESPACE)
+            - --service-node $(ENVOY_POD_NAME)
+            - --log-level info
+          env:
+            - name: CONTOUR_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: ENVOY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8002
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /config
+          lifecycle:
+            preStop:
+              exec:
+                command: ["wget", "-qO-", "http://localhost:9001/healthcheck/fail"]
       volumes:
         - name: contourcert
           secret:
