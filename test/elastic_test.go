@@ -13,8 +13,7 @@ import (
 
 func testElastic() {
 	It("should create test-ingress namespace", func() {
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-es", "--ignore-not-found=true")
-		ExecSafeAt(boot0, "kubectl", "create", "namespace", "test-es")
+		ExecSafeAt(boot0, "kubectl", "delete", "elasticsearch", "sample", "-n", "sandbox", "--ignore-not-found=true")
 	})
 
 	It("should be deployed successfully", func() {
@@ -42,7 +41,7 @@ func testElastic() {
 kind: Elasticsearch
 metadata:
   name: sample
-  namespace: test-es
+  namespace: sandbox
 spec:
   version: 7.4.2
   nodeSets:
@@ -64,6 +63,7 @@ spec:
         storageClassName: topolvm-provisioner
     podTemplate:
       spec:
+        serviceAccountName: elastic
         containers:
           - name: elasticsearch
             env:
@@ -79,7 +79,7 @@ apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
   name: ingress-sample
-  namespace: test-es
+  namespace: sandbox
 spec:
   order: 2000.0
   selector: elasticsearch.k8s.elastic.co/cluster-name == "sample"
@@ -99,7 +99,7 @@ spec:
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(
 				boot0,
-				"kubectl", "-n", "test-es", "get", "elasticsearch/sample",
+				"kubectl", "-n", "sandbox", "get", "elasticsearch/sample",
 				"--template", "'{{ .status.health }}'",
 			)
 			if err != nil {
@@ -113,13 +113,13 @@ spec:
 
 		By("accessing to elasticsearch")
 		stdout, stderr, err := ExecAt(boot0,
-			"kubectl", "get", "secret", "sample-es-elastic-user", "-n", "test-es", "-o=jsonpath='{.data.elastic}'",
+			"kubectl", "get", "secret", "sample-es-elastic-user", "-n", "sandbox", "-o=jsonpath='{.data.elastic}'",
 			"|", "base64", "--decode")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 		password := string(stdout)
 
 		if withKind {
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "test-es", "get", "svc", "sample-es-http", "-o", "json")
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "sandbox", "get", "svc", "sample-es-http", "-o", "json")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			svc := new(corev1.Service)
 			err = json.Unmarshal(stdout, svc)
@@ -136,7 +136,7 @@ spec:
 			workerAddr := cluster.Nodes[0].Address
 			stdout, stderr, err = ExecAt(boot0,
 				"ckecli", "ssh", "cybozu@"+workerAddr, "--",
-				"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http.test-es.svc.cluster.local:9200")
+				"curl", "-u", "elastic:"+password, "-k", "https://sample-es-http.sandbox.svc.cluster.local:9200")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
 	})
