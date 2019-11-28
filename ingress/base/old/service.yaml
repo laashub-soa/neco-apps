@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: contour-global
+  namespace: ingress
+  annotations:
+    metallb.universe.tf/address-pool: internet
+spec:
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+    targetPort: 8080
+  - port: 443
+    name: https
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app.kubernetes.io/name: contour
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contour-forest
+  namespace: ingress
+spec:
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+    targetPort: 8080
+  - port: 443
+    name: https
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app.kubernetes.io/name: contour
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contour-bastion
+  namespace: ingress
+  annotations:
+    metallb.universe.tf/address-pool: bastion
+spec:
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+    targetPort: 8080
+  - port: 443
+    name: https
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app.kubernetes.io/name: contour
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contour-metrics
+  namespace: ingress
+  labels:
+    app.kubernetes.io/name: contour
+spec:
+  ports:
+    - port: 8000
+      name: contour-metrics
+      protocol: TCP
+      targetPort: 8000
+    - port: 8002
+      name: envoy-metrics
+      protocol: TCP
+      targetPort: 8002
+  selector:
+    app.kubernetes.io/name: contour

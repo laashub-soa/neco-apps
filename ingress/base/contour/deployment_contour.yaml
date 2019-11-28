@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: contour
+  name: contour
+  namespace: projectcontour
+spec:
+  strategy:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: contour
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: contour
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: contour
+              topologyKey: "cke.cybozu.com/rack"
+      containers:
+      - image: quay.io/cybozu/contour:1.0.0.1
+        args:
+        - serve
+        - --incluster
+        - --use-extensions-v1beta1-ingress
+        - --xds-address=0.0.0.0
+        - --xds-port=8001
+        - --envoy-service-http-port=8080
+        - --envoy-service-https-port=8443
+        - --contour-cafile=/certs/ca.crt
+        - --contour-cert-file=/certs/tls.crt
+        - --contour-key-file=/certs/tls.key
+        - --config-path=/config/contour.yaml
+        volumeMounts:
+          - name: contourcert
+            mountPath: /certs
+            readOnly: true
+          - name: contour-config
+            mountPath: /config
+            readOnly: true
+        name: contour
+      volumes:
+        - name: contourcert
+          secret:
+            secretName: contourcert
+        - name: contour-config
+          configMap:
+            name: contour
+            defaultMode: 0644
+            items:
+            - key: contour.yaml
+              path: contour.yaml
