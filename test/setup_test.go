@@ -327,7 +327,14 @@ func applyAndWaitForApplications() {
 
 		// cert-manager often fails to synchronize due to unidentified reasons.
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			// It is temporary code for remove Namespace in cert-manager app
+			ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", "namespaces")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
