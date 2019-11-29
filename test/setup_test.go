@@ -203,6 +203,17 @@ func testSetup() {
 		})
 	}
 
+	// This is a temporal code. Remove this once after cert-manager application does not manage cert-manager namespace resource.
+	It("should remove APIService", func() {
+		if doUpgrade {
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "set", "cert-manager", "--sync-policy", "none")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "apiservices", "v1beta1.webhook.cert-manager.io")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		}
+	})
+
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 		if !withKind {
