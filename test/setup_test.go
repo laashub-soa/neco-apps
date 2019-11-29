@@ -345,6 +345,26 @@ func applyAndWaitForApplications() {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 
+			// Recreate clouddns secret
+			var data []byte
+			if withKind {
+				data = []byte("{}")
+			} else {
+				data, err = ioutil.ReadFile("account.json")
+				Expect(err).ShouldNot(HaveOccurred())
+			}
+
+			_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "cert-manager")
+			if err != nil {
+				return fmt.Errorf("failed to get cert-manager namespace")
+			}
+			_, _, err = ExecAt(boot0, "kubectl", "--namespace=cert-manager", "get", "secret", "clouddns")
+			if err != nil {
+				stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
+					"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+				return fmt.Errorf("failed to create clouddns secret: stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
 			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
