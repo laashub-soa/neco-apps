@@ -60,12 +60,12 @@ spec:
         resources:
           requests:
             storage: 1Gi
-        securityContext:
-          runAsUser: 1000
         storageClassName: topolvm-provisioner
     podTemplate:
       spec:
         serviceAccountName: elastic
+        securityContext:
+          runAsUser: 1000
         containers:
           - name: elasticsearch
             env:
