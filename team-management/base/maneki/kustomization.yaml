@@ -4,3 +4,5 @@ resources:
 - project.yaml
 - app-gorush.yaml
 - maneki.yaml
+commonLabels:
+  team: maneki
