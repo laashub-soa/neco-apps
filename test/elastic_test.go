@@ -60,6 +60,8 @@ spec:
         resources:
           requests:
             storage: 1Gi
+        securityContext:
+          runAsUser: 1000
         storageClassName: topolvm-provisioner
     podTemplate:
       spec:
