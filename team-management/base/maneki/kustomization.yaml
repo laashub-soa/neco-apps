@@ -2,11 +2,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - project.yaml
-- app-gorush/limitrange.yaml
-- app-gorush/namespace.yaml
-- app-gorush/resourcequota.yaml
-- app-gorush/rolebinding.yaml
-- maneki/limitrange.yaml
-- maneki/namespace.yaml
-- maneki/resourcequota.yaml
-- maneki/rolebinding.yaml
+- app-gorush.yaml
+- maneki.yaml
