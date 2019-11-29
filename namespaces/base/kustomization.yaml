@@ -11,5 +11,6 @@ resources:
 - monitoring.yaml
 - teleport.yaml
 - topolvm.yaml
+- cert-manager.yaml
 commonLabels:
   team: neco
