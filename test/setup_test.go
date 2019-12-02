@@ -203,6 +203,17 @@ func testSetup() {
 		})
 	}
 
+	// This is a temporal code. Remove this once after cert-manager application does not manage cert-manager namespace resource.
+	It("should remove APIService", func() {
+		if doUpgrade {
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "set", "cert-manager", "--sync-policy", "none")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "apiservices", "v1beta1.webhook.cert-manager.io")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		}
+	})
+
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 		if !withKind {
@@ -327,7 +338,34 @@ func applyAndWaitForApplications() {
 
 		// cert-manager often fails to synchronize due to unidentified reasons.
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			// It is temporary code for remove Namespace in cert-manager app
+			ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", "namespaces")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			// Recreate clouddns secret
+			var data []byte
+			if withKind {
+				data = []byte("{}")
+			} else {
+				data, err = ioutil.ReadFile("account.json")
+				Expect(err).ShouldNot(HaveOccurred())
+			}
+
+			_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "cert-manager")
+			if err != nil {
+				return fmt.Errorf("failed to get cert-manager namespace")
+			}
+			_, _, err = ExecAt(boot0, "kubectl", "--namespace=cert-manager", "get", "secret", "clouddns")
+			if err != nil {
+				stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
+					"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+				return fmt.Errorf("failed to create clouddns secret: stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
