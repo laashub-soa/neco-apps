@@ -1,7 +1,7 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: elastic-restricted
+  name: elastic-user
 spec:
   privileged: false
   # Required to prevent escalations to root.
@@ -45,7 +45,7 @@ spec:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: psp:elastic-restricted
+  name: psp:elastic-user
   annotations:
     rbac.authorization.kubernetes.io/autoupdate: "true"
 rules:
@@ -53,17 +53,17 @@ rules:
     resources: ['podsecuritypolicies']
     verbs:     ['use']
     resourceNames:
-      - elastic-restricted
+      - elastic-user
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: default:psp:elastic-restricted
+  name: default:psp:elastic-user
   annotations:
     rbac.authorization.kubernetes.io/autoupdate: "true"
 roleRef:
   kind: ClusterRole
-  name: psp:elastic-restricted
+  name: psp:elastic-user
   apiGroup: rbac.authorization.k8s.io
 subjects:
   - kind: ServiceAccount

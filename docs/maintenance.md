@@ -63,8 +63,7 @@ To check diffs between versions, download and compare manifests as follows:
 
 ```console
 wget https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml -O X.Y.Z.yaml 
-wget https://download.elastic.co/downloads/eck/A.B.C/all-in-one.yaml -O A.B.C.yaml 
-diff X.Y.Z.yaml A.B.C.yaml 
+sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: kube-system//' all-in-one.yaml > all-in-one_nsremoved.yaml
 ```
 
 cert-manager
