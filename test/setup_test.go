@@ -203,52 +203,16 @@ func testSetup() {
 		})
 	}
 
-	// TODO: delete this block after upgrading cert-manager
-	if doUpgrade {
-		It("should delete the old version cert-manager before upgrading if exists", func() {
-			By("checking the existence of old version CRD")
-			_, stderr, err := ExecAt(boot0, "kubectl", "get", "crd", "certificates.certmanager.k8s.io")
-			if strings.Contains(string(stderr), "NotFound") {
-				// cert-manager is already upgraded
-				return
-			}
-			Expect(err).NotTo(HaveOccurred())
+	// This is a temporal code. Remove this once after cert-manager application does not manage cert-manager namespace resource.
+	It("should remove APIService", func() {
+		if doUpgrade {
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "set", "cert-manager", "--sync-policy", "none")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
-			By("deleting the application")
-			ExecSafeAt(boot0, "argocd", "app", "delete", "cert-manager", "--cascade")
-
-			By("waiting the deletion")
-			Eventually(func() error {
-				stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "argocd", "get", "application", "-o", "json")
-				if err != nil {
-					return fmt.Errorf("stdout: %v, stderr: %v, err: %v", stdout, stderr, err)
-				}
-
-				var appList argocd.ApplicationList
-				err = json.Unmarshal(stdout, &appList)
-				if err != nil {
-					return err
-				}
-
-				for _, app := range appList.Items {
-					if app.GetName() == "cert-manager" {
-						return errors.New("cert-manager app still exists")
-					}
-				}
-
-				return nil
-			}).Should(Succeed())
-
-			By("deleting the CRDs")
-			ExecSafeAt(boot0, "kubectl", "delete", "crd",
-				"certificaterequests.certmanager.k8s.io",
-				"certificates.certmanager.k8s.io",
-				"challenges.certmanager.k8s.io",
-				"clusterissuers.certmanager.k8s.io",
-				"issuers.certmanager.k8s.io",
-				"orders.certmanager.k8s.io")
-		})
-	}
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "apiservices", "v1beta1.webhook.cert-manager.io")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		}
+	})
 
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
@@ -374,7 +338,34 @@ func applyAndWaitForApplications() {
 
 		// cert-manager often fails to synchronize due to unidentified reasons.
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			// It is temporary code for remove Namespace in cert-manager app
+			ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", "namespaces")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			// Recreate clouddns secret
+			var data []byte
+			if withKind {
+				data = []byte("{}")
+			} else {
+				data, err = ioutil.ReadFile("account.json")
+				Expect(err).ShouldNot(HaveOccurred())
+			}
+
+			_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "cert-manager")
+			if err != nil {
+				return fmt.Errorf("failed to get cert-manager namespace")
+			}
+			_, _, err = ExecAt(boot0, "kubectl", "--namespace=cert-manager", "get", "secret", "clouddns")
+			if err != nil {
+				stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
+					"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+				return fmt.Errorf("failed to create clouddns secret: stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
