@@ -16,6 +16,30 @@ patches:
   - contour/service_contour.yaml
 patchesJson6902:
   - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: httpproxies.projectcontour.io
+    path: contour/patch_crd.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: ingressroutes.contour.heptio.com
+    path:  contour/patch_crd.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: tlscertificatedelegations.contour.heptio.com
+    path:  contour/patch_crd.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: tlscertificatedelegations.projectcontour.io
+    path:  contour/patch_crd.yaml
+  - target:
       group: rbac.authorization.k8s.io
       version: v1beta1
       kind: Role
