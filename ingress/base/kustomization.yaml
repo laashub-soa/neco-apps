@@ -12,7 +12,7 @@ resources:
   - contour/pdb.yaml
   - contour/rbac_contour-plus.yaml
   - contour/service.yaml
-patches:
+patchesStrategicMerge:
   - contour/deployment.yaml
   - contour/rbac_contour.yaml
   - contour/service_contour.yaml

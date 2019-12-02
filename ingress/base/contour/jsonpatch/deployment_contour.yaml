@@ -5,6 +5,8 @@
   path: /spec/template/spec/volumes/2
 - op: remove
   path: /spec/template/spec/containers/0/volumeMounts/1
+
+# Remove app labels
 - op: remove
   path: /metadata/labels/app
 - op: remove

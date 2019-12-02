@@ -10,9 +10,23 @@
   path: /spec/template/spec/containers/0/volumeMounts/2
 - op: remove
   path: /spec/template/spec/initContainers/0/volumeMounts/2
+
+# Remove app labels
 - op: remove
   path: /metadata/labels/app
 - op: remove
   path: /spec/selector/matchLabels/app
 - op: remove
   path: /spec/template/metadata/labels/app
+
+# Replace containerPorts
+- op: replace
+  path: /spec/template/spec/containers/0/ports/0/containerPort
+  value: 8080
+- op: remove
+  path: /spec/template/spec/containers/0/ports/0/hostPort
+- op: replace
+  path: /spec/template/spec/containers/0/ports/1/containerPort
+  value: 8443
+- op: remove
+  path: /spec/template/spec/containers/0/ports/1/hostPort
