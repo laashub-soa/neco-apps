@@ -5,3 +5,9 @@
   path: /spec/template/spec/volumes/2
 - op: remove
   path: /spec/template/spec/containers/0/volumeMounts/1
+- op: remove
+  path: /metadata/labels/app
+- op: remove
+  path: /spec/selector/matchLabels/app
+- op: remove
+  path: /spec/template/metadata/labels/app
