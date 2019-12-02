@@ -15,6 +15,7 @@ spec:
         - prefix: /
       timeoutPolicy:
         response: 2m
+        idle: 5m
       services:
         - name: grafana
           port: 80
