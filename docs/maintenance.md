@@ -18,7 +18,7 @@ cd argocd-cd
 git diff vA.B.C...vX.Y.Z manifests
 ```
 
-We register paths for gRPC API in `argocd-server` IngressRoute.
+We register paths for gRPC API in `argocd-server` HTTPProxy.
 So we have to keep watching changes in those paths by the following commands.
 
 ```console
@@ -33,11 +33,11 @@ Then you should apply the changes the following files.
 .
 ├── argocd-ingress
 │   ├── base
-│   │   └── ingressroute.yaml # Base definition of the IngressRoute
+│   │   └── httpproxy.yaml # Base definition of the HTTPProxy
 │   └── overlays
 │        └── ...
 └── test
-     └── argocd-ingress_test.go # Test for the IngressRoute
+     └── argocd-ingress_test.go # Test for the HTTPProxy
 ```
 
 You can easily fetch those paths by the following command. **Do it at your own risk.**
