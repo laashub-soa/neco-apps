@@ -124,6 +124,15 @@ spec:
 		Expect(err).ShouldNot(HaveOccurred())
 		Expect(pdb.Status.CurrentHealthy).Should(Equal(int32(2)))
 
+		By("checking PodDisruptionBudget for envoy Deployment")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "envoy-pdb", "-n", "ingress", "-o", "json")
+		if err != nil {
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		}
+		err = json.Unmarshal(stdout, &pdb)
+		Expect(err).ShouldNot(HaveOccurred())
+		Expect(pdb.Status.CurrentHealthy).Should(Equal(int32(3)))
+
 		By("creating HTTPProxy")
 		fqdnHTTP := testID + "-http.test-ingress.gcp0.dev-ne.co"
 		fqdnHTTPS := testID + "-https.test-ingress.gcp0.dev-ne.co"
