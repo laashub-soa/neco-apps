@@ -225,6 +225,15 @@ func testSetup() {
 		ExecSafeAt(boot0, "cd neco-apps; git checkout "+commitID)
 	})
 
+	if doUpgrade {
+		//TODO: Remove these codes when 'ECK-0.9.0' disappears from stage and release branches.
+		It("should delete previous version ECK", func() {
+			By("disabling argocd auto-sync")
+			ExecSafeAt(boot0, "argocd", "app", "set", "elastic", "--sync-policy", "none")
+			ExecSafeAt(boot0, "kubectl", "delete", "ns", "elastic-system")
+		})
+	}
+
 	It("should setup applications", func() {
 		if !doUpgrade {
 			setupArgoCD()

@@ -1,8 +1,38 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - common.yaml
-  - psp.yaml
-  - rbac.yaml
-  - statefulset.yaml
+  - upstream/all-in-one_nsremoved.yaml
   - secret.yaml
+patchesJson6902:
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: apmservers.apm.k8s.elastic.co
+    path: patch_crd.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: elasticsearches.elasticsearch.k8s.elastic.co
+    path: patch_crd.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: kibanas.kibana.k8s.elastic.co
+    path: patch_crd.yaml
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      namespace: elastic-system
+      name: elastic-operator
+    path: patch_deploy.yaml
+  - target:
+      group: rbac.authorization.k8s.io
+      version: v1
+      kind: ClusterRole
+      name: elastic-operator
+    path: patch_rbac.yaml
+
