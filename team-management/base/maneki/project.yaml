@@ -9,6 +9,8 @@ spec:
   destinations:
   - namespace: app-gorush
     server: '*'
+  - namespace: app-monitoring
+    server: '*'
   - namespace: maneki
     server: '*'
   - namespace: sandbox
