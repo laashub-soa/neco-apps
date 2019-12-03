@@ -1,0 +1,5 @@
+- op: replace
+  path: /metadata/namespace
+  value: ingress
+- op: remove
+  path: /spec/selector/app

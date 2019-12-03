@@ -60,7 +60,7 @@ patchesJson6902:
       kind: Service
       name: contour
       namespace: projectcontour
-    path: contour/jsonpatch/replace-ns.yaml
+    path: contour/jsonpatch/service_contour.yaml
   - target:
       group: apps
       version: v1
