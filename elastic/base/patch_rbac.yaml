@@ -1,0 +1,11 @@
+- "op": "add"
+  "path": "/rules/9"
+  "value":
+    "apiGroups":
+    - "policy"
+    "resources":
+    - "podsecuritypolicies"
+    "verbs":
+    - "use"
+    "resourceNames":
+    - "elastic.restricted"

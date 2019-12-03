@@ -59,7 +59,12 @@ $ git grep "Invoke(" | grep -v fake | sed 's|^.*"\(.*\)/.*".*$|\1|' | sort | uni
 elastic cloud on Kubernetes
 ---------------------------
 
-TBD
+To check diffs between versions, download and compare manifests as follows:
+
+```console
+wget https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml -O X.Y.Z.yaml 
+sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: kube-system//' all-in-one.yaml > all-in-one_nsremoved.yaml
+```
 
 cert-manager
 ------------
