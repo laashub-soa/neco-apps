@@ -14,8 +14,6 @@ resources:
   - contour/service.yaml
 patchesStrategicMerge:
   - contour/deployment.yaml
-  - contour/rbac_contour.yaml
-  - contour/service_contour.yaml
 patchesJson6902:
   - target:
       group: apiextensions.k8s.io
@@ -44,17 +42,23 @@ patchesJson6902:
   - target:
       group: rbac.authorization.k8s.io
       version: v1beta1
+      kind: ClusterRoleBinding
+      name: contour
+    path: contour/jsonpatch/clusterrolebinding.yaml
+  - target:
+      group: rbac.authorization.k8s.io
+      version: v1beta1
       kind: Role
       name: contour-leaderelection
       namespace: projectcontour
-    path: contour/jsonpatch/replace-ns.yaml
+    path: contour/jsonpatch/role.yaml
   - target:
       group: rbac.authorization.k8s.io
       version: v1beta1
       kind: RoleBinding
       name: contour-leaderelection
       namespace: projectcontour
-    path: contour/jsonpatch/replace-ns.yaml
+    path: contour/jsonpatch/rolebinding.yaml
   - target:
       version: v1
       kind: Service

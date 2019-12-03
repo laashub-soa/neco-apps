@@ -3,3 +3,7 @@
   value: ingress
 - op: remove
   path: /spec/selector/app
+- op: add
+  path: /spec/selector
+  value:
+    app.kubernetes.io/name: contour
