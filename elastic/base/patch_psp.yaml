@@ -10,7 +10,7 @@
 - "op": "add"
   "path": "/spec/runAsUser/ranges"
   "value":
-    "min": 1000
-    "max": 65535
+   - "min": 1000
+     "max": 65535
 - "op": "remove"
   "path": "/metadata/annotations"
