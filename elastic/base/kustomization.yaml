@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - upstream/all-in-one_nsremoved.yaml
-  - upstream/elastic-psp.yaml
   - secret.yaml
 patchesJson6902:
   - target:
@@ -30,15 +29,3 @@ patchesJson6902:
       namespace: elastic-system
       name: elastic-operator
     path: patch_deploy.yaml
-  - target:
-      group: rbac.authorization.k8s.io
-      version: v1
-      kind: ClusterRole
-      name: elastic-operator
-    path: patch_rbac.yaml
-  - target:
-      group: policy
-      version: v1beta1
-      kind: PodSecurityPolicy
-      name: elastic.restricted
-    path: patch_psp.yaml
