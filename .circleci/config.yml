@@ -175,6 +175,7 @@ jobs:
           command: |
             curl -sSLf -o ./bin/env https://raw.githubusercontent.com/cybozu-go/neco/master/bin/env
             ./bin/run-kindtest.sh
+          no_output_timeout: 20m
       - run:
           name: Remove instance
           command: |
