@@ -131,44 +131,43 @@ func testSetup() {
 		issueKubeconfig()
 	})
 
-	// TODO: This secret creation must move in "if !doUpgrade{}" sentence after the release
-	It("should create secrets of account.json", func() {
-		By("loading account.json")
-		var data []byte
-		var err error
-		if withKind {
-			data = []byte("{}")
-		} else {
-			data, err = ioutil.ReadFile("account.json")
-			Expect(err).ShouldNot(HaveOccurred())
-		}
-
-		By("creating namespace and secrets for external-dns")
-		_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "external-dns")
-		if err != nil {
-			ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
-		}
-		_, _, err = ExecAt(boot0, "kubectl", "--namespace=external-dns", "get", "secret", "clouddns")
-		if err != nil {
-			_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
-				"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
-			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		}
-
-		By("creating namespace and secrets for cert-manager")
-		_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "cert-manager")
-		if err != nil {
-			ExecSafeAt(boot0, "kubectl", "create", "namespace", "cert-manager")
-		}
-		_, _, err = ExecAt(boot0, "kubectl", "--namespace=cert-manager", "get", "secret", "clouddns")
-		if err != nil {
-			_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
-				"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
-			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		}
-	})
-
 	if !doUpgrade {
+		It("should create secrets of account.json", func() {
+			By("loading account.json")
+			var data []byte
+			var err error
+			if withKind {
+				data = []byte("{}")
+			} else {
+				data, err = ioutil.ReadFile("account.json")
+				Expect(err).ShouldNot(HaveOccurred())
+			}
+
+			By("creating namespace and secrets for external-dns")
+			_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "external-dns")
+			if err != nil {
+				ExecSafeAt(boot0, "kubectl", "create", "namespace", "external-dns")
+			}
+			_, _, err = ExecAt(boot0, "kubectl", "--namespace=external-dns", "get", "secret", "clouddns")
+			if err != nil {
+				_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=external-dns",
+					"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+				Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+			}
+
+			By("creating namespace and secrets for cert-manager")
+			_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "cert-manager")
+			if err != nil {
+				ExecSafeAt(boot0, "kubectl", "create", "namespace", "cert-manager")
+			}
+			_, _, err = ExecAt(boot0, "kubectl", "--namespace=cert-manager", "get", "secret", "clouddns")
+			if err != nil {
+				_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
+					"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
+				Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+			}
+		})
+
 		It("should prepare secrets", func() {
 			By("creating namespace and secrets for grafana")
 			ExecSafeAt(boot0, "kubectl", "create", "namespace", "monitoring")
@@ -203,17 +202,6 @@ func testSetup() {
 		})
 	}
 
-	// This is a temporal code. Remove this once after cert-manager application does not manage cert-manager namespace resource.
-	It("should remove APIService", func() {
-		if doUpgrade {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "set", "cert-manager", "--sync-policy", "none")
-			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "apiservices", "v1beta1.webhook.cert-manager.io")
-			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		}
-	})
-
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 		if !withKind {
@@ -224,15 +212,6 @@ func testSetup() {
 		}
 		ExecSafeAt(boot0, "cd neco-apps; git checkout "+commitID)
 	})
-
-	if doUpgrade {
-		//TODO: Remove these codes when 'ECK-0.9.0' disappears from stage and release branches.
-		It("should delete previous version ECK", func() {
-			By("disabling argocd auto-sync")
-			ExecSafeAt(boot0, "argocd", "app", "set", "elastic", "--sync-policy", "none")
-			ExecSafeAt(boot0, "kubectl", "delete", "ns", "elastic-system")
-		})
-	}
 
 	It("should setup applications", func() {
 		if !doUpgrade {
@@ -347,34 +326,7 @@ func applyAndWaitForApplications() {
 
 		// cert-manager often fails to synchronize due to unidentified reasons.
 		Eventually(func() error {
-			// It is temporary code for remove Namespace in cert-manager app
-			ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", "namespaces")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-
-			// Recreate clouddns secret
-			var data []byte
-			if withKind {
-				data = []byte("{}")
-			} else {
-				data, err = ioutil.ReadFile("account.json")
-				Expect(err).ShouldNot(HaveOccurred())
-			}
-
-			_, _, err = ExecAt(boot0, "kubectl", "get", "namespace", "cert-manager")
-			if err != nil {
-				return fmt.Errorf("failed to get cert-manager namespace")
-			}
-			_, _, err = ExecAt(boot0, "kubectl", "--namespace=cert-manager", "get", "secret", "clouddns")
-			if err != nil {
-				stdout, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "--namespace=cert-manager",
-					"create", "secret", "generic", "clouddns", "--from-file=account.json=/dev/stdin")
-				return fmt.Errorf("failed to create clouddns secret: stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-
-			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
