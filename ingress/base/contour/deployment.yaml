@@ -46,7 +46,7 @@ spec:
             mountPath: /config
             readOnly: true
         name: contour
-      - image: quay.io/cybozu/contour-plus:0.3.0
+      - image: quay.io/cybozu/contour-plus:0.3.1
         name: contour-plus
         env:
           - name: CP_SERVICE_NAME
