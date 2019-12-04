@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cybozu-go/log"
 	certmanagerv1alpha2 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -114,9 +115,21 @@ spec:
 				if st.Type != certmanagerv1alpha2.CertificateConditionReady {
 					continue
 				}
-				if st.Status == "True" {
-					return nil
+				if st.Reason != "Ready" {
+					failed, err := isCertificateRequestFailed(cert)
+					if err != nil {
+						return err
+					}
+					if failed {
+						err = recreateCertificate("test-certificate", "cert-manager", certificate)
+						if err != nil {
+							return err
+						}
+						return fmt.Errorf("Certificate is recreated")
+					}
+					return fmt.Errorf("Certificate is not ready")
 				}
+				return nil
 			}
 			return errors.New("certificate is not ready")
 		}).Should(Succeed())
@@ -125,4 +138,56 @@ spec:
 		_, _, err = ExecAt(boot0, "kubectl", "get", "-n=cert-manager", "secrets/example-com-tls")
 		Expect(err).NotTo(HaveOccurred())
 	})
+}
+
+func isCertificateRequestFailed(cert certmanagerv1alpha2.Certificate) (bool, error) {
+	var certReqList certmanagerv1alpha2.CertificateRequestList
+	var targetCertReq *certmanagerv1alpha2.CertificateRequest
+
+	stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=cert-manager", "certificaterequest", "-o", "json")
+	if err != nil {
+		return false, fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+	}
+	err = json.Unmarshal(stdout, &certReqList)
+	if err != nil {
+		return false, err
+	}
+
+OUTER:
+	for _, cr := range certReqList.Items {
+		for _, or := range cr.OwnerReferences {
+			if or.Name == cert.Name {
+				targetCertReq = &cr
+				break OUTER
+			}
+		}
+	}
+
+	if targetCertReq == nil {
+		return false, nil
+	}
+
+	reason := targetCertReq.Status.Conditions[0].Reason
+	if reason == "Failed" {
+		log.Error("CertificateRequest failed", map[string]interface{}{
+			"certificate name":         cert.Name,
+			"certificate request name": targetCertReq.Name,
+		})
+		return true, nil
+	}
+	return false, fmt.Errorf("CertificateRequest is not ready")
+}
+
+func recreateCertificate(name, namespace, certificate string) error {
+	stdout, stderr, err := ExecAt(boot0, "kubectl", "delete", "-n", namespace, "certificate", name)
+	if err != nil {
+		return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+	}
+
+	stdout, stderr, err = ExecAtWithInput(boot0, []byte(certificate), "kubectl", "apply", "-f", "-")
+	if err != nil {
+		return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+	}
+
+	return nil
 }
