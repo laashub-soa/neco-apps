@@ -12,7 +12,9 @@ spec:
         spec:
           containers:
             - name: machines-endpoints
-              image: quay.io/cybozu/machines-endpoints:0.3.2
+              image: quay.io/cybozu/machines-endpoints:0.4.0
+              args:
+                - --monitoring-endpoints
               imagePullPolicy: IfNotPresent
           hostNetwork: true
           restartPolicy: OnFailure
