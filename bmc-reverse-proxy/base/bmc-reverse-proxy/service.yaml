@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bmc-reverse-proxy
   annotations:
-    metallb.universe.tf/address-pool: internet
+    metallb.universe.tf/address-pool: bastion
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
