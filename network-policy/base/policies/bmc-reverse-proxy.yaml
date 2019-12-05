@@ -1,0 +1,20 @@
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-bmc-allow
+  namespace: bmc-reverse-proxy
+spec:
+  order: 500.0
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: role == 'bmc'
+        ports:
+          - 443
+          - 5900
+      source:
+        selector: app.kubernetes.io/name == 'bmc-reverse-proxy'
+        namespaceSelector: team == 'neco'
