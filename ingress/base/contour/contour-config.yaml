@@ -13,4 +13,3 @@ data:
       configmap-name: contour-leader
       configmap-namespace: ingress
     accesslog-format: envoy
-

@@ -97,6 +97,9 @@ cd contour
 git diff vA.B.C...vX.Y.Z examples/contour
 ```
 
+Note that not all manifests inherit the upstream (e.g. contour and envoy deployments).
+Please check `kustomization.yaml` which manifest inherits or not.
+
 metallb
 -------
 
