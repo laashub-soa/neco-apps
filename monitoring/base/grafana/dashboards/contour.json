@@ -1,34 +1,4 @@
 {
-    "__inputs": [
-        {
-            "name": "DS_PROMETHEUS",
-            "label": "prometheus",
-            "description": "",
-            "type": "datasource",
-            "pluginId": "prometheus",
-            "pluginName": "Prometheus"
-        }
-    ],
-    "__requires": [
-        {
-            "type": "grafana",
-            "id": "grafana",
-            "name": "Grafana",
-            "version": "5.0.4"
-        },
-        {
-            "type": "panel",
-            "id": "graph",
-            "name": "Graph",
-            "version": "5.0.0"
-        },
-        {
-            "type": "datasource",
-            "id": "prometheus",
-            "name": "Prometheus",
-            "version": "5.0.0"
-        }
-    ],
     "annotations": {
         "list": [
             {
@@ -46,7 +16,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": null,
-    "iteration": 1532630524651,
+    "iteration": 1575616418657,
     "links": [],
     "panels": [
         {
@@ -56,6 +26,7 @@
             "dashes": false,
             "datasource": "prometheus",
             "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
                 "h": 8,
                 "w": 6,
@@ -77,6 +48,9 @@
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -87,7 +61,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "avg(contour_ingressroute_total{namespace=~\"$Namespace\"}) by (namespace)",
+                    "expr": "avg(contour_httpproxy_total{namespace=~\"$Namespace\"}) by (namespace)",
                     "format": "time_series",
                     "interval": "",
                     "intervalFactor": 1,
@@ -97,8 +71,9 @@
             ],
             "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
-            "title": "Total IngressRoutes",
+            "title": "Total HTTPProxies",
             "tooltip": {
                 "shared": true,
                 "sort": 0,
@@ -130,7 +105,11 @@
                     "min": null,
                     "show": true
                 }
-            ]
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
         },
         {
             "aliasColors": {},
@@ -139,6 +118,7 @@
             "dashes": false,
             "datasource": "prometheus",
             "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
                 "h": 8,
                 "w": 6,
@@ -160,6 +140,9 @@
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -170,7 +153,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "avg(contour_ingressroute_orphaned_total{namespace=~\"$Namespace\"}) by (namespace)",
+                    "expr": "avg(contour_httpproxy_orphaned_total{namespace=~\"$Namespace\"}) by (namespace)",
                     "format": "time_series",
                     "interval": "",
                     "intervalFactor": 1,
@@ -180,8 +163,9 @@
             ],
             "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
-            "title": "Orphaned IngressRoutes",
+            "title": "Orphaned HTTPProxies",
             "tooltip": {
                 "shared": true,
                 "sort": 0,
@@ -213,7 +197,11 @@
                     "min": null,
                     "show": true
                 }
-            ]
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
         },
         {
             "aliasColors": {},
@@ -222,6 +210,7 @@
             "dashes": false,
             "datasource": "prometheus",
             "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
                 "h": 8,
                 "w": 6,
@@ -243,6 +232,9 @@
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -253,7 +245,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "avg(contour_ingressroute_valid_total{namespace=~\"$Namespace\",vhost=~\"$VHost\"}) by (namespace,vhost)",
+                    "expr": "avg(contour_httpproxy_valid_total{namespace=~\"$Namespace\",vhost=~\"$VHost\"}) by (namespace,vhost)",
                     "format": "time_series",
                     "interval": "",
                     "intervalFactor": 1,
@@ -263,8 +255,9 @@
             ],
             "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
-            "title": "Valid IngressRoutes",
+            "title": "Valid HTTPProxies",
             "tooltip": {
                 "shared": true,
                 "sort": 0,
@@ -296,7 +289,11 @@
                     "min": null,
                     "show": true
                 }
-            ]
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
         },
         {
             "aliasColors": {},
@@ -305,6 +302,7 @@
             "dashes": false,
             "datasource": "prometheus",
             "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
                 "h": 8,
                 "w": 6,
@@ -326,6 +324,9 @@
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -336,7 +337,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "avg(contour_ingressroute_invalid_total{namespace=~\"$Namespace\",vhost=~\"$VHost\"}) by (namespace,vhost)",
+                    "expr": "avg(contour_httpproxy_invalid_total{namespace=~\"$Namespace\",vhost=~\"$VHost\"}) by (namespace,vhost)",
                     "format": "time_series",
                     "interval": "",
                     "intervalFactor": 1,
@@ -346,8 +347,9 @@
             ],
             "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
-            "title": "Invalid IngressRoutes",
+            "title": "Invalid HTTPProxies",
             "tooltip": {
                 "shared": true,
                 "sort": 0,
@@ -379,7 +381,11 @@
                     "min": null,
                     "show": true
                 }
-            ]
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
         },
         {
             "aliasColors": {},
@@ -388,6 +394,7 @@
             "dashes": false,
             "datasource": "prometheus",
             "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
                 "h": 8,
                 "w": 6,
@@ -409,6 +416,9 @@
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -419,7 +429,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "avg(contour_ingressroute_root_total{namespace=~\"$Namespace\"}) by (namespace)",
+                    "expr": "avg(contour_httpproxy_root_total{namespace=~\"$Namespace\"}) by (namespace)",
                     "format": "time_series",
                     "interval": "",
                     "intervalFactor": 1,
@@ -429,8 +439,9 @@
             ],
             "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
-            "title": "Root IngressRoutes",
+            "title": "Root HTTPProxies",
             "tooltip": {
                 "shared": true,
                 "sort": 0,
@@ -462,7 +473,11 @@
                     "min": null,
                     "show": true
                 }
-            ]
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
         },
         {
             "aliasColors": {},
@@ -471,6 +486,7 @@
             "dashes": false,
             "datasource": "prometheus",
             "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
                 "h": 8,
                 "w": 6,
@@ -491,6 +507,9 @@
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -524,6 +543,7 @@
             ],
             "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
             "title": "Contour LDS Updates",
             "tooltip": {
@@ -556,7 +576,11 @@
                     "min": null,
                     "show": true
                 }
-            ]
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
         },
         {
             "aliasColors": {},
@@ -565,6 +589,7 @@
             "dashes": false,
             "datasource": "prometheus",
             "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
                 "h": 8,
                 "w": 6,
@@ -585,6 +610,9 @@
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -618,6 +646,7 @@
             ],
             "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
             "title": "Contour CDS Updates",
             "tooltip": {
@@ -650,7 +679,11 @@
                     "min": null,
                     "show": true
                 }
-            ]
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
         },
         {
             "aliasColors": {},
@@ -659,6 +692,7 @@
             "dashes": false,
             "datasource": "prometheus",
             "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
                 "h": 8,
                 "w": 6,
@@ -679,6 +713,9 @@
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -712,6 +749,7 @@
             ],
             "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
             "title": "Contour RDS Updates",
             "tooltip": {
@@ -744,19 +782,29 @@
                     "min": null,
                     "show": true
                 }
-            ]
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
         }
     ],
     "refresh": "10s",
-    "schemaVersion": 16,
+    "schemaVersion": 19,
     "style": "dark",
     "tags": [],
     "templating": {
         "list": [
             {
                 "allValue": ".*",
-                "current": {},
+                "current": {
+                    "text": "All",
+                    "value": [
+                        "$__all"
+                    ]
+                },
                 "datasource": "prometheus",
+                "definition": "",
                 "hide": 0,
                 "includeAll": true,
                 "label": null,
@@ -766,6 +814,7 @@
                 "query": "label_values(namespace)",
                 "refresh": 2,
                 "regex": "",
+                "skipUrlSync": false,
                 "sort": 0,
                 "tagValuesQuery": "",
                 "tags": [],
@@ -775,8 +824,14 @@
             },
             {
                 "allValue": ".*",
-                "current": {},
+                "current": {
+                    "text": "All",
+                    "value": [
+                        "$__all"
+                    ]
+                },
                 "datasource": "prometheus",
+                "definition": "",
                 "hide": 0,
                 "includeAll": true,
                 "label": null,
@@ -786,6 +841,7 @@
                 "query": "label_values(vhost)",
                 "refresh": 2,
                 "regex": "",
+                "skipUrlSync": false,
                 "sort": 0,
                 "tagValuesQuery": "",
                 "tags": [],
