@@ -148,9 +148,9 @@ rules:
   - delete
   - deletecollection
 - apiGroups:
-  - contour.heptio.com
+  - projectcontour.io
   resources:
-  - ingressroutes
+  - httpproxies
   verbs:
   - get
   - list
