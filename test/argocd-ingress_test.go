@@ -84,6 +84,6 @@ func testArgoCDIngress() {
 		Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		s = strings.Split(string(stdout), "\n")
 		Expect(s[0]).To(Equal(strconv.Itoa(http.StatusOK)))
-		Expect(s[1]).To(Equal("application/grpc"))
+		Expect(s[1]).To(Equal("application/grpc-web+proto"))
 	})
 }
