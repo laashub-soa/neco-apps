@@ -55,7 +55,7 @@ func prepare() {
 }
 
 func issueKubeconfig() {
-	ExecSafeAt("kind", "cp", "$(kind get kubeconfig-path --name='kindtest')", "~/.kube/config")
+	// 	execsafeat("kind", "cp", "$(kind get kubeconfig-path --name='kindtest')", "~/.kube/config")
 }
 
 // ExecAt executes command at given host

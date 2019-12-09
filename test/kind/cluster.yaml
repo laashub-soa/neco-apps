@@ -14,6 +14,7 @@ kubeadmConfigPatches:
   apiServer:
     extraArgs:
       "enable-admission-plugins": "NamespaceLifecycle,LimitRanger,ServiceAccount,Priority,DefaultTolerationSeconds,DefaultStorageClass,PersistentVolumeClaimResize,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,NodeRestriction"
+      "feature-gates": "EvenPodsSpread=true"
   scheduler:
     extraVolumes:
       - name: "config"
@@ -22,6 +23,7 @@ kubeadmConfigPatches:
         readOnly: true
     extraArgs:
       config: /var/lib/scheduler/scheduler-config.yaml
+      "feature-gates": "EvenPodsSpread=true"
 
 # 1 control plane node and 3 workers
 nodes:
