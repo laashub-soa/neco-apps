@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elastic-operator
+  namespace: elastic-system
+  labels:
+    app.kubernetes.io/name: elastic-operator
+spec:
+  selector:
+    matchLabels:
+        app.kubernetes.io/name: elastic-operator
+        control-plane: elastic-operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: elastic-operator
+    spec:
+      containers:
+        - name: manager
+          ports:
+            - $patch: replace
+            - containerPort: 9443
+              name: webhook-server
+              protocol: TCP

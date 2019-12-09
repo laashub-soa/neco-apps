@@ -11,6 +11,8 @@ resources:
   - contour/pdb.yaml
   - contour/rbac_contour-plus.yaml
   - contour/service.yaml
+patchesStrategicMerge:
+  - contour/rbac.yaml
 patchesJson6902:
   - target:
       group: apiextensions.k8s.io
@@ -36,12 +38,6 @@ patchesJson6902:
       kind: CustomResourceDefinition
       name: tlscertificatedelegations.projectcontour.io
     path:  contour/jsonpatch/crd.yaml
-  - target:
-      group: rbac.authorization.k8s.io
-      version: v1beta1
-      kind: ClusterRoleBinding
-      name: contour
-    path: contour/jsonpatch/clusterrolebinding.yaml
   - target:
       group: rbac.authorization.k8s.io
       version: v1beta1
