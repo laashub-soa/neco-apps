@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: contour
+subjects:
+  - kind: ServiceAccount
+    name: contour
+    namespace: ingress
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: contour-leaderelection
+  namespace: projectcontour
+subjects:
+  - kind: ServiceAccount
+    name: contour
+    namespace: ingress
