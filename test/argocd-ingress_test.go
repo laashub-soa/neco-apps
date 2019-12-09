@@ -62,31 +62,28 @@ func testArgoCDIngress() {
 		Expect(s[0]).To(Equal(strconv.Itoa(http.StatusOK)))
 		Expect(s[1]).To(Equal("application/json"))
 
-		By("requesting to argocd-server with grpc")
-		// They are configured as routes in HTTPProxy individually to communicate with grpc and should be tested.
-		endpoints := []string{
-			"/account.AccountService",
-			"/application.ApplicationService",
-			"/certificate.CertificateService",
-			"/cluster.ClusterService",
-			"/cluster.SettingsService",
-			"/project.ProjectService",
-			"/repocreds.RepoCredsService",
-			"/repository.RepoServerService",
-			"/repository.RepositoryService",
-			"/session.SessionService",
-			"/version.VersionService",
-		}
-		for _, e := range endpoints {
-			stdout, stderr, err = ExecAt(boot0,
-				"curl", "-skL", "https://argocd.gcp0.dev-ne.co"+e+"/Read",
-				"-o", "/dev/null",
-				"-w", `'%{http_code}\n%{content_type}'`,
-			)
-			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-			s = strings.Split(string(stdout), "\n")
-			Expect(s[0]).To(Equal(strconv.Itoa(http.StatusOK)))
-			Expect(s[1]).To(Equal("application/grpc"))
-		}
+		By("requesting to argocd-server with gRPC")
+		stdout, stderr, err = ExecAt(boot0,
+			"curl", "-skL", "https://argocd.gcp0.dev-ne.co/account.AccountService/Read",
+			"-H", "'Content-Type: application/grpc'",
+			"-o", "/dev/null",
+			"-w", `'%{http_code}\n%{content_type}'`,
+		)
+		Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		s = strings.Split(string(stdout), "\n")
+		Expect(s[0]).To(Equal(strconv.Itoa(http.StatusOK)))
+		Expect(s[1]).To(Equal("application/grpc"))
+
+		By("requesting to argocd-server with gRPC-Web")
+		stdout, stderr, err = ExecAt(boot0,
+			"curl", "-skL", "https://argocd.gcp0.dev-ne.co/application.ApplicationService/Read",
+			"-H", "'Content-Type: application/grpc-web+proto'",
+			"-o", "/dev/null",
+			"-w", `'%{http_code}\n%{content_type}'`,
+		)
+		Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		s = strings.Split(string(stdout), "\n")
+		Expect(s[0]).To(Equal(strconv.Itoa(http.StatusOK)))
+		Expect(s[1]).To(Equal("application/grpc-web+proto"))
 	})
 }

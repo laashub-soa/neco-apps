@@ -11,101 +11,24 @@ spec:
     tls:
       secretName: argocd-server-tls
   routes:
-    # For static files
+    # For static files and Dex APIs
     - conditions:
-      - prefix: /
+        - prefix: /
       services:
-      - name: argocd-server-https
-        port: 443
+        - name: argocd-server-https
+          port: 443
       timeoutPolicy:
         response: 2m
         idle: 5m
-    # For gRPC API
+    # For gRPC APIs
     - conditions:
-      - prefix: /account.AccountService
+        - prefix: /
+        - header:
+            name: content-type
+            contains: application/grpc
       services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /application.ApplicationService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /certificate.CertificateService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /cluster.ClusterService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /cluster.SettingsService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /project.ProjectService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /repocreds.RepoCredsService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /repository.RepoServerService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /repository.RepositoryService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /session.SessionService
-      services:
-      - name: argocd-server
-        port: 443
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-    - conditions:
-      - prefix: /version.VersionService
-      services:
-      - name: argocd-server
-        port: 443
+        - name: argocd-server
+          port: 443
       timeoutPolicy:
         response: 2m
         idle: 5m
