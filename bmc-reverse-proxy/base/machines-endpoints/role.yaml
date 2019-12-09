@@ -5,7 +5,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources:
-      - configmap
+      - configmaps
     verbs: ["get", "update", "create"]
   - apiGroups: ["policy"]
     resources: ["podsecuritypolicies"]

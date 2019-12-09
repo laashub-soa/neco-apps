@@ -67,7 +67,8 @@ var _ = Describe("Test applications", func() {
 		Context("argocd-ingress", testArgoCDIngress)
 	}
 	Context("admission", testAdmission)
-	if !withKind {
+	// TODO: When cybozu-go/neco:release branch becomes to use bmc-https-server feature, remove !doUpgrade condition.
+	if !withKind && !doUpgrade {
 		Context("bmc-reverse-proxy", testBMCReverseProxy)
 	}
 })
