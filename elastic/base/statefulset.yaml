@@ -8,8 +8,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-        app.kubernetes.io/name: elastic-operator
-        control-plane: elastic-operator
+      app.kubernetes.io/name: elastic-operator
   template:
     metadata:
       labels:
