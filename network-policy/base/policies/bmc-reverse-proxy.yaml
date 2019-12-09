@@ -1,4 +1,17 @@
 apiVersion: crd.projectcalico.org/v1
+kind: NetworkSet
+metadata:
+  name: bmc
+  namespace: bmc-reverse-proxy
+  labels:
+    role: bmc
+spec:
+  nets:
+    - 10.72.16.0/20
+    - 10.76.16.0/20
+    - 10.78.16.0/20
+---
+apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy
 metadata:
   name: egress-bmc-allow
