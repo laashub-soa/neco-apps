@@ -51,18 +51,13 @@ spec:
     spec:
       containers:
       - name: contour
-        image: docker.io/projectcontour/contour:master
+        image: docker.io/projectcontour/contour:v1.0.1
         imagePullPolicy: Always
         command:
         - contour
         - certgen
         - --incluster
         - --kube
-        env:
-        - name: CONTOUR_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
       restartPolicy: Never
       serviceAccountName: contour-certgen
   parallelism: 1
