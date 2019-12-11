@@ -54,9 +54,16 @@ contour
 Check diffs of projectcontour/contour files as follows:
 
 ```console
-git clone https://github.com/projectcontour/contour
-cd contour
-git diff vA.B.C...vX.Y.Z examples/contour
+$ git clone https://github.com/projectcontour/contour
+$ cd contour
+$ git diff vA.B.C...vX.Y.Z examples/contour
+```
+
+Then, import YAML manifests as follows:
+
+```console
+$ git checkout vX.Y.Z
+$ cp examples/contour/*.yaml /path/to/neco-apps/ingress/base/contour/upstream
 ```
 
 Note that:
