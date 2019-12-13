@@ -5,4 +5,5 @@ metadata:
   namespace: argocd
 spec:
   source:
+    targetRevision: stage
     path: bmc-reverse-proxy/overlays/stage0
