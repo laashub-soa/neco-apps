@@ -31,12 +31,9 @@ spec:
         - --cert-dir=/certs
         image: quay.io/cybozu/neco-admission:0.1.1
         resources:
-          limits:
-            cpu: 100m
-            memory: 30Mi
           requests:
             cpu: 100m
-            memory: 20Mi
+            memory: 30Mi
         volumeMounts:
           - name: certs
             mountPath: /certs
