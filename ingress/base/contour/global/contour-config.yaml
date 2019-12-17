@@ -2,7 +2,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: contour
-  namespace: ingress
 data:
   contour.yaml: |
     disablePermitInsecure: false
@@ -10,5 +9,5 @@ data:
       minimumProtocolVersion: "1.2"
     leaderelection:
       configmap-name: contour-leader
-      configmap-namespace: ingress
+      configmap-namespace: ingress-global
     accesslog-format: envoy

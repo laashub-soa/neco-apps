@@ -5,5 +5,7 @@ resources:
   - 02-rbac.yaml
   - 02-service-contour.yaml
   - certificate.yaml
-  - contour-config.yaml
   - deployment.yaml
+  - pdb.yaml
+  - rbac_contour-plus.yaml
+  - service.yaml

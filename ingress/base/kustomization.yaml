@@ -4,51 +4,28 @@ resources:
   - contour/upstream/01-crds.yaml
   - contour/common
   - contour/global
-#  - contour/pdb.yaml
-#  - contour/rbac_contour-plus.yaml
-#  - contour/service.yaml
 patchesJson6902:
-  # - target:
-  #     group: apiextensions.k8s.io
-  #     version: v1beta1
-  #     kind: CustomResourceDefinition
-  #     name: httpproxies.projectcontour.io
-  #   path: contour/jsonpatch/crd.yaml
-  # - target:
-  #     group: apiextensions.k8s.io
-  #     version: v1beta1
-  #     kind: CustomResourceDefinition
-  #     name: ingressroutes.contour.heptio.com
-  #   path:  contour/jsonpatch/crd.yaml
-  # - target:
-  #     group: apiextensions.k8s.io
-  #     version: v1beta1
-  #     kind: CustomResourceDefinition
-  #     name: tlscertificatedelegations.contour.heptio.com
-  #   path:  contour/jsonpatch/crd.yaml
-  # - target:
-  #     group: apiextensions.k8s.io
-  #     version: v1beta1
-  #     kind: CustomResourceDefinition
-  #     name: tlscertificatedelegations.projectcontour.io
-  #   path:  contour/jsonpatch/crd.yaml
-  # - target:
-  #     group: rbac.authorization.k8s.io
-  #     version: v1beta1
-  #     kind: Role
-  #     name: contour-leaderelection
-  #     namespace: projectcontour
-  #   path: contour/jsonpatch/role.yaml
-  # - target:
-  #     group: rbac.authorization.k8s.io
-  #     version: v1beta1
-  #     kind: RoleBinding
-  #     name: contour-leaderelection
-  #     namespace: projectcontour
-  #   path: contour/jsonpatch/rolebinding.yaml
-  # - target:
-  #     version: v1
-  #     kind: Service
-  #     name: contour
-  #     namespace: projectcontour
-  #   path: contour/jsonpatch/service_contour.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: httpproxies.projectcontour.io
+    path: contour/jsonpatch/crd.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: ingressroutes.contour.heptio.com
+    path:  contour/jsonpatch/crd.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: tlscertificatedelegations.contour.heptio.com
+    path:  contour/jsonpatch/crd.yaml
+  - target:
+      group: apiextensions.k8s.io
+      version: v1beta1
+      kind: CustomResourceDefinition
+      name: tlscertificatedelegations.projectcontour.io
+    path:  contour/jsonpatch/crd.yaml
