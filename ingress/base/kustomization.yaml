@@ -4,6 +4,8 @@ resources:
   - contour/upstream/01-crds.yaml
   - contour/common
   - contour/global
+  - contour/forest
+  - contour/bastion
 patchesJson6902:
   - target:
       group: apiextensions.k8s.io
