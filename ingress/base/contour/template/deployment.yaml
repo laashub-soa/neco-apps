@@ -81,8 +81,6 @@ spec:
           name: contour-config
           readOnly: true
       - env:
-        - name: CP_SERVICE_NAME
-          value: ingress/contour-global
         - name: CP_DEFAULT_ISSUER_NAME
           value: clouddns
         image: quay.io/cybozu/contour-plus:0.3.1

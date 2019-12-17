@@ -4,12 +4,6 @@ resources:
   - contour/upstream/01-crds.yaml
   - contour/common
   - contour/global
-#  - contour/upstream/02-rbac.yaml
-#  - contour/upstream/02-service-contour.yaml
-#  - contour/certificate.yaml
-#  - contour/common.yaml
-#  - contour/contour-config.yaml
-#  - contour/deployment.yaml
 #  - contour/pdb.yaml
 #  - contour/rbac_contour-plus.yaml
 #  - contour/service.yaml

@@ -1,19 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: ingress-global
 resources:
   - ../template
-patchesJson6902:
-  - target:
-      group: rbac.authorization.k8s.io
-      version: v1beta1
-      kind: Role
-      name: contour-leaderelection
-      namespace: projectcontour
-    path: jsonpatch/role.yaml
-  - target:
-      group: rbac.authorization.k8s.io
-      version: v1beta1
-      kind: RoleBinding
-      name: contour-leaderelection
-      namespace: projectcontour
-    path: jsonpatch/rolebinding.yaml
+patchesStrategicMerge:
+  - rbac.yaml
+  - deployment.yaml
