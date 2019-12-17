@@ -240,8 +240,18 @@
                     },
                     {
                         "selected": false,
-                        "text": "ingress",
-                        "value": "ingress"
+                        "text": "ingress-global",
+                        "value": "ingress-global"
+                    },
+                    {
+                        "selected": false,
+                        "text": "ingress-forest",
+                        "value": "ingress-forest"
+                    },
+                    {
+                        "selected": false,
+                        "text": "ingress-bastion",
+                        "value": "ingress-bastion"
                     },
                     {
                         "selected": false,

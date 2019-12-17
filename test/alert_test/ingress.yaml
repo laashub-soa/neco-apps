@@ -4,11 +4,11 @@ rule_files:
 tests:
   - interval: 1m
     input_series:
-      - series: 'up{job="contour"}'
+      - series: 'up{job="contour", kubernetes_namespace="ingress-global"}'
         values: '0+0x10'
     alert_rule_test:
       - eval_time: 10m
-        alertname: ContourDown
+        alertname: ContourGlobalDown
         exp_alerts:
           - exp_labels:
               severity: critical
@@ -17,11 +17,11 @@ tests:
               summary: Contour has disappeared from Prometheus target discovery.
   - interval: 1m
     input_series:
-      - series: 'up{job="ingress"}'
+      - series: 'up{job="ingress", kubernetes_namespace="ingress-global"}'
         values: '0+0x10'
     alert_rule_test:
       - eval_time: 10m
-        alertname: IngressDown
+        alertname: IngressGlobalDown
         exp_alerts:
           - exp_labels:
               severity: critical
