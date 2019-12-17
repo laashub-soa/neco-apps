@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -20,7 +19,6 @@ import (
 )
 
 const (
-	appSyncOrderFile   = "../app-sync-order.txt"
 	argoCDPasswordFile = "./argocd-password.txt"
 
 	grafanaSecret = `apiVersion: v1
@@ -106,26 +104,6 @@ func testSetup() {
 			ExecSafeAt(boot0, "ckecli", "sabakan", "disable")
 		})
 	}
-
-	It("should list all apps in app-sync-order.txt", func() {
-		appList := loadSyncOrder()
-		kustomFile, err := filepath.Abs("../argocd-config/base/kustomization.yaml")
-		Expect(err).ShouldNot(HaveOccurred())
-		stdout, err := ioutil.ReadFile(kustomFile)
-		Expect(err).ShouldNot(HaveOccurred())
-		k := struct {
-			Resources []string `json:"resources"`
-		}{}
-		Expect(yaml.Unmarshal(stdout, &k)).ShouldNot(HaveOccurred())
-		var resources []string
-		for _, r := range k.Resources {
-			r = r[:len(r)-len(filepath.Ext(r))]
-			resources = append(resources, r)
-		}
-		sort.Strings(appList)
-		sort.Strings(resources)
-		Expect(appList).Should(Equal(resources))
-	})
 
 	if !doUpgrade {
 		It("should create secrets of account.json", func() {
@@ -271,23 +249,6 @@ func testSetup() {
 	}
 }
 
-func loadSyncOrder() []string {
-	orderFileAbs, err := filepath.Abs(appSyncOrderFile)
-	Expect(err).ShouldNot(HaveOccurred())
-	stdout, err := ioutil.ReadFile(orderFileAbs)
-	Expect(err).ShouldNot(HaveOccurred())
-	lines := strings.Split(string(stdout), "\n")
-	var results []string
-	for _, line := range lines {
-		if line == "" {
-			continue
-		}
-		results = append(results, line)
-	}
-
-	return results
-}
-
 func applyAndWaitForApplications() {
 	By("creating Argo CD app")
 	if withKind {
@@ -296,12 +257,26 @@ func applyAndWaitForApplications() {
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
 	}
 
-	syncOrder := loadSyncOrder()
+	By("getting application list")
+	kustomFile, err := filepath.Abs("../argocd-config/base/kustomization.yaml")
+	Expect(err).ShouldNot(HaveOccurred())
+	stdout, err := ioutil.ReadFile(kustomFile)
+	Expect(err).ShouldNot(HaveOccurred())
+	k := struct {
+		Resources []string `json:"resources"`
+	}{}
+	Expect(yaml.Unmarshal(stdout, &k)).ShouldNot(HaveOccurred())
+	var appList []string
+	for _, r := range k.Resources {
+		r = r[:len(r)-len(filepath.Ext(r))]
+		appList = append(appList, r)
+	}
+	fmt.Printf("aplication list: %v", appList)
+	Expect(appList).ShouldNot(HaveLen(0))
 
 	By("waiting initialization")
 	Eventually(func() error {
-	OUTER:
-		for _, appName := range syncOrder {
+		for _, appName := range appList {
 			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
@@ -320,32 +295,11 @@ func applyAndWaitForApplications() {
 				app.Operation == nil {
 				continue
 			}
-			for _, cond := range st.Conditions {
-				if cond.Type == argocd.ApplicationConditionSyncError {
-					continue OUTER
-				}
-			}
+
 			return fmt.Errorf("%s is not initialized. argocd app get %s -o json: %s", appName, appName, appStdout)
 		}
 		return nil
 	}).Should(Succeed())
-
-	for _, appName := range syncOrder {
-		By("syncing " + appName + " manually")
-		if appName != "cert-manager" {
-			ExecSafeAt(boot0, "argocd", "app", "sync", "--prune", appName)
-			continue
-		}
-
-		// cert-manager often fails to synchronize due to unidentified reasons.
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", appName)
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-	}
 }
 
 func setupArgoCD() {
