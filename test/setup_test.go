@@ -228,6 +228,7 @@ func testSetup() {
 
 	if doUpgrade {
 		It("delete ingress namespace", func() {
+			ExecSafeAt(boot0, "argocd", "app", "set", "namespaces", "--sync-policy", "none")
 			ExecSafeAt(boot0, "kubectl", "delete", "namespace", "ingress")
 		})
 	}
