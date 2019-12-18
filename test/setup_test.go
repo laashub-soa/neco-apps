@@ -252,7 +252,14 @@ func testSetup() {
 func applyAndWaitForApplications() {
 	By("creating Argo CD app")
 	if withKind {
-		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/kind")
+		ExecSafeAt(boot0, "argocd", "app", "create", "argocd-config",
+			"--repo", "https://github.com/cybozu-go/neco-apps.git",
+			"--path", "argocd-config/overlays/kind",
+			"--dest-namespace", "argocd",
+			"--dest-server", "https://kubernetes.default.svc",
+			"--sync-policy", "none",
+			"--revision", "release")
+		ExecSafeAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/kind")
 	} else {
 		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
 	}
@@ -271,7 +278,7 @@ func applyAndWaitForApplications() {
 		r = r[:len(r)-len(filepath.Ext(r))]
 		appList = append(appList, r)
 	}
-	fmt.Printf("aplication list: %v", appList)
+	fmt.Printf("aplication list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
 	By("waiting initialization")
