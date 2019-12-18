@@ -122,7 +122,7 @@ spec:
 		By("checking PodDisruptionBudget for contour Deployment")
 		for _, ns := range ingressNamespaces {
 			pdb := policyv1beta1.PodDisruptionBudget{}
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "contour-pdb", "-n", "ingress-"+ns, "-o", "json")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "contour-pdb", "-n", ns, "-o", "json")
 			if err != nil {
 				Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 			}
@@ -134,7 +134,7 @@ spec:
 		By("checking PodDisruptionBudget for envoy Deployment")
 		for _, ns := range ingressNamespaces {
 			pdb := policyv1beta1.PodDisruptionBudget{}
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "envoy-pdb", "-n", "ingress-"+ns, "-o", "json")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "envoy-pdb", "-n", ns, "-o", "json")
 			if err != nil {
 				Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 			}
