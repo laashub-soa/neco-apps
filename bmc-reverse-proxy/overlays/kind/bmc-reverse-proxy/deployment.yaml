@@ -16,3 +16,5 @@ spec:
       containers:
         - image: quay.io/cybozu/testhttpd:0
           name: bmc-reverse-proxy
+          volumeMounts: null
+      volumes: null
