@@ -197,7 +197,7 @@ metadata:
   name: root
   namespace: test-ingress
   annotations:
-	kubernetes.io/ingress.class: bastion
+    kubernetes.io/ingress.class: bastion
 spec:
   virtualhost:
     fqdn: %s
