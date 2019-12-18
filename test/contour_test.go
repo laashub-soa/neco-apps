@@ -416,6 +416,6 @@ spec:
 			"-s",
 		)
 		Expect(err).To(HaveOccurred())
-		Expect(stdout).To(Equal("404"))
+		Expect(string(stdout)).To(Equal("404"))
 	})
 }
