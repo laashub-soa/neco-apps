@@ -154,8 +154,8 @@ metadata:
   name: tls
   namespace: test-ingress
   annotations:
-	kubernetes.io/tls-acme: "true"
-	kubernetes.io/ingress.class: global
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: global
 spec:
   virtualhost:
     fqdn: %s
@@ -180,7 +180,7 @@ metadata:
   name: root
   namespace: test-ingress
   annotations:
-	kubernetes.io/ingress.class: global
+    kubernetes.io/ingress.class: global
 spec:
   virtualhost:
     fqdn: %s
@@ -194,7 +194,7 @@ spec:
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
 metadata:
-  name: root
+  name: bastion
   namespace: test-ingress
   annotations:
     kubernetes.io/ingress.class: bastion
