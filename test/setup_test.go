@@ -1,10 +1,12 @@
 package test
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -14,6 +16,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/yaml"
 )
 
@@ -266,11 +269,21 @@ func applyAndWaitForApplications(overlay string) {
 	By("getting application list")
 	stdout, _, err := kustomizeBuild("../argocd-config/overlays/" + overlay)
 	Expect(err).ShouldNot(HaveOccurred())
-	var apps []argocd.Application
-	err = yaml.Unmarshal(stdout, &apps)
-	Expect(err).ShouldNot(HaveOccurred())
+
 	var appList []string
-	for _, app := range apps {
+	y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
+	for {
+		data, err := y.Read()
+		if err == io.EOF {
+			break
+		}
+		Expect(err).ShouldNot(HaveOccurred())
+
+		var app argocd.Application
+		err = yaml.Unmarshal(data, &app)
+		if err != nil {
+			continue
+		}
 		appList = append(appList, app.Name)
 	}
 	fmt.Printf("aplication list: %v\n", appList)
