@@ -240,21 +240,32 @@ spec:
 		}).Should(Succeed())
 
 		By("accessing DNS port of some node as squid")
-		stdout, _, err = ExecAt(boot0, "kubectl", "get", "pods", "-n=internet-egress", "-l=app.kubernetes.io/name=squid", "-o", "json")
-		Expect(err).NotTo(HaveOccurred())
-		squidPodList := new(corev1.PodList)
-		err = json.Unmarshal(stdout, squidPodList)
-		Expect(err).NotTo(HaveOccurred())
-		var podName string
-		for _, pod := range squidPodList.Items {
-			for _, cond := range pod.Status.Conditions {
-				if cond.Type == corev1.PodReady {
-					podName = pod.Name
+		Eventually(func() error {
+			stdout, _, err = ExecAt(boot0, "kubectl", "get", "pods", "-n=internet-egress", "-l=app.kubernetes.io/name=squid", "-o", "json")
+			if err != nil {
+				return err
+			}
+
+			squidPodList := new(corev1.PodList)
+			err = json.Unmarshal(stdout, squidPodList)
+			if err != nil {
+				return err
+			}
+
+			var podName string
+		OUTER:
+			for _, pod := range squidPodList.Items {
+				for _, cond := range pod.Status.Conditions {
+					if cond.Type == corev1.PodReady {
+						podName = pod.Name
+						break OUTER
+					}
 				}
 			}
-		}
-		Expect(podName).ShouldNot(HaveLen(0))
-		Eventually(func() error {
+			if podName == "" {
+				return errors.New("podName should not be blank")
+			}
+
 			stdout, stderr, err := ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", podName, "-c", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
 			switch t := err.(type) {
 			case *ssh.ExitError:
