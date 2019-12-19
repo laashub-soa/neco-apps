@@ -1,10 +1,61 @@
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: neco-admission
+  annotations:
+    cert-manager.io/inject-ca-from: kube-system/neco-admission
+webhooks:
+- name: mhttpproxy.kb.io
+  namespaceSelector:
+    matchExpressions:
+    - key: control-plane
+      operator: NotIn
+      values: ["true"]
+  clientConfig:
+    service:
+      name: neco-admission
+      namespace: kube-system
+      path: /mutate-projectcontour-io-httpproxy
+  failurePolicy: Fail
+  rules:
+  - apiGroups:
+    - projectcontour.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    resources:
+    - httpproxies
+---
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: neco-admission
   annotations:
     cert-manager.io/inject-ca-from: kube-system/neco-admission
 webhooks:
+- name: vhttpproxy.kb.io
+  namespaceSelector:
+    matchExpressions:
+    - key: control-plane
+      operator: NotIn
+      values: ["true"]
+  clientConfig:
+    service:
+      name: neco-admission
+      namespace: kube-system
+      path: /validate-projectcontour-io-httpproxy
+  failurePolicy: Fail
+  rules:
+  - apiGroups:
+    - projectcontour.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - httpproxies
 - name: vnetworkpolicy.kb.io
   namespaceSelector:
     matchExpressions:

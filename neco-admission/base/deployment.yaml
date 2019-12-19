@@ -29,7 +29,7 @@ spec:
       - name: neco-admission
         args:
         - --cert-dir=/certs
-        image: quay.io/cybozu/neco-admission:0.1.1
+        image: quay.io/cybozu/neco-admission:0.2.1
         resources:
           requests:
             cpu: 100m
