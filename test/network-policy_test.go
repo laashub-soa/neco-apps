@@ -289,14 +289,15 @@ spec:
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 
 		By("waiting for pods to be ready")
+		var unboundPodName string
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n=internet-egress", "-l=app.kubernetes.io/name=unbound", "-o", "go-template='{{ (index .items 0).metadata.name }}'")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			podName = string(stdout)
+			unboundPodName = string(stdout)
 
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n=internet-egress", podName, "-c", "ubuntu", "true")
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n=internet-egress", unboundPodName, "-c", "ubuntu", "true")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -305,7 +306,7 @@ spec:
 
 		By("accessing DNS port of some node as unbound")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", podName, "-c", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
+			stdout, stderr, err := ExecAtWithInput(boot0, []byte("Xclose"), "kubectl", "-n", "internet-egress", "exec", "-i", unboundPodName, "-c", "ubuntu", "--", "timeout", "3s", "telnet", nodeIP, "53", "-e", "X")
 			switch t := err.(type) {
 			case *ssh.ExitError:
 				// telnet command returns 124 when it times out
