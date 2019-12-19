@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -209,7 +208,11 @@ func testSetup() {
 			setupArgoCD()
 		}
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
-		applyAndWaitForApplications()
+		if withKind {
+			applyAndWaitForApplications("kind")
+		} else {
+			applyAndWaitForApplications("gcp")
+		}
 	})
 
 	if !withKind {
@@ -249,34 +252,26 @@ func testSetup() {
 	}
 }
 
-func applyAndWaitForApplications() {
+func applyAndWaitForApplications(overlay string) {
 	By("creating Argo CD app")
-	if withKind {
-		ExecSafeAt(boot0, "argocd", "app", "create", "argocd-config",
-			"--repo", "https://github.com/cybozu-go/neco-apps.git",
-			"--path", "argocd-config/overlays/kind",
-			"--dest-namespace", "argocd",
-			"--dest-server", "https://kubernetes.default.svc",
-			"--sync-policy", "none",
-			"--revision", "release")
-		ExecSafeAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/kind")
-	} else {
-		ExecSafeAt(boot0, "kubectl", "apply", "-k", "./neco-apps/argocd-config/overlays/gcp")
-	}
+	ExecSafeAt(boot0, "argocd", "app", "create", "argocd-config",
+		"--repo", "https://github.com/cybozu-go/neco-apps.git",
+		"--path", "argocd-config/overlays/"+overlay,
+		"--dest-namespace", "argocd",
+		"--dest-server", "https://kubernetes.default.svc",
+		"--sync-policy", "none",
+		"--revision", "release")
+	ExecSafeAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/"+overlay)
 
 	By("getting application list")
-	kustomFile, err := filepath.Abs("../argocd-config/base/kustomization.yaml")
+	stdout, _, err := kustomizeBuild("../argocd-config/overlays/" + overlay)
 	Expect(err).ShouldNot(HaveOccurred())
-	stdout, err := ioutil.ReadFile(kustomFile)
+	var apps []argocd.Application
+	err = yaml.Unmarshal(stdout, &apps)
 	Expect(err).ShouldNot(HaveOccurred())
-	k := struct {
-		Resources []string `json:"resources"`
-	}{}
-	Expect(yaml.Unmarshal(stdout, &k)).ShouldNot(HaveOccurred())
 	var appList []string
-	for _, r := range k.Resources {
-		r = r[:len(r)-len(filepath.Ext(r))]
-		appList = append(appList, r)
+	for _, app := range apps {
+		appList = append(appList, app.Name)
 	}
 	fmt.Printf("aplication list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
