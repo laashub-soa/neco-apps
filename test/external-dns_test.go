@@ -43,7 +43,7 @@ apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
   name: test-endpoint
-  namespace: ingress
+  namespace: ingress-global
 spec:
   endpoints:
   - dnsName: %s
@@ -91,7 +91,7 @@ spec:
 			fields := strings.Fields(string(bytes.TrimSpace(stdout)))
 			if len(fields) < 5 || fields[4] != "10.0.5.9" {
 				// ignore errors while gathering additional information
-				dumpEndpoint, _, _ := ExecAt(boot0, "kubectl", "get", "-n", "ingress", "dnsendpoint", "test-endpoint", "-o", "yaml")
+				dumpEndpoint, _, _ := ExecAt(boot0, "kubectl", "get", "-n", "ingress-global", "dnsendpoint", "test-endpoint", "-o", "yaml")
 				podLog, _, _ := ExecAt(boot0, "kubectl", "-n", "external-dns", "logs", "-l", "app.kubernetes.io/name=external-dns", "--tail", "10000")
 				return fmt.Errorf("expected IP address is 10.0.5.9, but actual response is %s\ndump of DNSEndpoint: %s\nexternal-dns logs: %s", string(stdout), string(dumpEndpoint), string(podLog))
 			}
@@ -99,7 +99,7 @@ spec:
 		}).Should(Succeed())
 
 		By("cleaning up")
-		_, stderr, err = ExecAt(boot0, "kubectl", "delete", "-n=ingress", "dnsendpoints/test-endpoint")
+		_, stderr, err = ExecAt(boot0, "kubectl", "delete", "-n=ingress-global", "dnsendpoints/test-endpoint")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 }
