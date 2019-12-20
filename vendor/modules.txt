@@ -47,7 +47,7 @@ github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
 # github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
-# github.com/google/go-cmp v0.3.0
+# github.com/google/go-cmp v0.3.1
 github.com/google/go-cmp/cmp
 github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
@@ -135,6 +135,8 @@ github.com/onsi/gomega/types
 github.com/pelletier/go-buffruneio
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
+# github.com/projectcontour/contour v1.0.1
+github.com/projectcontour/contour/apis/projectcontour/v1
 # github.com/prometheus/client_golang v1.2.1
 github.com/prometheus/client_golang/api
 github.com/prometheus/client_golang/api/prometheus/v1
@@ -144,7 +146,7 @@ github.com/prometheus/common/model
 github.com/sergi/go-diff/diffmatchpatch
 # github.com/sirupsen/logrus v1.4.2
 github.com/sirupsen/logrus
-# github.com/spf13/pflag v1.0.3
+# github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
 # github.com/src-d/gcfg v1.4.0
 github.com/src-d/gcfg
@@ -281,7 +283,7 @@ gopkg.in/tomb.v1
 gopkg.in/warnings.v0
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
-# k8s.io/api v0.0.0-20190918155943-95b840bb6a1f
+# k8s.io/api v0.0.0-20190918195907-bd6ac527cfd2
 k8s.io/api/apps/v1
 k8s.io/api/core/v1
 k8s.io/api/policy/v1beta1

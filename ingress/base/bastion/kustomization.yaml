@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ingress-bastion
+resources:
+  - ../template
+  - contour-config.yaml
+patchesStrategicMerge:
+  - rbac.yaml
+  - deployment.yaml
+  - rbac_contour-plus.yaml
+  - service.yaml
+  - certificate.yaml

@@ -127,10 +127,6 @@ func testSetup() {
 		Expect(appList).Should(Equal(resources))
 	})
 
-	It("should re-issue kubeconfig", func() {
-		issueKubeconfig()
-	})
-
 	if !doUpgrade {
 		It("should create secrets of account.json", func() {
 			By("loading account.json")
@@ -229,6 +225,13 @@ func testSetup() {
 		}
 		ExecSafeAt(boot0, "cd neco-apps; git checkout "+commitID)
 	})
+
+	if doUpgrade {
+		It("delete ingress namespace", func() {
+			ExecSafeAt(boot0, "argocd", "app", "set", "namespaces", "--sync-policy", "none")
+			ExecSafeAt(boot0, "kubectl", "delete", "namespace", "ingress")
+		})
+	}
 
 	It("should setup applications", func() {
 		if !doUpgrade {

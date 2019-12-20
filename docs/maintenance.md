@@ -70,6 +70,10 @@ Note that:
 - We do not use contour's certificate issuance feature, but use cert-manager to issue certificates required for gRPC.
 - We change Envoy manifest from DaemonSet to Deployment.
 - Not all manifests inherit the upstream. Please check `kustomization.yaml` which manifest inherits or not.
+  - If the manifest in the upstream is usable as is, use it from `ingress/base/kustomization.yaml`.
+  - If the manifest needs modification:
+    - If the manifest is for a cluster-wide resource, put a modified version in the `common` directory.
+    - If the manifest is for a namespaced resource, put a template in the `template` directory and apply patches.
 
 metallb
 -------

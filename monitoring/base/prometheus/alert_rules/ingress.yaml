@@ -1,18 +1,54 @@
 groups:
   - name: ingress
     rules:
-      - alert: ContourDown
+      - alert: ContourGlobalDown
         expr: |
-          absent(up{job="contour"} == 1)
+          absent(up{job="contour", kubernetes_namespace="ingress-global"} == 1)
         labels:
           severity: critical
         for: 10m
         annotations:
           summary: Contour has disappeared from Prometheus target discovery.
           runbook: Please consider to find root causes, and solve the problems
-      - alert: IngressDown
+      - alert: IngressGlobalDown
         expr: |
-          absent(up{job="ingress"} == 1)
+          absent(up{job="ingress", kubernetes_namespace="ingress-global"} == 1)
+        labels:
+          severity: critical
+        for: 10m
+        annotations:
+          summary: Ingress has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: ContourForestDown
+        expr: |
+          absent(up{job="contour", kubernetes_namespace="ingress-forest"} == 1)
+        labels:
+          severity: critical
+        for: 10m
+        annotations:
+          summary: Contour has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: IngressForestDown
+        expr: |
+          absent(up{job="ingress", kubernetes_namespace="ingress-forest"} == 1)
+        labels:
+          severity: critical
+        for: 10m
+        annotations:
+          summary: Ingress has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: ContourBastionDown
+        expr: |
+          absent(up{job="contour", kubernetes_namespace="ingress-bastion"} == 1)
+        labels:
+          severity: critical
+        for: 10m
+        annotations:
+          summary: Contour has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: IngressBastionDown
+        expr: |
+          absent(up{job="ingress", kubernetes_namespace="ingress-bastion"} == 1)
         labels:
           severity: critical
         for: 10m
