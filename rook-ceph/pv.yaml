@@ -19,7 +19,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sdb
+    path: /dev/ceph_lv_1
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -42,7 +42,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sdc
+    path: /dev/ceph_lv_2
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -65,7 +65,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sdd
+    path: /dev/ceph_lv_3
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -88,7 +88,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sde
+    path: /dev/ceph_lv_4
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -111,7 +111,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sdf
+    path: /dev/ceph_lv_5
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -134,7 +134,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sdg
+    path: /dev/ceph_lv_6
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -157,7 +157,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sdh
+    path: /dev/ceph_lv_7
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -180,7 +180,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sdi
+    path: /dev/ceph_lv_8
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -203,7 +203,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /dev/sdj
+    path: /dev/ceph_lv_9
   nodeAffinity:
     required:
       nodeSelectorTerms:
