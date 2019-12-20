@@ -11,7 +11,7 @@ spec:
     path: ingress/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: ingress
+    namespace: default
   syncPolicy:
     automated:
       prune: true

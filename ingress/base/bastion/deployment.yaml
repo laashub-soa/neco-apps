@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contour
+  namespace: ingress
+spec:
+  template:
+    spec:
+      containers:
+      - args:
+        - serve
+        - --incluster
+        - --use-extensions-v1beta1-ingress
+        - --xds-address=0.0.0.0
+        - --xds-port=8001
+        - --envoy-service-http-port=8080
+        - --envoy-service-https-port=8443
+        - --contour-cafile=/certs/ca.crt
+        - --contour-cert-file=/certs/tls.crt
+        - --contour-key-file=/certs/tls.key
+        - --config-path=/config/contour.yaml
+        - --ingress-class-name=bastion
+        name: contour
+      - args:
+        - --ingress-class-name=bastion
+        env:
+        - name: CP_SERVICE_NAME
+          value: ingress-bastion/envoy
+        name: contour-plus

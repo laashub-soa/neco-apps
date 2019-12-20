@@ -271,8 +271,11 @@ scrape_configs:
     kubernetes_sd_configs:
       - role: endpoints
         namespaces:
-          names: ["ingress"]
+          names: ["ingress-global", "ingress-forest", "ingress-bastion"]
     relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
       - source_labels: [__meta_kubernetes_service_name]
         action: keep
         regex: contour-metrics
@@ -288,8 +291,11 @@ scrape_configs:
     kubernetes_sd_configs:
       - role: endpoints
         namespaces:
-          names: ["ingress"]
+          names: ["ingress-global", "ingress-forest", "ingress-bastion"]
     relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
       - source_labels: [__meta_kubernetes_service_name]
         action: keep
         regex: contour-metrics
@@ -307,8 +313,11 @@ scrape_configs:
     kubernetes_sd_configs:
       - role: pod
         namespaces:
-          names: ["ingress"]
+          names: ["ingress-global", "ingress-forest", "ingress-bastion"]
     relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
       # Discovered Labels
       #   __address__="10.64.17.66"
       #   __meta_kubernetes_pod_annotation_prometheus_io_path="/stats/prometheus"
