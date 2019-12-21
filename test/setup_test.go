@@ -226,13 +226,6 @@ func testSetup() {
 		ExecSafeAt(boot0, "cd neco-apps; git checkout "+commitID)
 	})
 
-	if doUpgrade {
-		It("delete ingress namespace", func() {
-			ExecSafeAt(boot0, "argocd", "app", "set", "namespaces", "--sync-policy", "none")
-			ExecSafeAt(boot0, "kubectl", "delete", "namespace", "ingress")
-		})
-	}
-
 	It("should setup applications", func() {
 		if !doUpgrade {
 			setupArgoCD()
