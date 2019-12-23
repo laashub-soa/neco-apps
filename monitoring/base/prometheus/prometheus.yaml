@@ -10,6 +10,7 @@ rule_files:
   - /etc/prometheus/etcd.yaml
   - /etc/prometheus/external-dns.yaml
   - /etc/prometheus/ingress.yaml
+  - /etc/prometheus/kube-state-metrics.yaml
   - /etc/prometheus/kubernetes.yaml
   - /etc/prometheus/metallb.yaml
   - /etc/prometheus/monitoring.yaml
