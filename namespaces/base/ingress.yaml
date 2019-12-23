@@ -1,7 +1,25 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ingress
+  name: ingress-global
+  labels:
+    control-plane: "true"
+    topolvm.cybozu.com/webhook: ignore
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-bastion
+  labels:
+    control-plane: "true"
+    topolvm.cybozu.com/webhook: ignore
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-forest
   labels:
     control-plane: "true"
     topolvm.cybozu.com/webhook: ignore

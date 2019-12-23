@@ -15,7 +15,7 @@ import (
 func testArgoCDIngress() {
 	It("should login via HTTPProxy as admin", func() {
 		By("getting the ip address of the contour LoadBalancer")
-		stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=ingress", "get", "service/contour-bastion", "-o=json")
+		stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=ingress-bastion", "get", "service/envoy", "-o=json")
 		Expect(err).ShouldNot(HaveOccurred())
 
 		svc := new(corev1.Service)

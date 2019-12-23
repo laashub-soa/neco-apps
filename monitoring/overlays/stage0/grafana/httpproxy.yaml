@@ -5,6 +5,7 @@ metadata:
   namespace: monitoring
   annotations:
     kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: bastion
 spec:
   virtualhost:
     fqdn: grafana.monitoring.stage0.cybozu-ne.co

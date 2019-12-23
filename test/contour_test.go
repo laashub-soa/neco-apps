@@ -13,6 +13,8 @@ import (
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 )
 
+var ingressNamespaces = []string{"ingress-global", "ingress-forest", "ingress-bastion"}
+
 func testContour() {
 	It("should create test-ingress namespace", func() {
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-ingress", "--ignore-not-found=true")
@@ -21,20 +23,22 @@ func testContour() {
 
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=ingress",
-				"get", "deployment/contour", "-o=json")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
+			for _, ns := range ingressNamespaces {
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "deployment/contour", "-o=json")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
 
-			deployment := new(appsv1.Deployment)
-			err = json.Unmarshal(stdout, deployment)
-			if err != nil {
-				return err
-			}
+				deployment := new(appsv1.Deployment)
+				err = json.Unmarshal(stdout, deployment)
+				if err != nil {
+					return err
+				}
 
-			if deployment.Status.AvailableReplicas != 2 {
-				return fmt.Errorf("contour deployment's AvailableReplica is not 2: %d", int(deployment.Status.AvailableReplicas))
+				if deployment.Status.AvailableReplicas != 2 {
+					return fmt.Errorf("contour deployment's AvailableReplica is not 2 in %s: %d", ns, int(deployment.Status.AvailableReplicas))
+				}
 			}
 			return nil
 		}).Should(Succeed())
@@ -116,27 +120,33 @@ spec:
 		}).Should(Succeed())
 
 		By("checking PodDisruptionBudget for contour Deployment")
-		pdb := policyv1beta1.PodDisruptionBudget{}
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "contour-pdb", "-n", "ingress", "-o", "json")
-		if err != nil {
-			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		for _, ns := range ingressNamespaces {
+			pdb := policyv1beta1.PodDisruptionBudget{}
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "contour-pdb", "-n", ns, "-o", "json")
+			if err != nil {
+				Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+			}
+			err = json.Unmarshal(stdout, &pdb)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(pdb.Status.CurrentHealthy).Should(Equal(int32(2)), "namespace=%s", ns)
 		}
-		err = json.Unmarshal(stdout, &pdb)
-		Expect(err).ShouldNot(HaveOccurred())
-		Expect(pdb.Status.CurrentHealthy).Should(Equal(int32(2)))
 
 		By("checking PodDisruptionBudget for envoy Deployment")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "envoy-pdb", "-n", "ingress", "-o", "json")
-		if err != nil {
-			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		for _, ns := range ingressNamespaces {
+			pdb := policyv1beta1.PodDisruptionBudget{}
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "envoy-pdb", "-n", ns, "-o", "json")
+			if err != nil {
+				Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+			}
+			err = json.Unmarshal(stdout, &pdb)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(pdb.Status.CurrentHealthy).Should(Equal(int32(3)), "namespace=%s", ns)
 		}
-		err = json.Unmarshal(stdout, &pdb)
-		Expect(err).ShouldNot(HaveOccurred())
-		Expect(pdb.Status.CurrentHealthy).Should(Equal(int32(3)))
 
 		By("creating HTTPProxy")
 		fqdnHTTP := testID + "-http.test-ingress.gcp0.dev-ne.co"
 		fqdnHTTPS := testID + "-https.test-ingress.gcp0.dev-ne.co"
+		fqdnBastion := testID + "-bastion.test-ingress.gcp0.dev-ne.co"
 		ingressRoute := fmt.Sprintf(`
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
@@ -145,6 +155,7 @@ metadata:
   namespace: test-ingress
   annotations:
     kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: global
 spec:
   virtualhost:
     fqdn: %s
@@ -168,6 +179,8 @@ kind: HTTPProxy
 metadata:
   name: root
   namespace: test-ingress
+  annotations:
+    kubernetes.io/ingress.class: global
 spec:
   virtualhost:
     fqdn: %s
@@ -177,14 +190,31 @@ spec:
       services:
         - name: testhttpd
           port: 80
-`, fqdnHTTPS, fqdnHTTP)
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: bastion
+  namespace: test-ingress
+  annotations:
+    kubernetes.io/ingress.class: bastion
+spec:
+  virtualhost:
+    fqdn: %s
+  routes:
+    - conditions:
+        - prefix: /testhttpd
+      services:
+        - name: testhttpd
+          port: 80
+`, fqdnHTTPS, fqdnHTTP, fqdnBastion)
 		_, stderr, err = ExecAtWithInput(boot0, []byte(ingressRoute), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
 		By("getting contour service")
 		var targetIP string
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "ingress", "service/contour-global", "-o", "json")
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "ingress-global", "service/envoy", "-o", "json")
 			if err != nil {
 				return err
 			}
@@ -332,5 +362,60 @@ spec:
 			}
 			return nil
 		}).Should(Succeed())
+
+		By("trying to access from the Internet with a bastion URL")
+		// Though we expect 404 errors for invalid accesses, such errors can occur even when HTTPProxy has not been processed.
+		// So at first, access through the valid IP address and expect 200.
+		var bastionIP string
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "ingress-bastion", "service/envoy", "-o", "json")
+			if err != nil {
+				return err
+			}
+
+			service := new(corev1.Service)
+			err = json.Unmarshal(stdout, service)
+			if err != nil {
+				return err
+			}
+
+			if len(service.Status.LoadBalancer.Ingress) < 1 {
+				return errors.New("LoadBalancerIP is not assigned")
+			}
+			bastionIP = service.Status.LoadBalancer.Ingress[0].IP
+			if len(bastionIP) == 0 {
+				return errors.New("LoadBalancerIP is empty")
+			}
+			return nil
+		}).Should(Succeed())
+
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnBastion+":80:"+bastionIP,
+				"http://"+fqdnBastion+"/testhttpd",
+				"-m", "5",
+				"--fail",
+				"-o", "/dev/null",
+				"-w", "'%{http_code}'",
+				"-s",
+			)
+			if err != nil {
+				return err
+			}
+			if string(stdout) != "200" {
+				return errors.New("unexpected status: " + string(stdout))
+			}
+			return nil
+		}).Should(Succeed())
+
+		stdout, _, err := ExecAt(boot0, "curl", "-I", "--resolve", fqdnBastion+":80:"+targetIP,
+			"http://"+fqdnBastion+"/testhttpd",
+			"-m", "5",
+			"--fail",
+			"-o", "/dev/null",
+			"-w", "'%{http_code}'",
+			"-s",
+		)
+		Expect(err).To(HaveOccurred())
+		Expect(string(stdout)).To(Equal("404"))
 	})
 }

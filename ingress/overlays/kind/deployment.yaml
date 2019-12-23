@@ -2,7 +2,39 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: contour
-  namespace: ingress
+  namespace: ingress-global
+spec:
+  template:
+    spec:
+      containers:
+        - name: contour-plus
+          env:
+            - name: CP_CRDS
+              value: Certificate
+            - name: CP_DEFAULT_ISSUER_NAME
+              value: self-signed-issuer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contour
+  namespace: ingress-forest
+spec:
+  template:
+    spec:
+      containers:
+        - name: contour-plus
+          env:
+            - name: CP_CRDS
+              value: Certificate
+            - name: CP_DEFAULT_ISSUER_NAME
+              value: self-signed-issuer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contour
+  namespace: ingress-bastion
 spec:
   template:
     spec:

@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: contour-tls
+  namespace: ingress
+spec:
+  dnsNames:
+    - contour
+    - contour.ingress-forest
+    - contour.ingress-forest.svc
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: envoy-tls
+  namespace: ingress
+spec:
+  dnsNames:
+    - envoy
+    - envoy.ingress-forest
+    - envoy.ingress-forest.svc
