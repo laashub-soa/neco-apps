@@ -61,7 +61,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"argocd\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -150,7 +150,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"elastic-system\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -239,7 +239,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"maneki\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -328,7 +328,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"external-dns\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -415,13 +415,13 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "container_memory_usage_bytes{namespace=\"monitoring\", pod_name!~\"machines-endpoints-(.*)\"}/1024/1024",
+            "expr": "container_memory_usage_bytes{namespace=\"monitoring\", pod!~\"machines-endpoints-(.*)\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           },
           {
-            "expr": "sum (container_memory_usage_bytes{namespace=\"monitoring\", pod_name=~\"machines-endpoints-(.*)\"})/1024/1024",
+            "expr": "sum (container_memory_usage_bytes{namespace=\"monitoring\", pod=~\"machines-endpoints-(.*)\"})/1024/1024",
             "legendFormat": "machines-endpoints",
             "refId": "B"
           }
@@ -512,7 +512,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"internet-egress\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -601,7 +601,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=~\"ingress-.*\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -690,7 +690,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"teleport\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -780,7 +780,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"kube-system\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -869,7 +869,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"metallb-system\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -958,7 +958,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"topolvm-system\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -1048,7 +1048,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"demo\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -1137,7 +1137,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"default\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -1226,7 +1226,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"kube-public\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -1315,7 +1315,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"kube-node-lease\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
@@ -1404,7 +1404,7 @@
           {
             "expr": "container_memory_usage_bytes{namespace=\"sandbox\"}/1024/1024",
             "interval": "",
-            "legendFormat": "{{pod_name}}",
+            "legendFormat": "{{pod}}",
             "refId": "A"
           }
         ],
