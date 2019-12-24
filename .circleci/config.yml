@@ -220,7 +220,21 @@ jobs:
           command: |
             if [ -f .skip ]; then exit 0; fi
             ./bin/run-neco-apps-secret-ci.sh
-
+  push-release-tag:
+    docker:
+      - image: quay.io/cybozu/ubuntu-dev:18.04
+    steps:
+      - prepare_git
+      - checkout
+      - run: git checkout stage
+      - run: git merge --no-commit --no-ff ${CIRCLE_SHA1}
+      - run:
+          name: Push tag to GitHub
+          command: |
+            CI_REMOTE_REPOSITORY="git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
+            TAG_NAME="release-$(date +%Y.%m.%d)-${CIRCLE_BUILD_NUM}"
+            git tag ${TAG_NAME}
+            git push ${CI_REMOTE_REPOSITORY} stage ${TAG_NAME}
   create-pull-request-release:
     docker:
       - image: quay.io/cybozu/ubuntu-dev:18.04
