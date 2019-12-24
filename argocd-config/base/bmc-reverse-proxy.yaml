@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: bmc-reverse-proxy
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
 spec:
   project: default
   source:
