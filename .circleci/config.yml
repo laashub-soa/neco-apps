@@ -195,26 +195,28 @@ jobs:
 
   create-pull-request-stage:
     docker:
-      - image: quay.io/cybozu/golang:1.13-bionic
+      - image: quay.io/cybozu/ubuntu-dev:18.04
     steps:
       - prepare-git
       - checkout
-      - run: git checkout stage
-      - run: git merge --no-commit --no-ff ${CIRCLE_SHA1}
       - run:
           name: Check diff
           command: |
-            diffs=$(git status -s)
-            if [ "$diffs" = "" ]; then touch .skip; exit 0; fi
-            printf "%s\n" "$diffs"
-      # Skip the following steps if there is no difference.
+            git fetch -t origin
+            diffs=$(git diff --quiet master origin/stage)
+            if [ "$diffs" = "0" ]; then touch .skip; exit 0; fi
+            git diff --name-only master origin/stage
       - run:
-          name: Commit, tag and push to GitHub
+          name: Create a pull request
           command: |
             if [ -f .skip ]; then exit 0; fi
-            ./bin/commit-push.sh
+            BRANCH_NAME="stage-$(date +%Y.%m.%d)-${CIRCLE_BUILD_NUM}"
+            git checkout -b op-${BRANCH_NAME} origin/stage
+            git merge --no-edit master
+            git push git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git op-${BRANCH_NAME}:op-${BRANCH_NAME}
+            hub pull-request --message="[CI] Stage ${BRANCH_NAME}" --base=cybozu-private:stage --head=cybozu-private:op-${BRANCH_NAME}
       - run:
-          name: Merge neco-apps-secret
+          name: Create a pull request for neco-apps-secret staging branch
           command: |
             if [ -f .skip ]; then exit 0; fi
             ./bin/run-neco-apps-secret-ci.sh
