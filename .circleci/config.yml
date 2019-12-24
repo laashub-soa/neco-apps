@@ -331,7 +331,12 @@ workflows:
             - bootstrap
             - upgrade-stage
             - upgrade-release
-
+  release-tag:
+    jobs:
+      - push_release_tag:
+          filters:
+            branches:
+              only: stage
   production-release:
     jobs:
       - create-pull-request-release:
