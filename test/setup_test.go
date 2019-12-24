@@ -257,13 +257,19 @@ func testSetup() {
 
 func applyAndWaitForApplications(overlay string) {
 	By("creating Argo CD app")
-	ExecSafeAt(boot0, "argocd", "app", "create", "argocd-config",
-		"--repo", "https://github.com/cybozu-go/neco-apps.git",
-		"--path", "argocd-config/overlays/"+overlay,
-		"--dest-namespace", "argocd",
-		"--dest-server", "https://kubernetes.default.svc",
-		"--sync-policy", "none",
-		"--revision", "release")
+	Eventually(func() error {
+		stdout, stderr, err := ExecAt(boot0, "argocd", "app", "create", "argocd-config",
+			"--repo", "https://github.com/cybozu-go/neco-apps.git",
+			"--path", "argocd-config/overlays/"+overlay,
+			"--dest-namespace", "argocd",
+			"--dest-server", "https://kubernetes.default.svc",
+			"--sync-policy", "none",
+			"--revision", "release")
+		if err != nil {
+			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+		return nil
+	}).Should(Succeed())
 	ExecSafeAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/"+overlay)
 
 	By("getting application list")
