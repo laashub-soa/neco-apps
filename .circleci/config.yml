@@ -1,5 +1,16 @@
 version: 2.1
 commands:
+  prepare-git:
+    steps:
+      - run:
+          name: Configure GIT
+          command: |
+            git config --global user.email "neco@cybozu.com"
+            git config --global user.name "cybozu-neco"
+      - add_ssh_keys:
+          fingerprints:
+            - "ea:f2:f4:11:35:3f:87:04:bb:c4:84:50:ba:64:a1:5d"
+
   boot-dctest:
     description: "datacenter test"
     parameters:
@@ -182,19 +193,12 @@ jobs:
             . ./bin/env
             $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
 
-  merge-stage:
+  create-pull-request-stage:
     docker:
       - image: quay.io/cybozu/golang:1.13-bionic
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ea:f2:f4:11:35:3f:87:04:bb:c4:84:50:ba:64:a1:5d"
+      - prepare-git
       - checkout
-      - run:
-          name: Configure GIT
-          command: |
-            git config --global user.email "neco@cybozu.com"
-            git config --global user.name "cybozu-neco"
       - run: git checkout stage
       - run: git merge --no-commit --no-ff ${CIRCLE_SHA1}
       - run:
@@ -215,19 +219,12 @@ jobs:
             if [ -f .skip ]; then exit 0; fi
             ./bin/run-neco-apps-secret-ci.sh
 
-  create-pull-request:
+  create-pull-request-release:
     docker:
       - image: quay.io/cybozu/ubuntu-dev:18.04
     steps:
+      - prepare-git
       - checkout
-      - run:
-          name: Configure GIT
-          command: |
-            git config --global user.email "neco@cybozu.com"
-            git config --global user.name "cybozu-neco"
-      - add_ssh_keys:
-          fingerprints:
-            - "ea:f2:f4:11:35:3f:87:04:bb:c4:84:50:ba:64:a1:5d"
       - run:
           name: Create a branch with the tag
           command: |
@@ -290,7 +287,7 @@ workflows:
       - upgrade-stage:
           requires:
             - hold
-      - merge-stage:
+      - create-pull-request-stage:
           filters:
             branches:
               only:
@@ -313,7 +310,7 @@ workflows:
       - bootstrap
       - upgrade-stage
       - upgrade-release
-      - merge-stage:
+      - create-pull-request-stage:
           requires:
             - bootstrap
             - upgrade-stage
@@ -321,7 +318,7 @@ workflows:
 
   production-release:
     jobs:
-      - create-pull-request:
+      - create-pull-request-release:
           filters:
             branches:
               ignore: /.*/
