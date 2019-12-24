@@ -206,7 +206,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         image: quay.io/cybozu/contour:1.0.1.1
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: envoy-initconfig
         volumeMounts:
         - mountPath: /config
