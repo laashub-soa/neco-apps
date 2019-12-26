@@ -10,13 +10,16 @@ Upstream `install.yaml` is generated with kustomize as follows:
 kustomize build "${SRCROOT}/manifests/cluster-install" >> "${SRCROOT}/manifests/install.yaml"
 ```
 
-So, check diffs of argo-cd/manifests files as follows:
+So, check diffs of upstream/install.yaml files as follows:
 
 ```console
 git clone https://github.com/argoproj/argo-cd
 cd argocd-cd
-git diff vA.B.C...vX.Y.Z manifests
+git diff vA.B.C...vX.Y.Z manifests/install.yaml
 ```
+
+Update upstream/install.yaml if there's difference between 2 versions.  
+Update container image versions in deployment.yaml.
 
 elastic cloud on Kubernetes
 ---------------------------
