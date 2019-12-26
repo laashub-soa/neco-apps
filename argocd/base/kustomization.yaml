@@ -7,7 +7,4 @@ resources:
 patchesStrategicMerge:
   - configmap.yaml
   - deployment.yaml
-  - serviceaccount.yaml
-  - rbac.yaml
-  - secret.yaml
   - service.yaml
