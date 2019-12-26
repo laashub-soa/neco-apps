@@ -1,10 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - upstream/base
-  - upstream/crds
-  - upstream/cluster-rbac
-  - additional_service.yaml
+  - upstream/install.yaml
+  - neco/service.yaml
 patchesStrategicMerge:
   - configmap.yaml
   - deployment.yaml
