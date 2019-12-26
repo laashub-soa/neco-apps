@@ -1,5 +1,16 @@
 version: 2.1
 commands:
+  prepare-git:
+    steps:
+      - run:
+          name: Configure GIT
+          command: |
+            git config --global user.email "neco@cybozu.com"
+            git config --global user.name "cybozu-neco"
+      - add_ssh_keys:
+          fingerprints:
+            - "ea:f2:f4:11:35:3f:87:04:bb:c4:84:50:ba:64:a1:5d"
+
   boot-dctest:
     description: "datacenter test"
     parameters:
@@ -182,62 +193,64 @@ jobs:
             . ./bin/env
             $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
 
-  merge-stage:
-    docker:
-      - image: quay.io/cybozu/golang:1.13-bionic
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ea:f2:f4:11:35:3f:87:04:bb:c4:84:50:ba:64:a1:5d"
-      - checkout
-      - run:
-          name: Configure GIT
-          command: |
-            git config --global user.email "neco@cybozu.com"
-            git config --global user.name "cybozu-neco"
-      - run: git checkout stage
-      - run: git merge --no-commit --no-ff ${CIRCLE_SHA1}
-      - run:
-          name: Check diff
-          command: |
-            diffs=$(git status -s)
-            if [ "$diffs" = "" ]; then touch .skip; exit 0; fi
-            printf "%s\n" "$diffs"
-      # Skip the following steps if there is no difference.
-      - run:
-          name: Commit, tag and push to GitHub
-          command: |
-            if [ -f .skip ]; then exit 0; fi
-            ./bin/commit-push.sh
-      - run:
-          name: Merge neco-apps-secret
-          command: |
-            if [ -f .skip ]; then exit 0; fi
-            ./bin/run-neco-apps-secret-ci.sh
-
-  create-pull-request:
+  create-pull-request-stage:
     docker:
       - image: quay.io/cybozu/ubuntu-dev:18.04
     steps:
+      - prepare-git
       - checkout
       - run:
-          name: Configure GIT
-          command: |
-            git config --global user.email "neco@cybozu.com"
-            git config --global user.name "cybozu-neco"
-      - add_ssh_keys:
-          fingerprints:
-            - "ea:f2:f4:11:35:3f:87:04:bb:c4:84:50:ba:64:a1:5d"
-      - run:
-          name: Create a branch with the tag
+          name: Check diff
           command: |
             git fetch -t origin
-            git checkout -b op-${CIRCLE_TAG} origin/release
-            git merge --no-edit ${CIRCLE_TAG}
-            git push git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git op-${CIRCLE_TAG}:op-${CIRCLE_TAG}
+            git diff --name-only master origin/stage && touch .skip
       - run:
           name: Create a pull request
           command: |
+            if [ -f .skip ]; then exit 0; fi
+            BRANCH_NAME="stage-$(date +%Y.%m.%d)-${CIRCLE_BUILD_NUM}"
+            git checkout -b op-${BRANCH_NAME} origin/stage
+            git merge --no-edit master
+            git push git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git op-${BRANCH_NAME}:op-${BRANCH_NAME}
+            hub pull-request --message="[CI] Stage ${BRANCH_NAME}" --base=cybozu-go:stage --head=cybozu-go:op-${BRANCH_NAME}
+      - run:
+          name: Create a pull request for neco-apps-secret staging branch
+          command: |
+            if [ -f .skip ]; then exit 0; fi
+            ./bin/run-neco-apps-secret-ci.sh
+  push-release-tag:
+    docker:
+      - image: quay.io/cybozu/ubuntu-dev:18.04
+    steps:
+      - prepare-git
+      - checkout
+      - run: git checkout stage
+      - run: git merge --no-commit --no-ff ${CIRCLE_SHA1}
+      - run:
+          name: Push tag to GitHub
+          command: |
+            CI_REMOTE_REPOSITORY="git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
+            TAG_NAME="release-$(date +%Y.%m.%d)-${CIRCLE_BUILD_NUM}"
+            git tag ${TAG_NAME}
+            git push ${CI_REMOTE_REPOSITORY} stage ${TAG_NAME}
+  create-pull-request-release:
+    docker:
+      - image: quay.io/cybozu/ubuntu-dev:18.04
+    steps:
+      - prepare-git
+      - checkout
+      - run:
+          name: Check diff
+          command: |
+            git fetch -t origin
+            git diff --name-only ${CIRCLE_TAG} origin/release && touch .skip
+      - run:
+          name: Create a pull request
+          command: |
+            if [ -f .skip ]; then exit 0; fi
+            git checkout -b op-${CIRCLE_TAG} origin/release
+            git merge --no-edit ${CIRCLE_TAG}
+            git push git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git op-${CIRCLE_TAG}:op-${CIRCLE_TAG}
             hub pull-request --message="[CI] Release ${CIRCLE_TAG}" --base=cybozu-go:release --head=cybozu-go:op-${CIRCLE_TAG}
 
   clean-dns:
@@ -290,7 +303,7 @@ workflows:
       - upgrade-stage:
           requires:
             - hold
-      - merge-stage:
+      - create-pull-request-stage:
           filters:
             branches:
               only:
@@ -313,15 +326,20 @@ workflows:
       - bootstrap
       - upgrade-stage
       - upgrade-release
-      - merge-stage:
+      - create-pull-request-stage:
           requires:
             - bootstrap
             - upgrade-stage
             - upgrade-release
-
+  release-tag:
+    jobs:
+      - push-release-tag:
+          filters:
+            branches:
+              only: stage
   production-release:
     jobs:
-      - create-pull-request:
+      - create-pull-request-release:
           filters:
             branches:
               ignore: /.*/
