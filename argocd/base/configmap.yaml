@@ -1,9 +1,6 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  labels:
-    app.kubernetes.io/name: argocd-cm
-    app.kubernetes.io/part-of: argocd
   name: argocd-cm
   namespace: argocd
 data:
@@ -59,18 +56,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  labels:
-    app.kubernetes.io/name: argocd-rbac-cm
-    app.kubernetes.io/part-of: argocd
   name: argocd-rbac-cm
   namespace: argocd
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  labels:
-    app.kubernetes.io/name: argocd-ssh-known-hosts-cm
-    app.kubernetes.io/part-of: argocd
   name: argocd-ssh-known-hosts-cm
   namespace: argocd
 data:
@@ -86,9 +77,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  labels:
-    app.kubernetes.io/name: argocd-tls-certs-cm
-    app.kubernetes.io/part-of: argocd
   name: argocd-tls-certs-cm
   namespace: argocd
 data: {}
