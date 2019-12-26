@@ -4,6 +4,7 @@ resources:
   - upstream/base
   - upstream/crds
   - upstream/cluster-rbac
+  - additional_service.yaml
 patchesStrategicMerge:
   - configmap.yaml
   - deployment.yaml

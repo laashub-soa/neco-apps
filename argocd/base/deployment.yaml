@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - image: quay.io/cybozu/redis:5.0.7.1
-          name: argocd-redis
+          name: redis
 ---
 apiVersion: apps/v1
 kind: Deployment
