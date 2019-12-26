@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - app-gorush.yaml
+  - app-misc.yaml
   - app-monitoring.yaml
   - elastic-serviceaccount.yaml
   - maneki.yaml
