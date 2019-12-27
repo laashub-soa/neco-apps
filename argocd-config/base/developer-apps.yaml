@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: developer-apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "9"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/cybozu-go/neco-apps.git
+    targetRevision: release
+    path: developer-apps/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: maneki
+  syncPolicy:
+    automated:
+      selfHeal: true
