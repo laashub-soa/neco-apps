@@ -21,3 +21,4 @@ The sync order of applications can be managed with the `argocd.argoproj.io/sync-
 | neco-admission    | 8    |
 | argocd-ingress    | 8    |
 | bmc-reverse-proxy | 8    |
+| developer-apps    | 9    |

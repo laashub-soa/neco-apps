@@ -37,12 +37,12 @@ This repository has 4 CircleCI workflows, `main`, `daily`, `manual-dctest` and `
 
 `daily` workflow is executed daily for merging `master` to `stage`.  This consists of the following 4 jobs.
 
-| job name          | description                                                                                            | target branch |
-| ----------------- | ------------------------------------------------------------------------------------------------------ | ------------- |
-| `bootstrap`       | Bootstrap test on GCP instances                                                                        | `master`      |
-| `upgrade-stage`   | Upgrade test from `stage` branch (staging env)                                                         | `master`      |
-| `upgrade-release` | Upgrade test from `release` branch (production env)                                                    | `master`      |
-| `merge-stage`     | Merge `master` to `stage`, and create/push a tag, then trigger `merge-stage` of the secret repository. | `master`      |
+| job name                    | description                                                                                            | target branch |
+| -----------------           | ------------------------------------------------------------------------------------------------------ | ------------- |
+| `bootstrap`                 | Bootstrap test on GCP instances                                                                        | `master`      |
+| `upgrade-stage`             | Upgrade test from `stage` branch (staging env)                                                         | `master`      |
+| `upgrade-release`           | Upgrade test from `release` branch (production env)                                                    | `master`      |
+| `create-pull-request-stage` | Create PR to stage, then trigger `create-pull-request-stage` of the secret repository.                 | `master`      |
 
 `update-stage` is executed only if 3 other jobs succeeded.
 
@@ -59,10 +59,15 @@ This consists of the following 6 jobs.
 | `upgrade-master`             | Upgrade test from `master` branch                                                                      | all but `master`, `stage`, `release` |
 | `upgrade-stage`              | Upgrade test from `stage` branch (staging env)                                                         | all branches                         |
 | `upgrade-release`            | Upgrade test from `release` branch (production env)                                                    | all branches                         |
-| `merge-stage`                | Merge `master` to `stage`, and create/push a tag, then trigger `merge-stage` of the secret repository | `master`                             |
+| `create-pull-request-stage`  | Create PR to stage, then trigger `create-pull-request-stage` of the secret repository.                 | `master`                             |
 
 `bootstrap-2` is tested with `neco`'s feature branch which extracted from `neco-apps`'s branch name.
 For example, when `with-neco-branch-foo-bar` branch of `neco-apps`, it's tested with `foo-bar` branch of `neco`.
+
+### `release-tag` workflow
+
+`release-tag` workflow is used for pushing release tag to stage HEAD.
+This workflow is executed only when a PR is merged to stage branch.
 
 ### `production-release` workflow
 
