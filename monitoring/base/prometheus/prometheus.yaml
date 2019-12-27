@@ -83,6 +83,36 @@ scrape_configs:
     - source_labels: [__name__]
       action: drop
       regex: apiserver_request_latencies.*
+  - job_name: 'kubernetes-controller-manager'
+    kubernetes_sd_configs:
+    - role: endpoints
+      namespaces:
+        names: ["default"]
+    scheme: http
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+      action: keep
+      regex: kubernetes;https
+    - source_labels: [__address__]
+      action: replace
+      regex: ([^:]+)(?::\d+)?
+      replacement: ${1}:10252
+      target_label: instance
+  - job_name: 'kubernetes-scheduler'
+    kubernetes_sd_configs:
+    - role: endpoints
+      namespaces:
+        names: ["default"]
+    scheme: http
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+      action: keep
+      regex: kubernetes;https
+    - source_labels: [__address__]
+      action: replace
+      regex: ([^:]+)(?::\d+)?
+      replacement: ${1}:10251
+      target_label: instance
   - job_name: 'kubernetes-nodes'
     scheme: https
     tls_config:
