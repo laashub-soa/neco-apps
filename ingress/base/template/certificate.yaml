@@ -22,6 +22,9 @@ spec:
     name: contour-selfsign
   commonName: "ca.server.contour"
   isCA: true
+  usages:
+    - digital signature
+    - key encipherment
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
@@ -48,6 +51,9 @@ spec:
     - contour
     - contour.ingress
     - contour.ingress.svc
+  usages:
+    - digital signature
+    - key encipherment
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
@@ -65,3 +71,6 @@ spec:
     - envoy
     - envoy.ingress
     - envoy.ingress.svc
+  usages:
+    - digital signature
+    - key encipherment
