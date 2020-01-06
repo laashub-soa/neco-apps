@@ -22,7 +22,7 @@ PROMTOOL_VERSION := 2.12.0
 TELEPORT_VERSION := 4.1.3
 KUBERNETES_VERSION = 1.16.3
 KIND_VERSION = 0.6.1
-ARGOCD_VERSION = 1.2.5
+ARGOCD_VERSION = 1.3.6
 
 install.yaml: $(shell find ../argocd/base)
 	kustomize build ../argocd/base/ > install.yaml
