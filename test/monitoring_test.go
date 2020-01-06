@@ -340,7 +340,18 @@ func testMetrics() {
 
 		var jobNames []model.LabelName
 		for _, sc := range promConfig.ScrapeConfigs {
-			jobNames = append(jobNames, model.LabelName(sc.JobName))
+			jobName := sc.JobName
+			if withKind {
+				if jobName == "cke-etcd" ||
+					jobName == "external-dns" ||
+					jobName == "monitor-hw" ||
+					jobName == "teleport" ||
+					jobName == "bootserver-etcd" ||
+					jobName == "node-exporter" {
+					continue
+				}
+			}
+			jobNames = append(jobNames, model.LabelName(jobName))
 		}
 
 		By("checking discovered active labels and statuses")
@@ -360,14 +371,12 @@ func testMetrics() {
 			}
 
 			for _, jobName := range jobNames {
-				for _, target := range response.TargetsResult.Active {
-					if _, ok := target.Labels[jobName]; ok {
-						if target.Health != promv1.HealthGood {
-							return fmt.Errorf("target is not up, job_name: %s", jobName)
-						}
-					} else {
-						return fmt.Errorf("target is not found, job_name: %s", jobName)
-					}
+				target := findTarget(string(jobName), response.TargetsResult.Active)
+				if target == nil {
+					return fmt.Errorf("target is not found, job_name: %s", jobName)
+				}
+				if target.Health != promv1.HealthGood {
+					return fmt.Errorf("target is not 'up', job_name: %s, health: %s", jobName, target.Health)
 				}
 			}
 			return nil
@@ -485,4 +494,13 @@ func testMetrics() {
 			"\nactual   = %v\nexpected = %v", actual, expected)
 	})
 
+}
+
+func findTarget(job string, targets []promv1.ActiveTarget) *promv1.ActiveTarget {
+	for _, t := range targets {
+		if string(t.Labels["job"]) == job {
+			return &t
+		}
+	}
+	return nil
 }
