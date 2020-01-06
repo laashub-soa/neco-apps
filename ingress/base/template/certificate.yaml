@@ -1,3 +1,8 @@
+# NOTE:
+# `.spec.usages` in `Certificate` resources need to be added to suppress
+# adding an extended key usage for TLS server authentication.  Otherwise,
+# envoy Pods would not become ready.
+
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
