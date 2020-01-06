@@ -19,6 +19,16 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// dcJobs are Prometheus jobs deployed in dctest but not deployed in kindtest
+var dcJobs = []string{
+	"cke-etcd",
+	"external-dns",
+	"monitor-hw",
+	"teleport",
+	"bootserver-etcd",
+	"node-exporter",
+}
+
 func testMachinesEndpoints() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
@@ -341,15 +351,8 @@ func testMetrics() {
 		var jobNames []model.LabelName
 		for _, sc := range promConfig.ScrapeConfigs {
 			jobName := sc.JobName
-			if withKind {
-				if jobName == "cke-etcd" ||
-					jobName == "external-dns" ||
-					jobName == "monitor-hw" ||
-					jobName == "teleport" ||
-					jobName == "bootserver-etcd" ||
-					jobName == "node-exporter" {
-					continue
-				}
+			if withKind && isDCJob(jobName) {
+				continue
 			}
 			jobNames = append(jobNames, model.LabelName(jobName))
 		}
@@ -494,6 +497,15 @@ func testMetrics() {
 			"\nactual   = %v\nexpected = %v", actual, expected)
 	})
 
+}
+
+func isDCJob(job string) bool {
+	for _, dcJob := range dcJobs {
+		if dcJob == job {
+			return true
+		}
+	}
+	return false
 }
 
 func findTarget(job string, targets []promv1.ActiveTarget) *promv1.ActiveTarget {
