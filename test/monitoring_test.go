@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -476,7 +477,7 @@ func testMetrics() {
 		Expect(err).NotTo(HaveOccurred())
 
 		for _, g := range response.Rules.Groups {
-			if g.Name != "kube-apiserver.rules" {
+			if !strings.HasSuffix(g.Name, ".records") {
 				continue
 			}
 			for _, r := range g.Rules {

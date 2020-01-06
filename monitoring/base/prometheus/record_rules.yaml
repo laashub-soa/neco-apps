@@ -1,5 +1,5 @@
 groups:
-  - name: kube-apiserver.rules
+  - name: kube-apiserver.records
     rules:
       - expr: |
           histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers"}[5m])) without(instance, pod))
@@ -16,7 +16,7 @@ groups:
         labels:
           quantile: "0.5"
         record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
-  - name: kube-scheduler
+  - name: kube-scheduler.records
     rules:
       - expr: |
           histogram_quantile(0.99, sum(rate(scheduler_e2e_scheduling_duration_seconds_bucket{job="kube-scheduler"}[5m])) without(instance, pod))
