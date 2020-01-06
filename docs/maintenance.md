@@ -4,22 +4,28 @@ How to maintain neco-apps
 argocd
 ------
 
-Upstream `install.yaml` is generated with kustomize as follows:
+Check [releases](https://github.com/argoproj/argo-cd/releases) for changes.
+
+Download the upstream manifest as follows:
 
 ```console
-kustomize build "${SRCROOT}/manifests/cluster-install" >> "${SRCROOT}/manifests/install.yaml"
+$ curl -sLf -o argocd/base/upstream/install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/vX.Y.Z/manifests/install.yaml
 ```
 
-So, check diffs of upstream/install.yaml files as follows:
+Then check the diffs by `git diff`.
+
+cert-manager
+------------
+
+Check [the upgrading section](https://cert-manager.io/docs/installation/upgrading/) in the official website.
+
+Download manifests and remove `Namespace` resource from it as follows:
 
 ```console
-git clone https://github.com/argoproj/argo-cd
-cd argocd-cd
-git diff vA.B.C...vX.Y.Z manifests/install.yaml
+$ curl -sLf -o  cert-manager/base/upstream/cert-manager.yaml https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
+$ vi cert-manager/base/upstream/cert-manager.yaml
+  (Remove Namespace resources)
 ```
-
-Update upstream/install.yaml if there's difference between 2 versions.  
-Update container image versions in deployment.yaml.
 
 elastic cloud on Kubernetes
 ---------------------------
@@ -30,18 +36,6 @@ To check diffs between versions, download and compare manifests as follows:
 wget https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml
 sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: kube-system//' all-in-one.yaml > all-in-one_nsremoved.yaml
 ```
-
-cert-manager
-------------
-
-Download manifests and remove `Namespace` resource from it as follows:
-
-```console
-wget https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
-sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: cert-manager//' cert-manager.yaml > cert-manager_nsremoved.yaml
-```
-
-Note that `cert-manager_nsremoved.yaml` is used for input of `kustomize build`.
 
 external-dns
 ------------
