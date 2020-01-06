@@ -75,12 +75,17 @@ Note that:
 metallb
 -------
 
-Check diffs of danderson/metallb files as follows:
+Check [releases](https://github.com/danderson/metallb/releases)
+
+Download manifests and remove `Namespace` resource from it as follows:
 
 ```console
-git clone https://github.com/danderson/metallb
-cd metallb
-git diff vA.B.C...vX.Y.Z manifests
+$ git clone https://github.com/danderson/metallb
+$ cd metallb
+$ git checkout vX.Y.Z
+$ cp manifests/*.yaml /path/to/neco-apps/metallb/base/upstream
+$ vi metallb/base/upstream/metallb.yaml
+  (Remove Namespace resources)
 ```
 
 prometheus, alertmanager, grafana

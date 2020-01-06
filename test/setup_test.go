@@ -292,12 +292,19 @@ func applyAndWaitForApplications(overlay string) {
 		}
 		appList = append(appList, app.Name)
 	}
-	fmt.Printf("aplication list: %v\n", appList)
+	fmt.Printf("application list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
 	By("waiting initialization")
 	Eventually(func() error {
 		for _, appName := range appList {
+			// For upgrade metallb to v0.8.3
+			if doUpgrade && appName == "metallb" {
+				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
+				if err != nil {
+					return err
+				}
+			}
 			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
