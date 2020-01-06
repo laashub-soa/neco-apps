@@ -97,6 +97,11 @@ scrape_configs:
       action: replace
       regex: ([^:]+)(?::\d+)?
       replacement: ${1}:10252
+      target_label: __address__
+    - source_labels: [__address__]
+      action: replace
+      regex: ([^:]+)(?::\d+)?
+      replacement: ${1}
       target_label: instance
   - job_name: 'kubernetes-scheduler'
     kubernetes_sd_configs:
@@ -112,6 +117,11 @@ scrape_configs:
       action: replace
       regex: ([^:]+)(?::\d+)?
       replacement: ${1}:10251
+      target_label: __address__
+    - source_labels: [__address__]
+      action: replace
+      regex: ([^:]+)(?::\d+)?
+      replacement: ${1}
       target_label: instance
   - job_name: 'kubernetes-nodes'
     scheme: https

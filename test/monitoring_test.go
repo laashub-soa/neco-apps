@@ -365,6 +365,8 @@ func testMetrics() {
 						if target.Health != promv1.HealthGood {
 							return fmt.Errorf("target is not up, job_name: %s", jobName)
 						}
+					} else {
+						return fmt.Errorf("target is not found, job_name: %s", jobName)
 					}
 				}
 			}
