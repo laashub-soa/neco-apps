@@ -19,6 +19,16 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// dcJobs are Prometheus jobs deployed in dctest but not deployed in kindtest
+var dcJobs = []string{
+	"cke-etcd",
+	"external-dns",
+	"monitor-hw",
+	"teleport",
+	"bootserver-etcd",
+	"node-exporter",
+}
+
 func testMachinesEndpoints() {
 	It("should be deployed successfully", func() {
 		Eventually(func() error {
@@ -340,7 +350,11 @@ func testMetrics() {
 
 		var jobNames []model.LabelName
 		for _, sc := range promConfig.ScrapeConfigs {
-			jobNames = append(jobNames, model.LabelName(sc.JobName))
+			jobName := sc.JobName
+			if withKind && isDCJob(jobName) {
+				continue
+			}
+			jobNames = append(jobNames, model.LabelName(jobName))
 		}
 
 		By("checking discovered active labels and statuses")
@@ -360,12 +374,12 @@ func testMetrics() {
 			}
 
 			for _, jobName := range jobNames {
-				for _, target := range response.TargetsResult.Active {
-					if _, ok := target.Labels[jobName]; ok {
-						if target.Health != promv1.HealthGood {
-							return fmt.Errorf("target is not up, job_name: %s", jobName)
-						}
-					}
+				target := findTarget(string(jobName), response.TargetsResult.Active)
+				if target == nil {
+					return fmt.Errorf("target is not found, job_name: %s", jobName)
+				}
+				if target.Health != promv1.HealthGood {
+					return fmt.Errorf("target is not 'up', job_name: %s, health: %s", jobName, target.Health)
 				}
 			}
 			return nil
@@ -483,4 +497,22 @@ func testMetrics() {
 			"\nactual   = %v\nexpected = %v", actual, expected)
 	})
 
+}
+
+func isDCJob(job string) bool {
+	for _, dcJob := range dcJobs {
+		if dcJob == job {
+			return true
+		}
+	}
+	return false
+}
+
+func findTarget(job string, targets []promv1.ActiveTarget) *promv1.ActiveTarget {
+	for _, t := range targets {
+		if string(t.Labels["job"]) == job {
+			return &t
+		}
+	}
+	return nil
 }
