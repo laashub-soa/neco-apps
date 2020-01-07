@@ -319,6 +319,14 @@ func applyAndWaitForApplications(overlay string) {
 					return err
 				}
 			}
+			// For resizing disk prometheus
+			// TODO: delete this block if there is no diff
+			if doUpgrade && appName == "monitoring" {
+				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
+				if err != nil {
+					return err
+				}
+			}
 			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
