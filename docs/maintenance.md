@@ -100,7 +100,7 @@ teleport
 --------
 
 There is no official kubernetes manifests actively maintained for teleport.
-So, check changes in release notes on github.
+So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/blob/master/CHANGELOG.md) on github.
 
 topolvm
 -------
