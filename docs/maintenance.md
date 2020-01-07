@@ -105,7 +105,7 @@ So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/bl
 topolvm
 -------
 
-Check [releases](https://github.com/argoproj/argo-cd/releases) for changes.
+Check [releases](https://github.com/cybozu-go/topolvm/releases) for changes.
 
 Download the upstream manifest as follows:
 
