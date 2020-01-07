@@ -10,12 +10,14 @@ resources:
   - policies/monitoring.yaml
   - policies/teleport.yaml
   - global-policies/apiserver.yaml
+  - global-policies/controller-manager.yaml
   - global-policies/egress-all-allow.yaml
   - global-policies/egress-backyard-deny.yaml
   - global-policies/ingress-all-deny.yaml
   - global-policies/ingress-cluster-allow.yaml
   - global-policies/network-set.yaml
   - global-policies/node-dns.yaml
+  - global-policies/scheduler.yaml
 patchesStrategicMerge:
   - calico/deployment.yaml
   - calico/daemonset.yaml

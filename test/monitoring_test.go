@@ -373,13 +373,22 @@ func testMetrics() {
 				return err
 			}
 
+			// monitor-hw job on stopped machine should be down
+			const stoppedMachineInDCTest = 1
+			downedMonitorHW := 0
 			for _, jobName := range jobNames {
 				target := findTarget(string(jobName), response.TargetsResult.Active)
 				if target == nil {
 					return fmt.Errorf("target is not found, job_name: %s", jobName)
 				}
 				if target.Health != promv1.HealthGood {
-					return fmt.Errorf("target is not 'up', job_name: %s, health: %s", jobName, target.Health)
+					if target.Labels["job"] != "monitor-hw" {
+						return fmt.Errorf("target is not 'up', job_name: %s, health: %s", jobName, target.Health)
+					}
+					downedMonitorHW++
+					if downedMonitorHW > stoppedMachineInDCTest {
+						return fmt.Errorf("two or more monitor-hw jobs are not up; health: %s", target.Health)
+					}
 				}
 			}
 			return nil
