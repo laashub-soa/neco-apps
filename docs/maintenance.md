@@ -114,5 +114,4 @@ $ git clone https://github.com/cybozu-go/topolvm
 $ cd topolvm
 $ git checkout vX.Y.Z
 $ cp deploy/manifests/*.yaml /path/to/neco-apps/topolvm/base/upstream
-$ rm /path/to/neco-apps/topolvm/base/upstream/namespace.yaml
 ```
