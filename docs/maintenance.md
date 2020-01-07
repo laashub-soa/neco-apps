@@ -105,10 +105,13 @@ So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/bl
 topolvm
 -------
 
-Check diffs of cybozu-go/topolvm files as follows:
+Check [releases](https://github.com/argoproj/argo-cd/releases) for changes.
+
+Download the upstream manifest as follows:
 
 ```console
 git clone https://github.com/cybozu-go/topolvm
 cd topolvm
-git diff vA.B.C...vX.Y.Z deploy
+$ git checkout vX.Y.Z
+$ cp deploy/manifests/*.yaml /path/to/neco-apps/topolvm/base/upstream
 ```
