@@ -54,7 +54,7 @@ Then, import YAML manifests as follows:
 
 ```console
 $ git checkout vX.Y.Z
-$ cp examples/contour/*.yaml /path/to/neco-apps/ingress/base/contour/upstream
+$ cp examples/contour/*.yaml /path/to/neco-apps/ingress/base/contour/
 ```
 
 Note that:
@@ -110,8 +110,9 @@ Check [releases](https://github.com/cybozu-go/topolvm/releases) for changes.
 Download the upstream manifest as follows:
 
 ```console
-git clone https://github.com/cybozu-go/topolvm
-cd topolvm
+$ git clone https://github.com/cybozu-go/topolvm
+$ cd topolvm
 $ git checkout vX.Y.Z
 $ cp deploy/manifests/*.yaml /path/to/neco-apps/topolvm/base/upstream
+$ rm /path/to/neco-apps/topolvm/base/upstream/namespace.yaml
 ```
