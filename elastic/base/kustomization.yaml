@@ -5,22 +5,4 @@ resources:
   - secret.yaml
 patchesStrategicMerge:
   - statefulset.yaml
-patchesJson6902:
-  - target:
-      group: apiextensions.k8s.io
-      version: v1beta1
-      kind: CustomResourceDefinition
-      name: apmservers.apm.k8s.elastic.co
-    path: patch_crd.yaml
-  - target:
-      group: apiextensions.k8s.io
-      version: v1beta1
-      kind: CustomResourceDefinition
-      name: elasticsearches.elasticsearch.k8s.elastic.co
-    path: patch_crd.yaml
-  - target:
-      group: apiextensions.k8s.io
-      version: v1beta1
-      kind: CustomResourceDefinition
-      name: kibanas.kibana.k8s.elastic.co
-    path: patch_crd.yaml
+  - crd.yaml
