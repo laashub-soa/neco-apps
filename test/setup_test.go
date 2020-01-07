@@ -346,6 +346,15 @@ func applyAndWaitForApplications(overlay string) {
 				continue
 			}
 
+			// In upgrade test, sync without --force may cause temporal network disruption.
+			// It leads to sync-error of other applications,
+			// so sync manually out-of-sync apps in upgrade test.
+			if doUpgrade && st.Sync.Status == argocd.SyncStatusCodeOutOfSync {
+				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName)
+				if err != nil {
+					return err
+				}
+			}
 			return fmt.Errorf("%s is not initialized. argocd app get %s -o json: %s", appName, appName, appStdout)
 		}
 		return nil
