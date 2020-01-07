@@ -1,8 +1,7 @@
 How to maintain neco-apps
 =========================
 
-argocd
-------
+## argocd
 
 Check [releases](https://github.com/argoproj/argo-cd/releases) for changes.
 
@@ -14,8 +13,7 @@ $ curl -sLf -o argocd/base/upstream/install.yaml https://raw.githubusercontent.c
 
 Then check the diffs by `git diff`.
 
-cert-manager
-------------
+## cert-manager
 
 Check [the upgrading section](https://cert-manager.io/docs/installation/upgrading/) in the official website.
 
@@ -27,8 +25,7 @@ $ vi cert-manager/base/upstream/cert-manager.yaml
   (Remove Namespace resources)
 ```
 
-elastic cloud on Kubernetes
----------------------------
+## elastic (ECK)
 
 To check diffs between versions, download and compare manifests as follows:
 
@@ -37,16 +34,13 @@ wget https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml
 sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: kube-system//' all-in-one.yaml > all-in-one_nsremoved.yaml
 ```
 
-external-dns
-------------
+## external-dns
 
 Read the following document and fix manifests as necessary.
 
 https://github.com/kubernetes-incubator/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md
 
-
-contour
--------
+## ingress (Contour & Envoy)
 
 Check diffs of projectcontour/contour files as follows:
 
@@ -72,8 +66,7 @@ Note that:
     - If the manifest is for a cluster-wide resource, put a modified version in the `common` directory.
     - If the manifest is for a namespaced resource, put a template in the `template` directory and apply patches.
 
-metallb
--------
+## metallb
 
 Check [releases](https://github.com/danderson/metallb/releases)
 
@@ -88,22 +81,19 @@ $ vi metallb/base/upstream/metallb.yaml
   (Remove Namespace resources)
 ```
 
-prometheus, alertmanager, grafana
----------------------------------
+## monitoring (prometheus, alertmanager, grafana)
 
 There is no official kubernetes manifests for prometheus.
 So, check changes in release notes on github for both prometheus and alertmanager and make necessary actions.
 
+## network-policy (Calico)
 
-calico
-------
+Check [the release notes](https://docs.projectcalico.org/v3.11/release-notes/).
 
-To check diffs between minor versions, download and compare manifests as follows:
+Download the upstream manifest as follows:
 
 ```console
-wget https://docs.projectcalico.org/vX.Y/manifests/calico-policy-only.yaml -O vX.Y.yaml
-wget https://docs.projectcalico.org/vA.B/manifests/calico-policy-only.yaml -O vA.B.yaml
-diff -u vX.Y.yaml vA.B.yaml
+$ curl -sLf -o network-policy/base/calico/upstream/calico-policy-only.yaml https://docs.projectcalico.org/vX.Y/manifests/calico-policy-only.yaml
 ```
 
 teleport
@@ -111,7 +101,6 @@ teleport
 
 There is no official kubernetes manifests actively maintained for teleport.
 So, check changes in release notes on github.
-
 
 topolvm
 -------

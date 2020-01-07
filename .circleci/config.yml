@@ -64,7 +64,7 @@ commands:
                 command: |
                   cd neco
                   ./bin/run-dctest.sh bootstrap release
-                no_output_timeout: 20m
+                no_output_timeout: 31m
       - unless:
           condition: <<parameters.neco-release-branch>>
           steps:
@@ -73,7 +73,7 @@ commands:
                 command: |
                   cd neco
                   ./bin/run-dctest.sh bootstrap
-                no_output_timeout: 20m
+                no_output_timeout: 31m
 
 jobs:
   test:
@@ -106,7 +106,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             ./bin/run-test.sh
-          no_output_timeout: 20m
+          no_output_timeout: 31m
       - run:
           name: Remove instance
           command: |
@@ -125,7 +125,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade ./bin/run-test.sh
-          no_output_timeout: 20m
+          no_output_timeout: 31m
       - run:
           name: Remove instance
           command: |
@@ -144,7 +144,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=stage ./bin/run-test.sh
-          no_output_timeout: 20m
+          no_output_timeout: 31m
       - run:
           name: Remove instance
           command: |
@@ -163,7 +163,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=release ./bin/run-test.sh
-          no_output_timeout: 20m
+          no_output_timeout: 31m
       - run:
           name: Remove instance
           command: |
@@ -186,7 +186,7 @@ jobs:
           command: |
             curl -sSLf -o ./bin/env https://raw.githubusercontent.com/cybozu-go/neco/master/bin/env
             ./bin/run-kindtest.sh
-          no_output_timeout: 20m
+          no_output_timeout: 31m
       - run:
           name: Remove instance
           command: |

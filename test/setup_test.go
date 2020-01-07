@@ -298,8 +298,22 @@ func applyAndWaitForApplications(overlay string) {
 	By("waiting initialization")
 	Eventually(func() error {
 		for _, appName := range appList {
+			// For upgrade argocd to 1.3.6
+			if doUpgrade && appName == "argocd" {
+				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
+				if err != nil {
+					return err
+				}
+			}
 			// For upgrade metallb to v0.8.3
 			if doUpgrade && appName == "metallb" {
+				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
+				if err != nil {
+					return err
+				}
+			}
+			// For upgrade calico to 3.11.1
+			if doUpgrade && appName == "network-policy" {
 				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
 				if err != nil {
 					return err

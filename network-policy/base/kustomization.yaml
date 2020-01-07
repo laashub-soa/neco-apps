@@ -1,14 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - calico/common.yaml
-  - calico/daemonset.yaml
-  - calico/deployment.yaml
-  - calico/poddisruptionbudget.yaml
+  - calico/upstream/calico-policy-only.yaml
   - calico/podsecuritypolicy.yaml
   - calico/rbac.yaml
-  - calico/service.yaml
-  - calico/serviceaccount.yaml
   - policies/bmc-reverse-proxy.yaml
   - policies/ingress.yaml
   - policies/internet-egress.yaml
@@ -21,3 +16,6 @@ resources:
   - global-policies/ingress-cluster-allow.yaml
   - global-policies/network-set.yaml
   - global-policies/node-dns.yaml
+patchesStrategicMerge:
+  - calico/deployment.yaml
+  - calico/daemonset.yaml
