@@ -83,7 +83,7 @@ scrape_configs:
     - source_labels: [__name__]
       action: drop
       regex: apiserver_request_latencies.*
-  - job_name: 'kubernetes-controller-manager'
+  - job_name: 'kube-controller-manager'
     kubernetes_sd_configs:
     - role: endpoints
       namespaces:
@@ -103,7 +103,7 @@ scrape_configs:
       regex: ([^:]+)(?::\d+)?
       replacement: ${1}
       target_label: instance
-  - job_name: 'kubernetes-scheduler'
+  - job_name: 'kube-scheduler'
     kubernetes_sd_configs:
     - role: endpoints
       namespaces:
