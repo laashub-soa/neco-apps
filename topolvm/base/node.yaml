@@ -8,6 +8,3 @@ spec:
     spec:
       nodeSelector:
         cke.cybozu.com/role: cs
-      containers:
-        - name: topolvm-node
-          image: quay.io/cybozu/topolvm:0.2.2
