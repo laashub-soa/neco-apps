@@ -14,3 +14,12 @@ spec:
             - --storage.tsdb.path=/prometheus/data/
             - --storage.tsdb.retention.time=1d
             - --web.enable-admin-api
+  volumeClaimTemplates:
+    - metadata:
+        name: prometheus-storage-volume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: topolvm-provisioner
+        resources:
+          requests:
+            storage: 3Gi
