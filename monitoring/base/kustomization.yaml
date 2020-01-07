@@ -53,6 +53,9 @@ configMapGenerator:
   - name: dashboard-etcd
     files:
       - grafana/dashboards/etcd.json
+  - name: dashboard-kube-apiservers
+    files:
+      - grafana/dashboards/kube-apiservers.json
   - name: dashboard-kubernetes-cluster
     files:
       - grafana/dashboards/kubernetes_cluster.json

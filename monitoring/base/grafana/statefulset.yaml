@@ -101,6 +101,8 @@ spec:
               mountPath: /var/lib/grafana/dashboards/contour
             - name: dashboard-etcd-volume
               mountPath: /var/lib/grafana/dashboards/etcd
+            - name: dashboard-kube-apiservers
+              mountPath: /var/lib/grafana/dashboards/kube-apiservers
             - name: dashboard-kubernetes-cluster-volume
               mountPath: /var/lib/grafana/dashboards/kubernetes-cluster
             - name: dashboard-kubernetes-persistence-volumes-volume
@@ -147,6 +149,9 @@ spec:
         - name: dashboard-etcd-volume
           configMap:
             name: dashboard-etcd
+        - name: dashboard-kube-apiservers
+          configMap:
+              name: dashboard-kube-apiservers
         - name: dashboard-kubernetes-cluster-volume
           configMap:
             name: dashboard-kubernetes-cluster
