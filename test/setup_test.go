@@ -299,25 +299,25 @@ func applyAndWaitForApplications(overlay string) {
 	Eventually(func() error {
 		if doUpgrade {
 			// For upgrade argocd to 1.3.6
-			_, _, err := ExecAt(boot0, "argocd", "app", "sync", "argocd", "--force", "--async")
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "argocd", "--force", "--async")
 			if err != nil {
-				return err
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			// For upgrade metallb to v0.8.3
-			_, _, err = ExecAt(boot0, "argocd", "app", "sync", "metallb", "--force", "--async")
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "metallb", "--force", "--async")
 			if err != nil {
-				return err
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			// For upgrade calico to 3.11.1
-			_, _, err = ExecAt(boot0, "argocd", "app", "sync", "network-policy", "--force", "--async")
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "network-policy", "--force", "--async")
 			if err != nil {
-				return err
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			// For resizing disk prometheus
 			// TODO: delete this block if there is no diff
-			_, _, err = ExecAt(boot0, "argocd", "app", "sync", "monitoring", "--force", "--async")
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "monitoring", "--force", "--async")
 			if err != nil {
-				return err
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 		}
 
@@ -329,7 +329,7 @@ func applyAndWaitForApplications(overlay string) {
 			var app argocd.Application
 			err = json.Unmarshal(appStdout, &app)
 			if err != nil {
-				return err
+				return fmt.Errorf("stdout: %s, err: %v", appStdout, err)
 			}
 			if app.Status.Sync.ComparedTo.Source.TargetRevision != commitID {
 				return errors.New(appName + " does not have correct target yet")
@@ -345,9 +345,9 @@ func applyAndWaitForApplications(overlay string) {
 			// It leads to sync-error of other applications,
 			// so sync manually out-of-sync apps in upgrade test.
 			if doUpgrade && st.Sync.Status == argocd.SyncStatusCodeOutOfSync {
-				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName)
+				stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", appName)
 				if err != nil {
-					return err
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}
 			}
 			return fmt.Errorf("%s is not initialized. argocd app get %s -o json: %s", appName, appName, appStdout)
