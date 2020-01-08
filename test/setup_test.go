@@ -297,36 +297,31 @@ func applyAndWaitForApplications(overlay string) {
 
 	By("waiting initialization")
 	Eventually(func() error {
-		for _, appName := range appList {
+		if doUpgrade {
 			// For upgrade argocd to 1.3.6
-			if doUpgrade && appName == "argocd" {
-				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
-				if err != nil {
-					return err
-				}
+			_, _, err := ExecAt(boot0, "argocd", "app", "sync", "argocd", "--force", "--async")
+			if err != nil {
+				return err
 			}
 			// For upgrade metallb to v0.8.3
-			if doUpgrade && appName == "metallb" {
-				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
-				if err != nil {
-					return err
-				}
+			_, _, err = ExecAt(boot0, "argocd", "app", "sync", "metallb", "--force", "--async")
+			if err != nil {
+				return err
 			}
 			// For upgrade calico to 3.11.1
-			if doUpgrade && appName == "network-policy" {
-				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
-				if err != nil {
-					return err
-				}
+			_, _, err = ExecAt(boot0, "argocd", "app", "sync", "network-policy", "--force", "--async")
+			if err != nil {
+				return err
 			}
 			// For resizing disk prometheus
 			// TODO: delete this block if there is no diff
-			if doUpgrade && appName == "monitoring" {
-				_, _, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
-				if err != nil {
-					return err
-				}
+			_, _, err = ExecAt(boot0, "argocd", "app", "sync", "monitoring", "--force", "--async")
+			if err != nil {
+				return err
 			}
+		}
+
+		for _, appName := range appList {
 			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
