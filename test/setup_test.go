@@ -298,31 +298,28 @@ func applyAndWaitForApplications(overlay string) {
 	By("waiting initialization")
 	Eventually(func() error {
 		if doUpgrade {
-			// Execute "argocd app sync <app> --force --async" for incompatible applications.
-			// Append "--async" because it is hard to consider dependency here.
-			// This would return errors like "another operation is already in progress,"
-			// so ignore errors.
+			// Execute "argocd app sync <app> --force" for incompatible applications.
 
 			// For upgrade argocd to 1.3.6
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "argocd", "--force", "--async")
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "argocd", "--force")
 			if err != nil {
-				fmt.Printf("stdout: %s, stderr: %s, err: %v\n", stdout, stderr, err)
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			// For upgrade metallb to v0.8.3
-			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "metallb", "--force", "--async")
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "metallb", "--force")
 			if err != nil {
-				fmt.Printf("stdout: %s, stderr: %s, err: %v\n", stdout, stderr, err)
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			// For upgrade calico to 3.11.1
-			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "network-policy", "--force", "--async")
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "network-policy", "--force")
 			if err != nil {
-				fmt.Printf("stdout: %s, stderr: %s, err: %v\n", stdout, stderr, err)
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 			// For resizing disk prometheus
 			// TODO: delete this block if there is no diff
-			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "monitoring", "--force", "--async")
+			stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", "monitoring", "--force")
 			if err != nil {
-				fmt.Printf("stdout: %s, stderr: %s, err: %v\n", stdout, stderr, err)
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 		}
 
