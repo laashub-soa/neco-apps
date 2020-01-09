@@ -103,6 +103,8 @@ spec:
               mountPath: /var/lib/grafana/dashboards/etcd
             - name: dashboard-kube-apiserver
               mountPath: /var/lib/grafana/dashboards/kube-apiserver
+            - name: dashboard-kube-controller-manager
+              mountPath: /var/lib/grafana/dashboards/kube-controller-manager
             - name: dashboard-kube-scheduler
               mountPath: /var/lib/grafana/dashboards/kube-scheduler
             - name: dashboard-kubelet
@@ -156,6 +158,9 @@ spec:
         - name: dashboard-kube-apiserver
           configMap:
               name: dashboard-kube-apiserver
+        - name: dashboard-kube-controller-manager
+          configMap:
+              name: dashboard-kube-controller-manager
         - name: dashboard-kube-scheduler
           configMap:
               name: dashboard-kube-scheduler

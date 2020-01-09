@@ -56,6 +56,9 @@ configMapGenerator:
   - name: dashboard-kube-apiserver
     files:
       - grafana/dashboards/kube-apiserver.json
+  - name: dashboard-kube-controller-manager
+    files:
+      - grafana/dashboards/kube-controller-manager.json
   - name: dashboard-kube-scheduler
     files:
       - grafana/dashboards/kube-scheduler.json
