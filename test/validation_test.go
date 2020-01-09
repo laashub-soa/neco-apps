@@ -14,6 +14,7 @@ import (
 	"testing"
 	"text/template"
 
+	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/yaml"
@@ -63,6 +64,63 @@ func kustomizeBuild(dir string) ([]byte, []byte, error) {
 	cmd.Stderr = errBuf
 	err := cmd.Run()
 	return outBuf.Bytes(), errBuf.Bytes(), err
+}
+
+func testApplicationTargetRevision(t *testing.T) {
+	testcase := []struct {
+		targetDirs     string
+		targetRevision string
+	}{
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "gcp"),
+			targetRevision: "release",
+		},
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "kind"),
+			targetRevision: "release",
+		},
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "osaka0"),
+			targetRevision: "release",
+		},
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "stage0"),
+			targetRevision: "stage",
+		},
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "osaka0"),
+			targetRevision: "release",
+		},
+	}
+
+	t.Parallel()
+	for _, tc := range testcase {
+		t.Run(tc.targetDirs, func(t *testing.T) {
+			stdout, stderr, err := kustomizeBuild(tc.targetDirs)
+			if err != nil {
+				t.Error(fmt.Errorf("kustomize build faled. path: %s, stderr: %s, err: %v", tc.targetDirs, stderr, err))
+			}
+
+			y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
+			for {
+				data, err := y.Read()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					t.Error(err)
+				}
+
+				var app argocd.Application
+				err = yaml.Unmarshal(data, &app)
+				if err != nil {
+					t.Error(err)
+				}
+				if app.Spec.Source.TargetRevision != tc.targetRevision {
+					t.Error(fmt.Errorf("invalid targetRevision. application: %s, targetRevision: %s (should be %s)", app.Name, app.Spec.Source.TargetRevision, tc.targetRevision))
+				}
+			}
+		})
+	}
 }
 
 func testCRDStatus(t *testing.T) {
@@ -297,6 +355,7 @@ func TestValidation(t *testing.T) {
 		t.Skip("SSH_PRIVKEY envvar is defined as running e2e test")
 	}
 
+	t.Run("ApplicationTargetRevision", testApplicationTargetRevision)
 	t.Run("CRDStatus", testCRDStatus)
 	t.Run("GeneratedSecretName", testGeneratedSecretName)
 	t.Run("AlertRules", testAlertRules)
