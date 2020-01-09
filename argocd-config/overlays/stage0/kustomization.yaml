@@ -6,6 +6,7 @@ patchesStrategicMerge:
 - argocd.yaml
 - argocd-ingress.yaml
 - bmc-reverse-proxy.yaml
+- developer-apps.yaml
 - elastic.yaml
 - external-dns.yaml
 - ingress.yaml

@@ -1,4 +1,0 @@
-- op: remove
-  path: /metadata/creationTimestamp
-- op: remove
-  path: /status

@@ -156,7 +156,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.name
-        image: quay.io/cybozu/envoy:1.12.2.1
+        image: quay.io/cybozu/envoy:1.12.2.2
         imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:
