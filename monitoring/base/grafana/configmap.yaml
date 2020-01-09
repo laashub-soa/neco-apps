@@ -53,6 +53,34 @@ data:
       editable: false
       options:
         path: /var/lib/grafana/dashboards/etcd
+    - name: 'kube-apiserver'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/kube-apiserver
+    - name: 'kube-controller-manager'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/kube-controller-manager
+    - name: 'kube-scheduler'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/kube-scheduler
+    - name: 'kubelet'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/kubelet
     - name: 'kubernetes-cluster'
       folder: ''
       type: file

@@ -101,6 +101,14 @@ spec:
               mountPath: /var/lib/grafana/dashboards/contour
             - name: dashboard-etcd-volume
               mountPath: /var/lib/grafana/dashboards/etcd
+            - name: dashboard-kube-apiserver
+              mountPath: /var/lib/grafana/dashboards/kube-apiserver
+            - name: dashboard-kube-controller-manager
+              mountPath: /var/lib/grafana/dashboards/kube-controller-manager
+            - name: dashboard-kube-scheduler
+              mountPath: /var/lib/grafana/dashboards/kube-scheduler
+            - name: dashboard-kubelet
+              mountPath: /var/lib/grafana/dashboards/kubelet
             - name: dashboard-kubernetes-cluster-volume
               mountPath: /var/lib/grafana/dashboards/kubernetes-cluster
             - name: dashboard-kubernetes-persistence-volumes-volume
@@ -147,6 +155,18 @@ spec:
         - name: dashboard-etcd-volume
           configMap:
             name: dashboard-etcd
+        - name: dashboard-kube-apiserver
+          configMap:
+              name: dashboard-kube-apiserver
+        - name: dashboard-kube-controller-manager
+          configMap:
+              name: dashboard-kube-controller-manager
+        - name: dashboard-kube-scheduler
+          configMap:
+              name: dashboard-kube-scheduler
+        - name: dashboard-kubelet
+          configMap:
+              name: dashboard-kubelet
         - name: dashboard-kubernetes-cluster-volume
           configMap:
             name: dashboard-kubernetes-cluster

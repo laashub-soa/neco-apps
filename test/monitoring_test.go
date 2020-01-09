@@ -292,7 +292,7 @@ func testGrafana() {
 
 			// NOTE: expectedNum is the number of JSON files under monitoring/base/grafana/dashboards + 1(Node Exporter Full).
 			// Node Exporter Full is downloaded every time from the Internet because too large to store into configMap.
-			expectedNum := 11
+			expectedNum := 15
 			if len(dashboards) != expectedNum {
 				return fmt.Errorf("len(dashboards) should be %d: %d", expectedNum, len(dashboards))
 			}
