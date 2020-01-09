@@ -15,15 +15,14 @@ import (
 	"text/template"
 
 	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/yaml"
 )
 
 const (
-	manifestDir        = "../"
-	expectedSecretFile = "./expected-secret.yaml"
-	currentSecretFile  = "./current-secret.yaml"
+	manifestDir = "../"
 )
 
 var (
@@ -34,20 +33,6 @@ var (
 		filepath.Join(manifestDir, "vendor"),
 	}
 )
-
-type crdValidation struct {
-	Kind     string `json:"kind"`
-	Metadata struct {
-		Name string `json:"name"`
-	} `json:"metadata"`
-	Status *apiextensionsv1beta1.CustomResourceDefinitionStatus `json:"status"`
-}
-
-type secret struct {
-	Metadata struct {
-		Name string `json:"name"`
-	} `json:"metadata"`
-}
 
 func isKustomizationFile(name string) bool {
 	if name == "kustomization.yaml" || name == "kustomization.yml" || name == "Kustomization" {
@@ -123,6 +108,16 @@ func testApplicationTargetRevision(t *testing.T) {
 	}
 }
 
+// Use to check the existence of the status field in manifest files for CRDs.
+// `apiextensionsv1beta1.CustomResourceDefinition` cannot be used because the status field always exists in the struct.
+type crdValidation struct {
+	Kind     string `json:"kind"`
+	Metadata struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
+	Status *apiextensionsv1beta1.CustomResourceDefinitionStatus `json:"status"`
+}
+
 func testCRDStatus(t *testing.T) {
 	t.Parallel()
 
@@ -186,14 +181,14 @@ func testCRDStatus(t *testing.T) {
 	}
 }
 
-func readSecret(path string) ([]secret, error) {
+func readSecret(path string) ([]corev1.Secret, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
-	var secrets []secret
+	var secrets []corev1.Secret
 	y := k8sYaml.NewYAMLReader(bufio.NewReader(f))
 	for {
 		data, err := y.Read()
@@ -203,7 +198,7 @@ func readSecret(path string) ([]secret, error) {
 			return nil, err
 		}
 
-		var s secret
+		var s corev1.Secret
 		err = yaml.Unmarshal(data, &s)
 		if err != nil {
 			return nil, err
@@ -214,6 +209,11 @@ func readSecret(path string) ([]secret, error) {
 }
 
 func testGeneratedSecretName(t *testing.T) {
+	const (
+		expectedSecretFile = "./expected-secret.yaml"
+		currentSecretFile  = "./current-secret.yaml"
+	)
+
 	t.Parallel()
 
 	defer func() {
@@ -251,7 +251,7 @@ OUTER:
 				return err
 			}
 
-			if strings.Contains(string(str), "secretName: "+es.Metadata.Name) {
+			if strings.Contains(string(str), "secretName: "+es.Name) {
 				appeared = true
 			}
 			return nil
@@ -260,15 +260,15 @@ OUTER:
 			t.Fatal("failed to walk manifest directories")
 		}
 		if !appeared {
-			t.Error("secret:", es.Metadata.Name, "was not found in any manifests")
+			t.Error("secret:", es.Name, "was not found in any manifests")
 		}
 
 		for _, cs := range dummySecrets {
-			if cs.Metadata.Name == es.Metadata.Name {
+			if cs.Name == es.Name && cs.Namespace == es.Namespace {
 				continue OUTER
 			}
 		}
-		t.Error("secret:", es.Metadata.Name, "was not found in dummy secrets", dummySecrets)
+		t.Error("secret:", es.Namespace+"/"+es.Name, "was not found in dummy secrets")
 	}
 }
 
