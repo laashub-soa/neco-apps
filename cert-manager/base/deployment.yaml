@@ -17,6 +17,10 @@ kind: Deployment
 metadata:
   name: cert-manager
   namespace: cert-manager
+  annotations:
+    prometheus.io/path: "/metrics"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9402"
 spec:
   template:
     spec:
