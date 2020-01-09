@@ -1,25 +1,31 @@
 How to maintain neco-apps
 =========================
 
-argocd
-------
+## argocd
 
-Upstream `install.yaml` is generated with kustomize as follows:
+Check [releases](https://github.com/argoproj/argo-cd/releases) for changes.
 
-```console
-kustomize build "${SRCROOT}/manifests/cluster-install" >> "${SRCROOT}/manifests/install.yaml"
-```
-
-So, check diffs of argo-cd/manifests files as follows:
+Download the upstream manifest as follows:
 
 ```console
-git clone https://github.com/argoproj/argo-cd
-cd argocd-cd
-git diff vA.B.C...vX.Y.Z manifests
+$ curl -sLf -o argocd/base/upstream/install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/vX.Y.Z/manifests/install.yaml
 ```
 
-elastic cloud on Kubernetes
----------------------------
+Then check the diffs by `git diff`.
+
+## cert-manager
+
+Check [the upgrading section](https://cert-manager.io/docs/installation/upgrading/) in the official website.
+
+Download manifests and remove `Namespace` resource from it as follows:
+
+```console
+$ curl -sLf -o  cert-manager/base/upstream/cert-manager.yaml https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
+$ vi cert-manager/base/upstream/cert-manager.yaml
+  (Remove Namespace resources)
+```
+
+## elastic (ECK)
 
 To check diffs between versions, download and compare manifests as follows:
 
@@ -28,28 +34,13 @@ wget https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml
 sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: kube-system//' all-in-one.yaml > all-in-one_nsremoved.yaml
 ```
 
-cert-manager
-------------
-
-Download manifests and remove `Namespace` resource from it as follows:
-
-```console
-wget https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
-sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: cert-manager//' cert-manager.yaml > cert-manager_nsremoved.yaml
-```
-
-Note that `cert-manager_nsremoved.yaml` is used for input of `kustomize build`.
-
-external-dns
-------------
+## external-dns
 
 Read the following document and fix manifests as necessary.
 
 https://github.com/kubernetes-incubator/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md
 
-
-contour
--------
+## ingress (Contour & Envoy)
 
 Check diffs of projectcontour/contour files as follows:
 
@@ -63,7 +54,7 @@ Then, import YAML manifests as follows:
 
 ```console
 $ git checkout vX.Y.Z
-$ cp examples/contour/*.yaml /path/to/neco-apps/ingress/base/contour/upstream
+$ cp examples/contour/*.yaml /path/to/neco-apps/ingress/base/contour/
 ```
 
 Note that:
@@ -75,49 +66,52 @@ Note that:
     - If the manifest is for a cluster-wide resource, put a modified version in the `common` directory.
     - If the manifest is for a namespaced resource, put a template in the `template` directory and apply patches.
 
-metallb
--------
+## metallb
 
-Check diffs of danderson/metallb files as follows:
+Check [releases](https://github.com/danderson/metallb/releases)
+
+Download manifests and remove `Namespace` resource from it as follows:
 
 ```console
-git clone https://github.com/danderson/metallb
-cd metallb
-git diff vA.B.C...vX.Y.Z manifests
+$ git clone https://github.com/danderson/metallb
+$ cd metallb
+$ git checkout vX.Y.Z
+$ cp manifests/*.yaml /path/to/neco-apps/metallb/base/upstream
+$ vi metallb/base/upstream/metallb.yaml
+  (Remove Namespace resources)
 ```
 
-prometheus, alertmanager, grafana
----------------------------------
+## monitoring (prometheus, alertmanager, grafana)
 
 There is no official kubernetes manifests for prometheus.
 So, check changes in release notes on github for both prometheus and alertmanager and make necessary actions.
 
+## network-policy (Calico)
 
-calico
-------
+Check [the release notes](https://docs.projectcalico.org/v3.11/release-notes/).
 
-To check diffs between minor versions, download and compare manifests as follows:
+Download the upstream manifest as follows:
 
 ```console
-wget https://docs.projectcalico.org/vX.Y/manifests/calico-policy-only.yaml -O vX.Y.yaml
-wget https://docs.projectcalico.org/vA.B/manifests/calico-policy-only.yaml -O vA.B.yaml
-diff -u vX.Y.yaml vA.B.yaml
+$ curl -sLf -o network-policy/base/calico/upstream/calico-policy-only.yaml https://docs.projectcalico.org/vX.Y/manifests/calico-policy-only.yaml
 ```
 
 teleport
 --------
 
 There is no official kubernetes manifests actively maintained for teleport.
-So, check changes in release notes on github.
-
+So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/blob/master/CHANGELOG.md) on github.
 
 topolvm
 -------
 
-Check diffs of cybozu-go/topolvm files as follows:
+Check [releases](https://github.com/cybozu-go/topolvm/releases) for changes.
+
+Download the upstream manifest as follows:
 
 ```console
-git clone https://github.com/cybozu-go/topolvm
-cd topolvm
-git diff vA.B.C...vX.Y.Z deploy
+$ git clone https://github.com/cybozu-go/topolvm
+$ cd topolvm
+$ git checkout vX.Y.Z
+$ cp deploy/manifests/*.yaml /path/to/neco-apps/topolvm/base/upstream
 ```

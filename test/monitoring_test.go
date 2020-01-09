@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,6 +19,16 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
 )
+
+// dcJobs are Prometheus jobs deployed in dctest but not deployed in kindtest
+var dcJobs = []string{
+	"cke-etcd",
+	"external-dns",
+	"monitor-hw",
+	"teleport",
+	"bootserver-etcd",
+	"node-exporter",
+}
 
 func testMachinesEndpoints() {
 	It("should be deployed successfully", func() {
@@ -340,7 +351,11 @@ func testMetrics() {
 
 		var jobNames []model.LabelName
 		for _, sc := range promConfig.ScrapeConfigs {
-			jobNames = append(jobNames, model.LabelName(sc.JobName))
+			jobName := sc.JobName
+			if withKind && isDCJob(jobName) {
+				continue
+			}
+			jobNames = append(jobNames, model.LabelName(jobName))
 		}
 
 		By("checking discovered active labels and statuses")
@@ -359,12 +374,21 @@ func testMetrics() {
 				return err
 			}
 
+			// monitor-hw job on stopped machine should be down
+			const stoppedMachineInDCTest = 1
+			downedMonitorHW := 0
 			for _, jobName := range jobNames {
-				for _, target := range response.TargetsResult.Active {
-					if _, ok := target.Labels[jobName]; ok {
-						if target.Health != promv1.HealthGood {
-							return fmt.Errorf("target is not up, job_name: %s", jobName)
-						}
+				target := findTarget(string(jobName), response.TargetsResult.Active)
+				if target == nil {
+					return fmt.Errorf("target is not found, job_name: %s", jobName)
+				}
+				if target.Health != promv1.HealthGood {
+					if target.Labels["job"] != "monitor-hw" {
+						return fmt.Errorf("target is not 'up', job_name: %s, health: %s", jobName, target.Health)
+					}
+					downedMonitorHW++
+					if downedMonitorHW > stoppedMachineInDCTest {
+						return fmt.Errorf("two or more monitor-hw jobs are not up; health: %s", target.Health)
 					}
 				}
 			}
@@ -462,7 +486,7 @@ func testMetrics() {
 		Expect(err).NotTo(HaveOccurred())
 
 		for _, g := range response.Rules.Groups {
-			if g.Name != "kube-apiserver.rules" {
+			if !strings.HasSuffix(g.Name, ".records") {
 				continue
 			}
 			for _, r := range g.Rules {
@@ -483,4 +507,22 @@ func testMetrics() {
 			"\nactual   = %v\nexpected = %v", actual, expected)
 	})
 
+}
+
+func isDCJob(job string) bool {
+	for _, dcJob := range dcJobs {
+		if dcJob == job {
+			return true
+		}
+	}
+	return false
+}
+
+func findTarget(job string, targets []promv1.ActiveTarget) *promv1.ActiveTarget {
+	for _, t := range targets {
+		if string(t.Labels["job"]) == job {
+			return &t
+		}
+	}
+	return nil
 }

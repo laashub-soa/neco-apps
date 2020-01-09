@@ -11,10 +11,10 @@ spec:
     - 'secret'
     - 'hostPath'
   allowedHostPaths:
-    - pathPrefix: "/var/lib/kubelet"
-      readOnly: false
-    - pathPrefix: "/run/topolvm"
-      readOnly: false
+  - pathPrefix: "/var/lib/kubelet"
+    readOnly: false
+  - pathPrefix: "/run/topolvm"
+    readOnly: false
   hostNetwork: false
   runAsUser:
     rule: 'RunAsAny'
@@ -45,11 +45,11 @@ spec:
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:
-      - min: 1
-        max: 65535
+    - min: 1
+      max: 65535
   fsGroup:
     rule: 'MustRunAs'
     ranges:
-      - min: 1
-        max: 65535
+    - min: 1
+      max: 65535
   readOnlyRootFilesystem: true

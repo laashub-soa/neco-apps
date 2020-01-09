@@ -44,6 +44,6 @@ spec:
   issuerRef:
     name: webhook-ca
   dnsNames:
-    - controller
-    - controller.topolvm-system
-    - controller.topolvm-system.svc
+  - controller
+  - controller.topolvm-system
+  - controller.topolvm-system.svc

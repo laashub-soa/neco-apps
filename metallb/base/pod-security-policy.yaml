@@ -1,14 +1,12 @@
-# We ignore upstream psp because metallb neco does not require any priviledges.
-# Note that metallb in general can run in L2 mode that requires some priviledges.
+# In Neco, metallb is run in L3 mode so we drop privileges required for L2 mode.
 
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: metallb 
+  name: speaker
 spec:
   privileged: false
-  # Required to prevent escalations to root.
-  allowPrivilegeEscalation: false
+  allowedCapabilities: []
   # This is redundant with non-root + disallow privilege escalation,
   # but we can provide it for defense in depth.
   requiredDropCapabilities:
@@ -20,20 +18,9 @@ spec:
     - 'projected'
     - 'secret'
     - 'downwardAPI'
-    # Assume that persistentVolumes set up by the cluster admin are safe to use.
-    - 'persistentVolumeClaim'
-  hostNetwork: true
-  hostPorts:
-    - max: 7472
-      min: 7472
-  hostIPC: false
-  hostPID: false
   runAsUser:
     # Require the container to run without root privileges.
     rule: 'MustRunAsNonRoot'
-  seLinux:
-    # This policy assumes the nodes are using AppArmor rather than SELinux.
-    rule: 'RunAsAny'
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:

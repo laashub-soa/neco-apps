@@ -1,113 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app.kubernetes.io/component: application-controller
-    app.kubernetes.io/name: argocd-application-controller
-    app.kubernetes.io/part-of: argocd
   name: argocd-application-controller
 spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: argocd-application-controller
-  strategy:
-    type: Recreate
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: argocd-application-controller
     spec:
       containers:
-      - command:
-        - argocd-application-controller
-        - --status-processors
-        - "20"
-        - --operation-processors
-        - "10"
-        image: quay.io/cybozu/argocd:1.2.5.2
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8082
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        name: argocd-application-controller
-        ports:
-        - containerPort: 8082
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8082
-          initialDelaySeconds: 5
-          periodSeconds: 10
-      serviceAccountName: argocd-application-controller
+        - image: quay.io/cybozu/argocd:1.3.6.1
+          name: argocd-application-controller
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app.kubernetes.io/component: redis
-    app.kubernetes.io/name: argocd-redis
-    app.kubernetes.io/part-of: argocd
   name: argocd-redis
 spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: argocd-redis
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: argocd-redis
     spec:
       containers:
-      - args:
-        - --save
-        - ""
-        - --appendonly
-        - "no"
-        image: quay.io/cybozu/redis:5.0.5.1
-        name: redis
-        ports:
-        - containerPort: 6379
+        - image: quay.io/cybozu/redis:5.0.7.1
+          name: redis
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app.kubernetes.io/component: repo-server
-    app.kubernetes.io/name: argocd-repo-server
-    app.kubernetes.io/part-of: argocd
   name: argocd-repo-server
 spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: argocd-repo-server
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: argocd-repo-server
     spec:
-      automountServiceAccountToken: false
       containers:
-      - command:
+      - image: quay.io/cybozu/argocd:1.3.6.1
+        name: argocd-repo-server
+        command:
         - argocd-repo-server
         - --redis
         - argocd-redis:6379
-        image: quay.io/cybozu/argocd:1.2.5.2
-        livenessProbe:
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          tcpSocket:
-            port: 8081
-        name: argocd-repo-server
-        ports:
-        - containerPort: 8081
-        - containerPort: 8084
-        readinessProbe:
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          tcpSocket:
-            port: 8081
         env:
         - name: NO_PROXY
           value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server,argocd-server-metrics,argocd-redis,10.0.0.0/8
@@ -116,61 +42,26 @@ spec:
         - name: HTTPS_PROXY
           value: http://squid.internet-egress.svc:3128
         volumeMounts:
-        - mountPath: /app/config/ssh
-          name: ssh-known-hosts
-        - mountPath: /app/config/tls
-          name: tls-certs
         - name: tmp
           mountPath: /tmp
       volumes:
-      - configMap:
-          name: argocd-ssh-known-hosts-cm
-        name: ssh-known-hosts
-      - configMap:
-          name: argocd-tls-certs-cm
-        name: tls-certs
       - name: tmp
         emptyDir: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app.kubernetes.io/component: server
-    app.kubernetes.io/name: argocd-server
-    app.kubernetes.io/part-of: argocd
   name: argocd-server
 spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: argocd-server
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: argocd-server
     spec:
       containers:
       - command:
         - argocd-server
         - --staticassets
         - /shared/argocd/app
-        image: quay.io/cybozu/argocd:1.2.5.2
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 3
-          periodSeconds: 30
+        image: quay.io/cybozu/argocd:1.3.6.1
         name: argocd-server
-        ports:
-        - containerPort: 8080
-        - containerPort: 8083
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 3
-          periodSeconds: 30
         env:
         - name: NO_PROXY
           value: argocd-repo-server,argocd-application-controller,argocd-metrics,argocd-server,argocd-server-metrics,argocd-redis,argocd-dex-server,10.0.0.0/8
@@ -183,45 +74,24 @@ spec:
           name: ssh-known-hosts
         - mountPath: /app/config/tls
           name: tls-certs
-      serviceAccountName: argocd-server
-      volumes:
-      - configMap:
-          name: argocd-ssh-known-hosts-cm
-        name: ssh-known-hosts
-      - configMap:
-          name: argocd-tls-certs-cm
-        name: tls-certs
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app.kubernetes.io/name: argocd-dex-server
-    app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/component: dex-server
   name: argocd-dex-server
 spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: argocd-dex-server
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: argocd-dex-server
     spec:
-      serviceAccountName: argocd-dex-server
       initContainers:
       - name: copyutil
-        image: quay.io/cybozu/argocd:1.2.5.2
-        imagePullPolicy: IfNotPresent
+        image: quay.io/cybozu/argocd:1.3.6.1
         command: [cp, /usr/local/argocd/bin/argocd-util, /shared]
         volumeMounts:
         - mountPath: /shared
           name: static-files
       containers:
       - name: dex
-        image: quay.io/cybozu/dex:2.19.0.4
-        imagePullPolicy: IfNotPresent
+        image: quay.io/cybozu/dex:2.21.0.1
         command: [/shared/argocd-util, rundex]
         env:
         - name: NO_PROXY
@@ -230,16 +100,9 @@ spec:
           value: http://squid.internet-egress.svc.cluster.local:3128
         - name: HTTPS_PROXY
           value: http://squid.internet-egress.svc.cluster.local:3128
-        ports:
-        - containerPort: 5556
-        - containerPort: 5557
         volumeMounts:
-        - mountPath: /shared
-          name: static-files
         - mountPath: /tmp
           name: tmp
       volumes:
-      - emptyDir: {}
-        name: static-files
       - emptyDir: {}
         name: tmp
