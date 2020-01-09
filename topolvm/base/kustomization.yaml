@@ -1,12 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- certificates.yaml
-- crd.yaml
-- controller.yaml
-- node.yaml
-- mutatingwebhooks.yaml
-- provisioner.yaml
-- psp.yaml
-- scheduler.yaml
+- upstream/certificates.yaml
+- upstream/controller.yaml
+- upstream/crd.yaml
+- upstream/mutatingwebhooks.yaml
+- upstream/node.yaml
+- upstream/provisioner.yaml
+- upstream/psp.yaml
+- upstream/scheduler.yaml
 - pdb.yaml
+
+patchesStrategicMerge:
+- crd.yaml
+- node.yaml
+- scheduler.yaml
