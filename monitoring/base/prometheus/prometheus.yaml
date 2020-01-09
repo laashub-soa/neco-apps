@@ -6,7 +6,7 @@ rule_files:
   - /etc/prometheus/record_rules.yaml
   # Alert rules
   - /etc/prometheus/argocd.yaml
-  - /etc/prometheus/elastic.yaml
+  - /etc/prometheus/elastic-operator.yaml
   - /etc/prometheus/etcd.yaml
   - /etc/prometheus/external-dns.yaml
   - /etc/prometheus/ingress.yaml
@@ -403,6 +403,25 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
         action: keep
         regex: node
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: ${1}:${2}
+        target_label: __address__
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
+  - job_name: "elastic-operator"
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ["elastic-system"]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        action: keep
+        regex: elastic-operator
       - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
         action: replace
         regex: ([^:]+)(?::\d+)?;(\d+)
