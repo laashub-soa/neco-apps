@@ -12,7 +12,7 @@ groups:
           runbook: Please consider to find root causes, and solve the problems
       - alert: IngressGlobalDown
         expr: |
-          absent(up{job="ingress", kubernetes_namespace="ingress-global"} == 1)
+          absent(up{job="contour-envoy", kubernetes_namespace="ingress-global"} == 1)
         labels:
           severity: critical
         for: 10m
@@ -30,7 +30,7 @@ groups:
           runbook: Please consider to find root causes, and solve the problems
       - alert: IngressForestDown
         expr: |
-          absent(up{job="ingress", kubernetes_namespace="ingress-forest"} == 1)
+          absent(up{job="contour-envoy", kubernetes_namespace="ingress-forest"} == 1)
         labels:
           severity: critical
         for: 10m
@@ -48,7 +48,7 @@ groups:
           runbook: Please consider to find root causes, and solve the problems
       - alert: IngressBastionDown
         expr: |
-          absent(up{job="ingress", kubernetes_namespace="ingress-bastion"} == 1)
+          absent(up{job="contour-envoy", kubernetes_namespace="ingress-bastion"} == 1)
         labels:
           severity: critical
         for: 10m
