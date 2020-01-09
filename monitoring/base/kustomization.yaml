@@ -27,7 +27,7 @@ configMapGenerator:
       - prometheus/prometheus.yaml
       - prometheus/record_rules.yaml
       - prometheus/alert_rules/argocd.yaml
-      - prometheus/alert_rules/elastic.yaml
+      - prometheus/alert_rules/elastic-operator.yaml
       - prometheus/alert_rules/etcd.yaml
       - prometheus/alert_rules/external-dns.yaml
       - prometheus/alert_rules/ingress.yaml
