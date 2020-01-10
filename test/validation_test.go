@@ -14,15 +14,15 @@ import (
 	"testing"
 	"text/template"
 
+	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/yaml"
 )
 
 const (
-	manifestDir        = "../"
-	expectedSecretFile = "./expected-secret.yaml"
-	currentSecretFile  = "./current-secret.yaml"
+	manifestDir = "../"
 )
 
 var (
@@ -33,20 +33,6 @@ var (
 		filepath.Join(manifestDir, "vendor"),
 	}
 )
-
-type crdValidation struct {
-	Kind     string `json:"kind"`
-	Metadata struct {
-		Name string `json:"name"`
-	} `json:"metadata"`
-	Status *apiextensionsv1beta1.CustomResourceDefinitionStatus `json:"status"`
-}
-
-type secret struct {
-	Metadata struct {
-		Name string `json:"name"`
-	} `json:"metadata"`
-}
 
 func isKustomizationFile(name string) bool {
 	if name == "kustomization.yaml" || name == "kustomization.yml" || name == "Kustomization" {
@@ -63,6 +49,73 @@ func kustomizeBuild(dir string) ([]byte, []byte, error) {
 	cmd.Stderr = errBuf
 	err := cmd.Run()
 	return outBuf.Bytes(), errBuf.Bytes(), err
+}
+
+func testApplicationTargetRevision(t *testing.T) {
+	testcase := []struct {
+		targetDirs     string
+		targetRevision string
+	}{
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "gcp"),
+			targetRevision: "release",
+		},
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "kind"),
+			targetRevision: "release",
+		},
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "tokyo0"),
+			targetRevision: "release",
+		},
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "stage0"),
+			targetRevision: "stage",
+		},
+		{
+			targetDirs:     filepath.Join(manifestDir, "argocd-config", "overlays", "osaka0"),
+			targetRevision: "release",
+		},
+	}
+
+	t.Parallel()
+	for _, tc := range testcase {
+		t.Run(tc.targetDirs, func(t *testing.T) {
+			stdout, stderr, err := kustomizeBuild(tc.targetDirs)
+			if err != nil {
+				t.Error(fmt.Errorf("kustomize build faled. path: %s, stderr: %s, err: %v", tc.targetDirs, stderr, err))
+			}
+
+			y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
+			for {
+				data, err := y.Read()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					t.Error(err)
+				}
+
+				var app argocd.Application
+				err = yaml.Unmarshal(data, &app)
+				if err != nil {
+					t.Error(err)
+				}
+				if app.Spec.Source.TargetRevision != tc.targetRevision {
+					t.Error(fmt.Errorf("invalid targetRevision. application: %s, targetRevision: %s (should be %s)", app.Name, app.Spec.Source.TargetRevision, tc.targetRevision))
+				}
+			}
+		})
+	}
+}
+
+// Use to check the existence of the status field in manifest files for CRDs.
+// `apiextensionsv1beta1.CustomResourceDefinition` cannot be used because the status field always exists in the struct.
+type crdValidation struct {
+	Kind     string `json:"kind"`
+	Metadata struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
+	Status *apiextensionsv1beta1.CustomResourceDefinitionStatus `json:"status"`
 }
 
 func testCRDStatus(t *testing.T) {
@@ -128,14 +181,14 @@ func testCRDStatus(t *testing.T) {
 	}
 }
 
-func readSecret(path string) ([]secret, error) {
+func readSecret(path string) ([]corev1.Secret, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
-	var secrets []secret
+	var secrets []corev1.Secret
 	y := k8sYaml.NewYAMLReader(bufio.NewReader(f))
 	for {
 		data, err := y.Read()
@@ -145,7 +198,7 @@ func readSecret(path string) ([]secret, error) {
 			return nil, err
 		}
 
-		var s secret
+		var s corev1.Secret
 		err = yaml.Unmarshal(data, &s)
 		if err != nil {
 			return nil, err
@@ -156,6 +209,11 @@ func readSecret(path string) ([]secret, error) {
 }
 
 func testGeneratedSecretName(t *testing.T) {
+	const (
+		expectedSecretFile = "./expected-secret.yaml"
+		currentSecretFile  = "./current-secret.yaml"
+	)
+
 	t.Parallel()
 
 	defer func() {
@@ -193,7 +251,7 @@ OUTER:
 				return err
 			}
 
-			if strings.Contains(string(str), "secretName: "+es.Metadata.Name) {
+			if strings.Contains(string(str), "secretName: "+es.Name) {
 				appeared = true
 			}
 			return nil
@@ -202,15 +260,15 @@ OUTER:
 			t.Fatal("failed to walk manifest directories")
 		}
 		if !appeared {
-			t.Error("secret:", es.Metadata.Name, "was not found in any manifests")
+			t.Error("secret:", es.Name, "was not found in any manifests")
 		}
 
 		for _, cs := range dummySecrets {
-			if cs.Metadata.Name == es.Metadata.Name {
+			if cs.Name == es.Name && cs.Namespace == es.Namespace {
 				continue OUTER
 			}
 		}
-		t.Error("secret:", es.Metadata.Name, "was not found in dummy secrets", dummySecrets)
+		t.Error("secret:", es.Namespace+"/"+es.Name, "was not found in dummy secrets")
 	}
 }
 
@@ -297,6 +355,7 @@ func TestValidation(t *testing.T) {
 		t.Skip("SSH_PRIVKEY envvar is defined as running e2e test")
 	}
 
+	t.Run("ApplicationTargetRevision", testApplicationTargetRevision)
 	t.Run("CRDStatus", testCRDStatus)
 	t.Run("GeneratedSecretName", testGeneratedSecretName)
 	t.Run("AlertRules", testAlertRules)
