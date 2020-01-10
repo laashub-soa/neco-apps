@@ -5,6 +5,10 @@ metadata:
   namespace: elastic-system
   labels:
     app.kubernetes.io/name: elastic-operator
+  annotations:
+    prometheus.io/path: "/metrics"
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '9001'
 spec:
   selector:
     matchLabels:
@@ -16,8 +20,11 @@ spec:
     spec:
       containers:
         - name: manager
+          args: ["manager", "--operator-roles", "all", "--enable-debug-logs=false", "--metrics-port=9001"]
           ports:
             - $patch: replace
             - containerPort: 9443
               name: webhook-server
               protocol: TCP
+            - containerPort: 9001
+              name: metrics

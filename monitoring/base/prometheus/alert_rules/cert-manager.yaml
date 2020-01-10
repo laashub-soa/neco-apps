@@ -1,0 +1,12 @@
+groups:
+    - name: cert-manager
+      rules:
+        - alert: CertManagerDown
+          annotations:
+            summary: Cert Manager has disappeared from Prometheus target discovery.
+            runbook: TBD
+          expr: |
+            absent(up{job="cert-manager"} == 1)
+          for: 15m
+          labels:
+            severity: critical
