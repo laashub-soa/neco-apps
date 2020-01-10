@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: local-pv-provisioner
+  labels:
+    app.kubernetes.io/name: local-pv-provisioner
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: local-pv-provisioner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: local-pv-provisioner
+    spec:
+      containers:
+        - name: local-pv-provisioner
+          image: quay.io/cybozu/local-pv-provisioner:0.1.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --device-dir=/dev/crypt-disk/by-path
+            - --device-name-filter=.+-sas-.+-lun-0$
+          env:
+            - name: LP_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: dev
+              mountPath: /dev/crypt-disk/by-path
+              readOnly: true
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            privileged: true
+      serviceAccountName: local-pv-provisioner
+      volumes:
+        - name: dev
+          hostPath:
+            path: /dev/crypt-disk/by-path
+      nodeSelector:
+        cke.cybozu.com/role: ss
+      tolerations:
+        - key: cke.cybozu.com/role
+          operator: Equal
+          value: storage
