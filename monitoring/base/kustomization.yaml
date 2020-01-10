@@ -27,7 +27,8 @@ configMapGenerator:
       - prometheus/prometheus.yaml
       - prometheus/record_rules.yaml
       - prometheus/alert_rules/argocd.yaml
-      - prometheus/alert_rules/elastic.yaml
+      - prometheus/alert_rules/cert-manager.yaml
+      - prometheus/alert_rules/elastic-operator.yaml
       - prometheus/alert_rules/etcd.yaml
       - prometheus/alert_rules/external-dns.yaml
       - prometheus/alert_rules/ingress.yaml
@@ -53,6 +54,18 @@ configMapGenerator:
   - name: dashboard-etcd
     files:
       - grafana/dashboards/etcd.json
+  - name: dashboard-kube-apiserver
+    files:
+      - grafana/dashboards/kube-apiserver.json
+  - name: dashboard-kube-controller-manager
+    files:
+      - grafana/dashboards/kube-controller-manager.json
+  - name: dashboard-kube-scheduler
+    files:
+      - grafana/dashboards/kube-scheduler.json
+  - name: dashboard-kubelet
+    files:
+      - grafana/dashboards/kubelet.json
   - name: dashboard-kubernetes-cluster
     files:
       - grafana/dashboards/kubernetes_cluster.json
