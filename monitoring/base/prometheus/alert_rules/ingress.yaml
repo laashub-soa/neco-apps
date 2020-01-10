@@ -55,3 +55,12 @@ groups:
         annotations:
           summary: Ingress has disappeared from Prometheus target discovery.
           runbook: Please consider to find root causes, and solve the problems
+      - alert: InvalidHTTPProxyExist
+        expr: |
+          rate(contour_httpproxy_invalid_total[5m]) > 0
+        labels:
+          severity: minor
+        for: 10m
+        annotations:
+          summary: Invalid HTTPProxy resource exists.
+          runbook: Please check the status of HTTPProxy.

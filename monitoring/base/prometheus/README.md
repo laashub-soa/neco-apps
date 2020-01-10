@@ -45,6 +45,15 @@ $ promtool test rules ./test/alert_test/*.yaml
 $ promtool test rules ./test/alert_test/argocd.yaml
 ```
 
+Severity Levels
+---------------
+
+All alert rules should have the `severity` labels. This label indicates the level of the severity of the alert.
+
+- `warning`: Investigate to decide whether any action is required.
+- `minor`: Action is required, but the situation is not serious at this time.
+- `critical`: Action is required immediately because the problem gets worse. Investigate and resolve the causes of alert as soon as possible.
+
 Notice
 ------
 

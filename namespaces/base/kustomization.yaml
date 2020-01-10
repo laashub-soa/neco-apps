@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - argocd.yaml
 - bmc-reverse-proxy.yaml
+- cert-manager.yaml
 - elastic.yaml
 - external-dns.yaml
 - ingress.yaml
@@ -12,6 +13,5 @@ resources:
 - monitoring.yaml
 - teleport.yaml
 - topolvm.yaml
-- cert-manager.yaml
 commonLabels:
   team: neco

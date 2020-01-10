@@ -15,7 +15,7 @@ tests:
           - exp_labels:
               job: etcd
               instance: 10.0.0.1:2379
-              severity: warning
+              severity: minor
             exp_annotations:
               summary: "10.0.0.1:2379, etcd of etcd DB space uses more than 80%"
               runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"
@@ -32,14 +32,14 @@ tests:
           - exp_labels:
               job: etcd
               instance: 10.0.0.1:2379
-              severity: warning
+              severity: minor
             exp_annotations:
               summary: "10.0.0.1:2379, etcd of etcd DB space uses more than 80%"
               runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"
           - exp_labels:
               job: etcd
               instance: 10.0.0.1:2379
-              severity: critical
+              severity: minor
             exp_annotations:
               summary: "10.0.0.1:2379, etcd of etcd DB space uses more than 90%"
               runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"

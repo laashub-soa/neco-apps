@@ -39,6 +39,13 @@ data:
       editable: false
       options:
         path: /var/lib/grafana/dashboards/calico
+    - name: 'cert-manager'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/cert-manager
     - name: 'contour'
       folder: ''
       type: file

@@ -7,6 +7,15 @@ groups:
             runbook: TBD
           expr: |
             absent(up{job="cert-manager"} == 1)
-          for: 15m
+          for: 10m
           labels:
-            severity: critical
+            severity: minor
+        - alert: CertificateDoesNotReady
+          expr: |
+            certmanager_certificate_ready_status{condition="False"} > 0
+          for: 10m
+          labels:
+            severity: minor
+          annotations:
+            summary: Certificate resource does not ready.
+            runbook: Please check the status of Cert Manager and Certificate resources.
