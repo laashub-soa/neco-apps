@@ -30,7 +30,7 @@ tests:
         alertname: MetalLBAddressPoolHighUtilization
         exp_alerts:
           - exp_labels:
-              severity: critical
+              severity: warning
               pool: a
             exp_annotations:
               description: Address Pool of MetalLB will be exhausted.

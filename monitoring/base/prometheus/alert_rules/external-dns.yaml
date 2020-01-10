@@ -5,7 +5,7 @@ groups:
         expr: |
           absent(up{job="external-dns"} == 1)
         labels:
-          severity: critical
+          severity: minor
         for: 10m
         annotations:
           summary: ExternalDNS has disappeared from Prometheus target discovery.
@@ -14,7 +14,7 @@ groups:
         expr: |
           rate(external_dns_registry_errors_total[5m]) > 0
         labels:
-          severity: critical
+          severity: minor
         for: 30m
         annotations:
           summary: Registrations of DNS Endpoints return error.
@@ -23,7 +23,7 @@ groups:
         expr: |
           rate(external_dns_source_errors_total[5m]) > 0
         labels:
-          severity: critical
+          severity: minor
         for: 10m
         annotations:
           summary: Endpoints corresponding to a DNS name return error.

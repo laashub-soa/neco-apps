@@ -22,8 +22,10 @@ groups:
       - alert: MetalLBConfigStale
         expr: |
           metallb_k8s_client_config_stale_bool != 0               
-        for: 10m                                                          
-        annotations:                                     
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
           description: '{{ $labels.instance }}: MetalLB instance has stale configuration.'
           summary: '{{ $labels.instance }}: MetalLB stale configuration.'
       - alert: MetalLBAddressPoolHighUtilization
@@ -31,7 +33,7 @@ groups:
           (sum((metallb_allocator_addresses_in_use_total / metallb_allocator_addresses_total)) by (pool)
           / count(metallb_allocator_addresses_in_use_total) by (pool) * 100) > 75
         labels:
-          severity: critical
+          severity: warning
         for: 10m
         annotations:
           description: Address Pool of MetalLB will be exhausted.

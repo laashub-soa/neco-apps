@@ -9,12 +9,12 @@ groups:
           absent(up{job="node-exporter"} == 1)
         for: 15m
         labels:
-          severity: critical
+          severity: minor
       - alert: MonitorHWDown
         expr: |
           absent(up{job="metallb"} == 1)
         labels:
-          severity: critical
+          severity: minor
         for: 10m
         annotations:
           summary: MonitorHW has disappeared from Prometheus target discovery.
@@ -24,7 +24,7 @@ groups:
           (node_nf_conntrack_entries / node_nf_conntrack_entries_limit) * 100 > 75
         for: 1h
         labels:
-          severity: critical
+          severity: warning
         annotations:
           summary: Conntrack entries will be reach limit.
           runbook: Please re-configure the limit or plan some solutions.
