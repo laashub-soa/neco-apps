@@ -5,7 +5,7 @@ groups:
         expr: etcd_mvcc_db_total_size_in_bytes/etcd_server_quota_backend_bytes > 0.80
         for: 1m
         labels:
-          severity: warning
+          severity: minor
         annotations:
           summary: "{{ $labels.instance }}, {{ $labels.job }} of etcd DB space uses more than 80%"
           runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"
@@ -13,7 +13,7 @@ groups:
         expr: etcd_mvcc_db_total_size_in_bytes/etcd_server_quota_backend_bytes > 0.90
         for: 1m
         labels:
-          severity: critical
+          severity: minor
         annotations:
           summary: "{{ $labels.instance }}, {{ $labels.job }} of etcd DB space uses more than 90%"
           runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"

@@ -13,7 +13,7 @@ groups:
       > 0.01
     for: 15m
     labels:
-      severity: critical
+      severity: minor
   - alert: KubeStateMetricsWatchErrors
     annotations:
       message: kube-state-metrics is experiencing errors at an elevated rate in watch
@@ -26,4 +26,4 @@ groups:
       > 0.01
     for: 15m
     labels:
-      severity: critical
+      severity: minor
