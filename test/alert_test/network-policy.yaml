@@ -13,5 +13,5 @@ tests:
           - exp_labels:
               severity: critical
             exp_annotations:
-              runbook: Please consider to find root causes, and solve the problems
+              runbook: Please consider to find root causes, and solve the problems.
               summary: CalicoNode has disappeared from Prometheus target discovery.
