@@ -10,7 +10,7 @@ tests:
         alertname: AlertmanagerDown
         exp_alerts:
           - exp_labels:
-              severity: critical
+              severity: minor
             exp_annotations:
               runbook: TBD
               summary: Alertmanager has disappeared from Prometheus target discovery.
@@ -23,7 +23,7 @@ tests:
         alertname: PrometheusDown
         exp_alerts:
           - exp_labels:
-              severity: critical
+              severity: minor
             exp_annotations:
               runbook: TBD
               summary: Prometheus has disappeared from Prometheus target discovery.
