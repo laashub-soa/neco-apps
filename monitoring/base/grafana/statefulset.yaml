@@ -97,6 +97,8 @@ spec:
               name: storage
             - name: dashboard-calico-volume
               mountPath: /var/lib/grafana/dashboards/calico
+            - name: dashboard-cert-manager-volume
+              mountPath: /var/lib/grafana/dashboards/cert-manager
             - name: dashboard-contour-volume
               mountPath: /var/lib/grafana/dashboards/contour
             - name: dashboard-etcd-volume
@@ -149,6 +151,9 @@ spec:
         - name: dashboard-calico-volume
           configMap:
             name: dashboard-calico
+        - name: dashboard-cert-manager-volume
+          configMap:
+            name: dashboard-cert-manager
         - name: dashboard-contour-volume
           configMap:
             name: dashboard-contour

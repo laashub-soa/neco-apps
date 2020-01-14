@@ -47,6 +47,9 @@ configMapGenerator:
   - name: dashboard-calico
     files:
       - grafana/dashboards/calico.json
+  - name: dashboard-cert-manager
+    files:
+      - grafana/dashboards/cert-manager.json
   - name: dashboard-contour
     files:
       - grafana/dashboards/contour.json
