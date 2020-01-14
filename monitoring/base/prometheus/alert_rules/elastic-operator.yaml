@@ -9,4 +9,4 @@ groups:
             absent(up{job="elastic-operator"} == 1)
           for: 15m
           labels:
-            severity: critical
+            severity: minor

@@ -16,7 +16,7 @@ tests:
         exp_alerts:
           - exp_labels:
               exported_name: monitoring
-              severity: page
+              severity: minor
               sync_status: Synced
               project: default
             exp_annotations:
@@ -24,7 +24,7 @@ tests:
               runbook: See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync
           - exp_labels:
               exported_name: metallb
-              severity: page
+              severity: minor
               sync_status: Synced
               project: default
             exp_annotations:
@@ -39,7 +39,7 @@ tests:
         alertname: ArgoCDDown
         exp_alerts:
           - exp_labels:
-              severity: critical
+              severity: minor
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems
               summary: ArgoCD has disappeared from Prometheus target discovery.

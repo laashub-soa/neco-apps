@@ -244,20 +244,16 @@ func testGrafana() {
 	})
 
 	It("should have data sources and dashboards", func() {
-		Eventually(func() error {
-			By("getting external IP of grafana service")
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "get", "services", "grafana", "-o=json")
-			if err != nil {
-				return err
-			}
-			service := new(corev1.Service)
-			err = json.Unmarshal(stdout, service)
-			if err != nil {
-				return err
-			}
-			loadBalancerIP := service.Status.LoadBalancer.Ingress[0].IP
+		By("getting external IP of grafana service")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "get", "services", "grafana", "-o=json")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		service := new(corev1.Service)
+		err = json.Unmarshal(stdout, service)
+		Expect(err).NotTo(HaveOccurred())
+		loadBalancerIP := service.Status.LoadBalancer.Ingress[0].IP
 
-			By("getting admin stats from grafana")
+		By("getting admin stats from grafana")
+		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/admin/stats")
 			if err != nil {
 				return fmt.Errorf("unable to get admin stats, stderr: %s, err: %v", stderr, err)
@@ -276,9 +272,12 @@ func testGrafana() {
 			if adminStats.Dashboards == 0 {
 				return fmt.Errorf("no dashboards")
 			}
+			return nil
+		}).Should(Succeed())
 
-			By("confirming all dashboards are successfully registered")
-			stdout, stderr, err = ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/search")
+		By("confirming all dashboards are successfully registered")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "curl", "-u", "admin:AUJUl1K2xgeqwMdZ3XlEFc1QhgEQItODMNzJwQme", loadBalancerIP+"/api/search")
 			if err != nil {
 				return fmt.Errorf("unable to get dashboards, stderr: %s, err: %v", stderr, err)
 			}
@@ -292,7 +291,7 @@ func testGrafana() {
 
 			// NOTE: expectedNum is the number of JSON files under monitoring/base/grafana/dashboards + 1(Node Exporter Full).
 			// Node Exporter Full is downloaded every time from the Internet because too large to store into configMap.
-			expectedNum := 15
+			expectedNum := 16
 			if len(dashboards) != expectedNum {
 				return fmt.Errorf("len(dashboards) should be %d: %d", expectedNum, len(dashboards))
 			}

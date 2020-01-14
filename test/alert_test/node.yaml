@@ -11,7 +11,7 @@ tests:
         alertname: NodeExporterDown
         exp_alerts:
           - exp_labels:
-              severity: critical
+              severity: minor
             exp_annotations:
               runbook: TBD
               summary: NodeExporter has disappeared from Prometheus target discovery.
@@ -24,7 +24,7 @@ tests:
         alertname: MonitorHWDown
         exp_alerts:
           - exp_labels:
-              severity: critical
+              severity: minor
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems
               summary: MonitorHW has disappeared from Prometheus target discovery.
