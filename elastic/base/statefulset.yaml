@@ -28,3 +28,9 @@ spec:
               protocol: TCP
             - containerPort: 9001
               name: metrics
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
