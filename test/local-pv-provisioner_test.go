@@ -14,6 +14,7 @@ import (
 func testLocalPVProvisioner() {
 	var ssNodes corev1.NodeList
 	var ssNumber int
+	var targetPVList []corev1.PersistentVolume
 
 	It("should be deployed successfully", func() {
 		By("getting SS Nodes")
@@ -74,7 +75,6 @@ func testLocalPVProvisioner() {
 		}
 
 		By("checking the number of local PVs")
-		var targetPVList []corev1.PersistentVolume
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pv", "-o", "json")
 			if err != nil {
@@ -142,10 +142,14 @@ spec:
     volumeDevices:
     - name: local-volume
       devicePath: /dev/local-dev
-volumes:
-- name: local-volume
-  persistentVolumeClaim:
-    claimName: local-pvc
+  volumes:
+  - name: local-volume
+    persistentVolumeClaim:
+      claimName: local-pvc
+  tolerations:
+  - key: cke.cybozu.com/role
+    operator: Equal
+    value: storage
 `
 		claimYAML := `apiVersion: v1
 kind: PersistentVolumeClaim
@@ -165,20 +169,25 @@ spec:
 		stdout, stderr, err = ExecAtWithInput(boot0, []byte(podYAML), "kubectl", "apply", "-n", ns, "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 
-		By("confirming that the specified devicefile exists in the Pod")
+		By("waiting to be able to execute a command")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pvc", "local-pvc", "-n", ns)
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "date")
 			if err != nil {
-				return fmt.Errorf("failed to create PVC. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				return fmt.Errorf("failed to execute a command. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "ubuntu", "-n", ns)
-			if err != nil {
-				return fmt.Errorf("failed to create Pod. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
 			return nil
 		}).Should(Succeed())
 
-		Expect(fmt.Errorf("test")).ShouldNot(HaveOccurred())
+		By("confirming that can make filesystem for the block device")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "mkfs.ext4", "-F", "/dev/local-dev")
+		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+	})
+
+	It("cleans up", func() {
+		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns)
+		for _, pv := range targetPVList {
+			ExecSafeAt(boot0, "kubectl", "delete", "pv", pv.GetName())
+		}
 	})
 }
