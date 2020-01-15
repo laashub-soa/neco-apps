@@ -422,7 +422,8 @@ spec:
   containers:
   - name: ubuntu
     image: quay.io/cybozu/ubuntu-debug:18.04
-    command: ["sleep", "infinity"]`
+    command: ["/usr/local/bin/pause"]
+`
 	_, stderr, err := ExecAtWithInput(boot0, []byte(debugYAML), "kubectl", "apply", "-n", namespace, "-f", "-")
 	Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 

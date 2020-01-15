@@ -41,7 +41,7 @@ spec:
   containers:
   - name: ubuntu
     image: quay.io/cybozu/ubuntu:18.04
-    command: ["sleep", "infinity"]
+    command: ["/usr/local/bin/pause"]
     volumeMounts:
     - name: my-volume
       mountPath: /test1
