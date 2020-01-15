@@ -84,6 +84,9 @@ configMapGenerator:
   - name: dashboard-topolvm-volumegroup
     files:
       - grafana/dashboards/topolvm_volumegroup.json
+  - name: dashboard-local-pv-provisioner
+    files:
+      - grafana/dashboards/local-pv-provisioner.json
   - name: dashboard-all-nodes
     files:
       - grafana/dashboards/all_nodes.json
