@@ -164,21 +164,21 @@ spec:
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		stdout, stderr, err = ExecAtWithInput(boot0, []byte(podYAML), "kubectl", "apply", "-n", ns, "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+
+		By("confirming that the specified devicefile exists in the Pod")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pvc", "local-pvc", "-n", ns)
+			if err != nil {
+				return fmt.Errorf("failed to create PVC. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "ubuntu", "-n", ns)
+			if err != nil {
+				return fmt.Errorf("failed to create Pod. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		Expect(fmt.Errorf("test")).ShouldNot(HaveOccurred())
 	})
-
-	By("confirming that the specified devicefile exists in the Pod")
-	Eventually(func() error {
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pvc", "local-pvc", "-n", ns)
-		if err != nil {
-			return fmt.Errorf("failed to create PVC. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-		}
-
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "ubuntu", "-n", ns)
-		if err != nil {
-			return fmt.Errorf("failed to create Pod. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-		}
-		return nil
-	}).Should(Succeed())
-
-	Expect(fmt.Errorf("test")).ShouldNot(HaveOccurred())
 }
