@@ -119,4 +119,66 @@ func testLocalPVProvisioner() {
 
 		Expect(actual).Should(BeEquivalentTo(expected))
 	})
+
+	ns := "test-local-pv-provisioner"
+	It("should create test-local-pv-provisioner namespace", func() {
+		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
+		ExecSafeAt(boot0, "kubectl", "create", "namespace", ns)
+	})
+
+	It("should be used as block device", func() {
+		By("deploying Pod with PVC")
+		podYAML := `apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu
+  labels:
+    app.kubernetes.io/name: ubuntu
+spec:
+  containers:
+  - name: ubuntu
+    image: quay.io/cybozu/ubuntu:18.04
+    command: ["/usr/local/bin/pause"]
+    volumeDevices:
+    - name: local-volume
+      devicePath: /dev/local-dev
+volumes:
+- name: local-volume
+  persistentVolumeClaim:
+    claimName: local-pvc
+`
+		claimYAML := `apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-pvc
+spec:
+  storageClassName: local-storage
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Block
+  resources:
+    requests:
+      storage: 1Gi
+`
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(claimYAML), "kubectl", "apply", "-n", ns, "-f", "-")
+		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		stdout, stderr, err = ExecAtWithInput(boot0, []byte(podYAML), "kubectl", "apply", "-n", ns, "-f", "-")
+		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+	})
+
+	By("confirming that the specified devicefile exists in the Pod")
+	Eventually(func() error {
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pvc", "local-pvc", "-n", ns)
+		if err != nil {
+			return fmt.Errorf("failed to create PVC. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "ubuntu", "-n", ns)
+		if err != nil {
+			return fmt.Errorf("failed to create Pod. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+		return nil
+	}).Should(Succeed())
+
+	Expect(fmt.Errorf("test")).ShouldNot(HaveOccurred())
 }
