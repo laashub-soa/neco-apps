@@ -56,6 +56,13 @@ spec:
               fieldPath: metadata.name
         image: quay.io/cybozu/contour:1.0.1.1
         imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - sh
+                - -c
+                - "sleep 5"
         livenessProbe:
           httpGet:
             path: /healthz
@@ -162,6 +169,9 @@ spec:
           preStop:
             exec:
               command:
+              - bash
+              - -c
+              - "sleep 5";
               - bash
               - -c
               - --
