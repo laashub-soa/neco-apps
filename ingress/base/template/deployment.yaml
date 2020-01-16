@@ -171,7 +171,8 @@ spec:
               command:
               - bash
               - -c
-              - "sleep 5";
+              - "sleep 5"
+              - ;
               - bash
               - -c
               - --
