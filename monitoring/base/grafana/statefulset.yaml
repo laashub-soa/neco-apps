@@ -121,6 +121,8 @@ spec:
               mountPath: /var/lib/grafana/dashboards/cpu-usage
             - name: dashboard-topolvm-volumegroup-volume
               mountPath: /var/lib/grafana/dashboards/topolvm-volumegroup
+            - name: dashboard-local-pv-provisioner-volume
+              mountPath: /var/lib/grafana/dashboards/local-pv-provisioner
             - name: dashboard-all-nodes-volume
               mountPath: /var/lib/grafana/dashboards/all-nodes
             - name: dashboard-node-exporter-volume
@@ -187,6 +189,9 @@ spec:
         - name: dashboard-topolvm-volumegroup-volume
           configMap:
             name: dashboard-topolvm-volumegroup
+        - name: dashboard-local-pv-provisioner-volume
+          configMap:
+            name: dashboard-local-pv-provisioner
         - name: dashboard-all-nodes-volume
           configMap:
             name: dashboard-all-nodes

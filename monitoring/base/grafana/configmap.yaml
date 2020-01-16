@@ -130,6 +130,13 @@ data:
       editable: false
       options:
         path: /var/lib/grafana/dashboards/topolvm-volumegroup
+    - name: 'local-pv-provisioner'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/local-pv-provisioner
     - name: 'all-nodes'
       folder: ''
       type: file
