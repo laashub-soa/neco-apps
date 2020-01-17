@@ -41,7 +41,7 @@ spec:
   containers:
   - name: ubuntu
     image: quay.io/cybozu/ubuntu:18.04
-    command: ["sleep", "infinity"]
+    command: ["/usr/local/bin/pause"]
     volumeMounts:
     - name: my-volume
       mountPath: /test1
@@ -69,16 +69,6 @@ spec:
 
 		By("confirming that the specified volume exists in the Pod")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pvc", "topo-pvc", "-n", ns)
-			if err != nil {
-				return fmt.Errorf("failed to create PVC. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "ubuntu", "-n", ns)
-			if err != nil {
-				return fmt.Errorf("failed to create Pod. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-
 			stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "mountpoint", "-d", "/test1")
 			if err != nil {
 				return fmt.Errorf("failed to check mount point. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
