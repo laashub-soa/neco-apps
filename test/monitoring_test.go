@@ -20,7 +20,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// dcJobs are Prometheus jobs deployed in dctest but not deployed in kindtest
+// dcJobs is the subset of the Prometheus jobs deployed in dctest but not deployed in kindtest
 var dcJobs = []string{
 	"cke-etcd",
 	"external-dns",
@@ -28,6 +28,7 @@ var dcJobs = []string{
 	"teleport",
 	"bootserver-etcd",
 	"node-exporter",
+	"sabakan",
 }
 
 func testMachinesEndpoints() {
