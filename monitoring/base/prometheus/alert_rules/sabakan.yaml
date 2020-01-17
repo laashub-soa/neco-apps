@@ -1,0 +1,23 @@
+groups:
+  - name: sabakan
+    rules:
+      - alert: SabakanMachineUnhealthy
+        annotations:
+          summary: "The state of machine is unhealthy. Address: ${labels.address}, Sereal: ${labels.serial}"
+          runbook: TBD
+        expr: |
+          sabakan_machine_status{status="unhealthy", address~=".*", serial~=".*"} == 1
+        for: 15m
+        labels:
+          severity: warning
+  - name: sabakan
+    rules:
+      - alert: SabakanMachineUnreachable
+        annotations:
+          summary: "The state of machine is unreachable. Address: ${labels.address}, Sereal: ${labels.serial}"
+          runbook: TBD
+        expr: |
+          sabakan_machine_status{status="unreachable", address~=".*", serial~=".*"} == 1
+        for: 15m
+        labels:
+          severity: warning
