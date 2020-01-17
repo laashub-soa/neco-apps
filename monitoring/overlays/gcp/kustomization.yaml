@@ -3,6 +3,7 @@ kind: Kustomization
 bases:
   - ../../base
 patches:
+  - grafana/service.yaml
   - prometheus/statefulset.yaml
 configMapGenerator:
   - name: alertmanager
