@@ -6,7 +6,7 @@ groups:
           summary: "The status of machine got Unhealthy. Address: {{ $labels.address }}, Serial: {{ $labels.serial }}"
           runbook: TBD
         expr: |
-          sabakan_machine_status{status="unhealthy", address=~".*", serial=~".*"} == 1
+          sum(sabakan_machine_status{status="unhealthy"}) by (address, serial) > 0
         for: 15m
         labels:
           severity: warning
@@ -15,7 +15,7 @@ groups:
           summary: "The status of machine got Unreachable. Address: {{ $labels.address}, Serial: {{ $labels.serial }}"
           runbook: TBD
         expr: |
-          sabakan_machine_status{status="unreachable", address=~".*", serial=~".*"} == 1
+          sum(sabakan_machine_status{status="unreachable"}) by (address, serial) > 0
         for: 15m
         labels:
           severity: warning
