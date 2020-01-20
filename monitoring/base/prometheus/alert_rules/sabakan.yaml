@@ -3,7 +3,7 @@ groups:
     rules:
       - alert: SabakanMachineUnhealthy
         annotations:
-          summary: "The status of machine got Unhealthy. Address: ${labels.address}, Sereal: ${labels.serial}"
+          summary: "The status of machine got Unhealthy. Address: {{ $labels.address }}, Serial: {{ $labels.serial }}"
           runbook: TBD
         expr: |
           sabakan_machine_status{status="unhealthy", address=~".*", serial=~".*"} == 1
@@ -12,7 +12,7 @@ groups:
           severity: warning
       - alert: SabakanMachineUnreachable
         annotations:
-          summary: "The status of machine got Unreachable. Address: ${labels.address}, Sereal: ${labels.serial}"
+          summary: "The status of machine got Unreachable. Address: {{ $labels.address}, Serial: {{ $labels.serial }}"
           runbook: TBD
         expr: |
           sabakan_machine_status{status="unreachable", address=~".*", serial=~".*"} == 1
