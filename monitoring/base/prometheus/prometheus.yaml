@@ -310,6 +310,30 @@ scrape_configs:
         regex: ([^:]+)(?::\d+)?
         replacement: ${1}:9105
         target_label: __address__
+  - job_name: "sabakan"
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: ["monitoring"]
+    relabel_configs:
+      # Discovered Labels
+      #   __address__="10.69.0.3:2381"
+      # Expected Target Labels
+      #   instance="10.69.0.3"
+      #   __address__="10.69.0.3:10081"
+      - source_labels: [__meta_kubernetes_endpoints_name]
+        action: keep
+        regex: bootserver-etcd-metrics
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}:10081
+        target_label: __address__
   - job_name: "contour"
     kubernetes_sd_configs:
       - role: endpoints
