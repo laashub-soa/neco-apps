@@ -20,7 +20,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// dcJobs are Prometheus jobs deployed in dctest but not deployed in kindtest
+// dcJobs is the subset of the Prometheus jobs deployed in dctest but not deployed in kindtest
 var dcJobs = []string{
 	"cke-etcd",
 	"external-dns",
@@ -28,6 +28,7 @@ var dcJobs = []string{
 	"teleport",
 	"bootserver-etcd",
 	"node-exporter",
+	"sabakan",
 }
 
 func testMachinesEndpoints() {
@@ -291,7 +292,7 @@ func testGrafana() {
 
 			// NOTE: expectedNum is the number of JSON files under monitoring/base/grafana/dashboards + 1(Node Exporter Full).
 			// Node Exporter Full is downloaded every time from the Internet because too large to store into configMap.
-			expectedNum := 17
+			expectedNum := 18
 			if len(dashboards) != expectedNum {
 				return fmt.Errorf("len(dashboards) should be %d: %d", expectedNum, len(dashboards))
 			}

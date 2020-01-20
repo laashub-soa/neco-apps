@@ -123,6 +123,8 @@ spec:
               mountPath: /var/lib/grafana/dashboards/topolvm-volumegroup
             - name: dashboard-local-pv-provisioner-volume
               mountPath: /var/lib/grafana/dashboards/local-pv-provisioner
+            - name: dashboard-sabakan-volume
+              mountPath: /var/lib/grafana/dashboards/sabakan
             - name: dashboard-all-nodes-volume
               mountPath: /var/lib/grafana/dashboards/all-nodes
             - name: dashboard-node-exporter-volume
@@ -192,6 +194,9 @@ spec:
         - name: dashboard-local-pv-provisioner-volume
           configMap:
             name: dashboard-local-pv-provisioner
+        - name: dashboard-sabakan-volume
+          configMap:
+            name: dashboard-sabakan
         - name: dashboard-all-nodes-volume
           configMap:
             name: dashboard-all-nodes
