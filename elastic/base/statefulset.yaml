@@ -37,6 +37,9 @@ spec:
         - image: quay.io/cybozu/ubuntu:18.04
           name: symlink-certs
           command: ["sh", "-c"]
+          securityContext:
+            runAsUser: 10000
+            runAsGroup: 10000
           args:
             - mkdir -p /tmp/k8s-webhook-server && ln -s /certs /tmp/k8s-webhook-server/serving-certs
           volumeMounts:
