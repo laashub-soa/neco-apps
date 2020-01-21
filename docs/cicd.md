@@ -28,10 +28,10 @@ This repository has 4 CircleCI workflows, `main`, `daily`, `manual-dctest` and `
 
 `main` workflow is used for testing feature branch of `neco-apps`. This consists of the following 2 jobs.
 
-| job name   | description              | target branch                                        |
-| ---------- | ------------------------ | ---------------------------------------------------- |
-| `test`     | Syntax check for go lang | all branches                                         |
-| `kindtest` | Bootstrap test on kind   | all branches except `master`, `stage`, and `release` |
+| job name   | description              | target branch                                                                     |
+| ---------- | ------------------------ | --------------------------------------------------------------------------------- |
+| `test`     | Syntax check for go lang | all branches                                                                      |
+| `kindtest` | Bootstrap test on kind   | all branches except `master`, `stage`, `release`, `op-release-*` and `op-stage-*` |
 
 ### `daily` workflow
 
