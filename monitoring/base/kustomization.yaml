@@ -94,3 +94,6 @@ configMapGenerator:
   - name: dashboard-all-nodes
     files:
       - grafana/dashboards/all_nodes.json
+  - name: dashboard-neco-admission
+    files:
+      - grafana/dashboards/neco-admission.json
