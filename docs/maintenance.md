@@ -30,8 +30,9 @@ $ vi cert-manager/base/upstream/cert-manager.yaml
 To check diffs between versions, download and compare manifests as follows:
 
 ```console
-wget https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml
-sed 'N;N;N;N;N;s/apiVersion: v1\nkind: Namespace\nmetadata:\n  name: kube-system//' all-in-one.yaml > all-in-one_nsremoved.yaml
+$ wget https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml
+$ vi elastic/base/upstream/all-in-one.yaml
+  (Remove Namespace resources)
 ```
 
 ## external-dns
