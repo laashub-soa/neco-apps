@@ -41,7 +41,7 @@ spec:
             runAsUser: 10000
             runAsGroup: 10000
           args:
-            - mkdir -p /tmp/k8s-webhook-server && ln -s /certs /tmp/k8s-webhook-server/serving-certs
+            - mkdir -p /tmp/k8s-webhook-server && ln -sf /certs /tmp/k8s-webhook-server/serving-certs
           volumeMounts:
             - mountPath: /tmp
               name: tmp
