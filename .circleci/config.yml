@@ -271,7 +271,11 @@ workflows:
       - kindtest:
           filters:
             branches:
-              ignore: ["master", "stage", "release"]
+              ignore:
+                - master
+                - stage
+                - release
+                - /^op-(stage|release)-.*/
 
   manual-dctest:
     jobs:
