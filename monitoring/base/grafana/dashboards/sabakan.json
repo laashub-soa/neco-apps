@@ -15,118 +15,14 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 22,
+    "iteration": 1579512323741,
     "links": [],
     "panels": [
         {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-                "h": 10,
-                "w": 12,
-                "x": 0,
-                "y": 0
-            },
-            "hiddenSeries": false,
-            "id": 5,
-            "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": true,
-                "total": false,
-                "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {
-                "dataLinks": []
-            },
-            "percentage": false,
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-                {
-                    "expr": "sum(rate(sabakan_api_request_count{instance=~\"$instance\",code=~\"2..\"}[5m]))",
-                    "intervalFactor": 2,
-                    "legendFormat": "2xx",
-                    "refId": "B"
-                },
-                {
-                    "expr": "sum(rate(sabakan_api_request_count{instance=~\"$instance\",code=~\"3..\"}[5m]))",
-                    "intervalFactor": 2,
-                    "legendFormat": "3xx",
-                    "refId": "D"
-                },
-                {
-                    "expr": "sum(rate(sabakan_api_request_count{instance=~\"$instance\",code=~\"4..\"}[5m]))",
-                    "intervalFactor": 2,
-                    "legendFormat": "4xx",
-                    "refId": "A"
-                },
-                {
-                    "expr": "sum(rate(sabakan_api_request_count{instance=~\"$instance\",code=~\"5..\"}[5m]))",
-                    "intervalFactor": 2,
-                    "legendFormat": "5xx",
-                    "refId": "C"
-                }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "RPC Rate",
-            "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-                "buckets": null,
-                "mode": "time",
-                "name": null,
-                "show": true,
-                "values": []
-            },
-            "yaxes": [
-                {
-                    "format": "short",
-                    "label": null,
-                    "logBase": 1,
-                    "max": null,
-                    "min": null,
-                    "show": true
-                },
-                {
-                    "format": "short",
-                    "label": null,
-                    "logBase": 1,
-                    "max": null,
-                    "min": null,
-                    "show": true
-                }
-            ],
-            "yaxis": {
-                "align": false,
-                "alignLevel": null
-            }
-        },
-        {
             "cacheTimeout": null,
             "colorBackground": false,
+            "colorPostfix": false,
+            "colorPrefix": false,
             "colorValue": false,
             "colors": [
                 "#299c46",
@@ -134,7 +30,8 @@
                 "#d44a3a"
             ],
             "datasource": null,
-            "format": "decmbytes",
+            "description": "The percentage of healthy machines",
+            "format": "none",
             "gauge": {
                 "maxValue": 100,
                 "minValue": 0,
@@ -143,12 +40,12 @@
                 "thresholdMarkers": true
             },
             "gridPos": {
-                "h": 7,
+                "h": 6,
                 "w": 4,
-                "x": 12,
+                "x": 0,
                 "y": 0
             },
-            "id": 8,
+            "id": 10,
             "interval": null,
             "links": [],
             "mappingType": 1,
@@ -166,7 +63,7 @@
             "nullPointMode": "connected",
             "nullText": null,
             "options": {},
-            "postfix": "",
+            "postfix": "%",
             "postfixFontSize": "50%",
             "prefix": "",
             "prefixFontSize": "50%",
@@ -178,24 +75,24 @@
                 }
             ],
             "sparkline": {
-                "fillColor": "rgba(31, 118, 189, 0.18)",
+                "fillColor": "rgba(192, 216, 255, 0.26)",
                 "full": false,
-                "lineColor": "rgb(31, 120, 193)",
-                "show": false,
+                "lineColor": "#C0D8FF",
+                "show": true,
                 "ymax": null,
                 "ymin": null
             },
             "tableColumn": "",
             "targets": [
                 {
-                    "expr": "sum(images_bytes_total)",
+                    "expr": "100 * sum(max(sabakan_machine_status{status=\"healthy\"}) by (address, serial)) / sum(sabakan_machine_status{instance=\"10.69.0.3\"})",
                     "refId": "A"
                 }
             ],
             "thresholds": "",
             "timeFrom": null,
             "timeShift": null,
-            "title": "Total Bytes of Images",
+            "title": "Healthy Machines",
             "type": "singlestat",
             "valueFontSize": "80%",
             "valueMaps": [
@@ -217,7 +114,7 @@
                 "#d44a3a"
             ],
             "datasource": null,
-            "format": "decmbytes",
+            "format": "bytes",
             "gauge": {
                 "maxValue": 100,
                 "minValue": 0,
@@ -226,9 +123,9 @@
                 "thresholdMarkers": true
             },
             "gridPos": {
-                "h": 7,
+                "h": 6,
                 "w": 4,
-                "x": 16,
+                "x": 4,
                 "y": 0
             },
             "id": 7,
@@ -271,7 +168,7 @@
             "tableColumn": "",
             "targets": [
                 {
-                    "expr": "sum(assets_bytes_total)",
+                    "expr": "sum(sabakan_assets_bytes_total)",
                     "refId": "A"
                 }
             ],
@@ -279,6 +176,89 @@
             "timeFrom": null,
             "timeShift": null,
             "title": "Total Bytes of Assets",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+                {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                }
+            ],
+            "valueName": "avg"
+        },
+        {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+                "#299c46",
+                "rgba(237, 129, 40, 0.89)",
+                "#d44a3a"
+            ],
+            "datasource": null,
+            "format": "bytes",
+            "gauge": {
+                "maxValue": 100,
+                "minValue": 0,
+                "show": false,
+                "thresholdLabels": false,
+                "thresholdMarkers": true
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 4,
+                "x": 8,
+                "y": 0
+            },
+            "id": 8,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+                {
+                    "name": "value to text",
+                    "value": 1
+                },
+                {
+                    "name": "range to text",
+                    "value": 2
+                }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "options": {},
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+                {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                }
+            ],
+            "sparkline": {
+                "fillColor": "rgba(31, 118, 189, 0.18)",
+                "full": false,
+                "lineColor": "rgb(31, 120, 193)",
+                "show": false,
+                "ymax": null,
+                "ymin": null
+            },
+            "tableColumn": "",
+            "targets": [
+                {
+                    "expr": "sum(sabakan_images_bytes_total)",
+                    "refId": "A"
+                }
+            ],
+            "thresholds": "",
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Total Bytes of Images",
             "type": "singlestat",
             "valueFontSize": "80%",
             "valueMaps": [
@@ -299,10 +279,96 @@
             "fill": 1,
             "fillGradient": 0,
             "gridPos": {
-                "h": 9,
-                "w": 12,
+                "h": 10,
+                "w": 8,
                 "x": 0,
-                "y": 10
+                "y": 6
+            },
+            "hiddenSeries": false,
+            "id": 3,
+            "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "nullPointMode": "null",
+            "options": {
+                "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 2,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+                {
+                    "expr": "sum(sabakan_machine_status{status=\"healthy\", instance=\"10.69.0.3\"})",
+                    "refId": "A"
+                }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Count of healthy machines",
+            "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+            },
+            "yaxes": [
+                {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                },
+                {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                }
+            ],
+            "yaxis": {
+                "align": false,
+                "alignLevel": null
+            }
+        },
+        {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
+            "fillGradient": 0,
+            "gridPos": {
+                "h": 10,
+                "w": 8,
+                "x": 8,
+                "y": 6
             },
             "hiddenSeries": false,
             "id": 2,
@@ -331,7 +397,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "sum(sabakan_machine_status{status!=\"healthy\"}) by (status)",
+                    "expr": "sum(sabakan_machine_status{status!=\"healthy\", instance=\"10.69.0.3\"}) by (status)",
                     "refId": "A"
                 }
             ],
@@ -385,13 +451,13 @@
             "fill": 1,
             "fillGradient": 0,
             "gridPos": {
-                "h": 10,
-                "w": 12,
+                "h": 11,
+                "w": 16,
                 "x": 0,
-                "y": 19
+                "y": 16
             },
             "hiddenSeries": false,
-            "id": 3,
+            "id": 5,
             "legend": {
                 "avg": false,
                 "current": false,
@@ -417,15 +483,35 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "sum(sabakan_machine_status{status=\"healthy\"})",
+                    "expr": "sum(rate(sabakan_api_request_count{instance=~\"$instance\",code=~\"2..\"}[5m]))",
+                    "intervalFactor": 2,
+                    "legendFormat": "2xx",
+                    "refId": "B"
+                },
+                {
+                    "expr": "sum(rate(sabakan_api_request_count{instance=~\"$instance\",code=~\"3..\"}[5m]))",
+                    "intervalFactor": 2,
+                    "legendFormat": "3xx",
+                    "refId": "D"
+                },
+                {
+                    "expr": "sum(rate(sabakan_api_request_count{instance=~\".*\",code=~\"4..\"}[5m]))",
+                    "intervalFactor": 2,
+                    "legendFormat": "4xx",
                     "refId": "A"
+                },
+                {
+                    "expr": "sum(rate(sabakan_api_request_count{instance=~\".*\",code=~\"5..\"}[5m]))",
+                    "intervalFactor": 2,
+                    "legendFormat": "5xx",
+                    "refId": "C"
                 }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Count of healthy machines",
+            "title": "RPC Rate",
             "tooltip": {
                 "shared": true,
                 "sort": 0,
@@ -467,7 +553,34 @@
     "style": "dark",
     "tags": [],
     "templating": {
-        "list": []
+        "list": [
+            {
+                "allValue": ".*",
+                "current": {
+                    "selected": false,
+                    "text": "All",
+                    "value": "$__all"
+                },
+                "datasource": "prometheus",
+                "definition": "label_values(sabakan_assets_bytes_total, instance)",
+                "hide": 0,
+                "includeAll": true,
+                "label": null,
+                "multi": false,
+                "name": "instance",
+                "options": [],
+                "query": "label_values(sabakan_assets_bytes_total, instance)",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            }
+        ]
     },
     "time": {
         "from": "now-6h",
@@ -490,5 +603,5 @@
     "timezone": "",
     "title": "Sabakan",
     "uid": "Gi8iM9EWk",
-    "version": 5
+    "version": 6
 }
