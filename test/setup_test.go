@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	. "github.com/onsi/ginkgo"
@@ -308,7 +309,7 @@ func applyAndWaitForApplications(overlay string) {
 	}
 
 	By("waiting initialization")
-	Eventually(func() error {
+	checkAllAppsSynced := func() error {
 	OUTER:
 		for _, appName := range appList {
 			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
@@ -347,7 +348,9 @@ func applyAndWaitForApplications(overlay string) {
 			return fmt.Errorf("%s is not initialized. argocd app get %s -o json: %s", appName, appName, appStdout)
 		}
 		return nil
-	}).Should(Succeed())
+	}
+	Eventually(checkAllAppsSynced).Should(Succeed())
+	Consistently(checkAllAppsSynced, 10*time.Second, 1*time.Second).Should(Succeed())
 }
 
 func setupArgoCD() {
