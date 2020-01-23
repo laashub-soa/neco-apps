@@ -13,9 +13,6 @@ spec:
       defaultRequest:
         cpu: 100m
         memory: 10Mi
-      default:
-        cpu: 200m
-        memory: 100Mi
       max:
         cpu: 20
         memory: 100Gi
