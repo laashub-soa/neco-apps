@@ -296,18 +296,6 @@ func applyAndWaitForApplications(overlay string) {
 	fmt.Printf("application list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
-	By("pruning resource quota manually")
-	//TODO: Remove this `By` block after merged this PR: https://github.com/cybozu-go/neco-apps/pull/344
-	if doUpgrade {
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "team-management", "--prune")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-	}
-
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 	OUTER:
