@@ -1,0 +1,11 @@
+ArgoCDApplicationValidator:
+    rules:
+      - repository: https://github.com/cybozu-private/maneki-apps.git
+        projects:
+          - maneki
+          - maneki-apps
+      - repository: https://github.com/cybozu-go/neco-apps.git
+        projects:
+          - default
+          - maneki
+          - maneki-apps

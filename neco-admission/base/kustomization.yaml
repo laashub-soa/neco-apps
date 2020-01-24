@@ -7,3 +7,7 @@ resources:
 - rolebinding.yaml
 - serviceaccount.yaml
 - webhook.yaml
+configMapGenerator:
+  - name: neco-admission-config
+    files:
+      - config.yaml
