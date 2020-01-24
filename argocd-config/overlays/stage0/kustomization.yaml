@@ -12,6 +12,7 @@ patchesStrategicMerge:
 - external-dns.yaml
 - ingress.yaml
 - local-pv-provisioner.yaml
+- maneki-apps.yaml
 - metallb.yaml
 - monitoring.yaml
 - namespaces.yaml
