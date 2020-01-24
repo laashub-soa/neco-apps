@@ -291,6 +291,14 @@ func applyAndWaitForApplications(overlay string) {
 		if err != nil {
 			continue
 		}
+
+		// Skip if the app is for tenants
+		if res, ok := app.Labels["is-tenant"]; ok {
+			if res == "true" {
+				continue
+			}
+		}
+
 		appList = append(appList, app.Name)
 	}
 	fmt.Printf("application list: %v\n", appList)

@@ -5,6 +5,8 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "9"
+  labels:
+    is-tenant: "true"
 spec:
   destination:
     namespace: argocd
