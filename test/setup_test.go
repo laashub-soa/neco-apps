@@ -271,6 +271,13 @@ func applyAndWaitForApplications(overlay string) {
 		}
 		return nil
 	}).Should(Succeed())
+
+	// TODO: Delete this "By" block after pruned developer-apps from release branch's argocd-config
+	By("pruning developer-apps")
+	if doUpgrade {
+		ExecSafeAt(boot0, "argocd", "app", "delete", "developer-apps")
+	}
+
 	ExecSafeAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/"+overlay)
 
 	By("getting application list")
