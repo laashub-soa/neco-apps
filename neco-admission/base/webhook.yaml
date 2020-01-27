@@ -78,3 +78,25 @@ webhooks:
     - UPDATE
     resources:
     - networkpolicies
+- name: vapplication.kb.io
+  namespaceSelector:
+    matchExpressions:
+    - key: control-plane
+      operator: NotIn
+      values: ["true"]
+  clientConfig:
+    service:
+      name: neco-admission
+      namespace: kube-system
+      path: /validate-argoproj-io-application
+  failurePolicy: Fail
+  rules:
+  - apiGroups:
+    - argoproj.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - applications

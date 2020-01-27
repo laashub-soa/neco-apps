@@ -2,6 +2,7 @@ package test
 
 import (
 	"encoding/json"
+	"fmt"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -68,5 +69,40 @@ spec:
 
 		stdout, stderr, err = ExecAtWithInput(boot0, []byte(httpProxyYAML), "kubectl", "delete", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+	})
+
+	It("should validate Application", func() {
+		applicationTmplYAML := `
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: %s
+  namespace: default
+spec:
+  project: %s
+  source:
+    repoURL: %s
+    targetRevision: master
+    path: dummy/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+`
+
+		By("creating Application which points to neco-apps repo and belongs to default project")
+		name := "valid"
+		project := "default"
+		repoURL := "https://github.com/cybozu-go/neco-apps.git"
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(fmt.Sprintf(applicationTmplYAML, name, project, repoURL)),
+			"kubectl", "apply", "-f", "-")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		ExecSafeAt(boot0, "kubectl", "delete", "application", name)
+
+		By("denying to create Application which points to maneki-apps repo and belongs to default project")
+		name = "invalid"
+		repoURL = "https://github.com/cybozu-private/maneki-apps.git"
+		stdout, stderr, err = ExecAtWithInput(boot0, []byte(fmt.Sprintf(applicationTmplYAML, name, project, repoURL)),
+			"kubectl", "apply", "-f", "-")
+		Expect(err).To(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 	})
 }

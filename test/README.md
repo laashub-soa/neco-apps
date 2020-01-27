@@ -64,3 +64,7 @@ You can run test for neco-apps on the running dctest.
 - `make validation`: Run validation test of manifests.
 - `make test-alert-rules`: Run unit test of Prometheus alerts.
 - `make kustomize-check`: Check syntax of the Kubernetes manifests using `kustomize check`
+
+Ignore the status of tenants' Applications
+------------------------------------------
+If you would like to ignore the sync status, label `is-tenant="true"` to the App.
