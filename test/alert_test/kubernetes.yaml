@@ -94,6 +94,8 @@ tests:
     input_series:
       - series: 'kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace="kube-system", pod="calico-node", container="unbound"}'
         values: '1+1x30'
+      - series: 'kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace="app-gorush", pod="gorush", container="gorush"}'
+        values: '1+1x30'
     alert_rule_test:
       - eval_time: 30m
         alertname: KubePodCrashLooping
