@@ -31,8 +31,7 @@ commands:
             - run:
                 name: Checkout Neco (specified branch)
                 command: |
-                  # If CIRCLE_BRANCH has specified prefix("with-neco-branch-"), change the branch to be cloned.
-                  NECO_BRANCH=${CIRCLE_BRANCH#with-neco-branch-}
+                  NECO_BRANCH=${CIRCLE_BRANCH}
 
                   # If there is not NECO_BRANCH branch in the cybozu-go/neco repository, git clone will fail.
                   echo "checkout $NECO_BRANCH"
@@ -271,11 +270,7 @@ workflows:
       - kindtest:
           filters:
             branches:
-              ignore:
-                - master
-                - stage
-                - release
-                - /^op-(stage|release)-.*/
+              ignore: ["master", "stage", "release", /^op-(stage|release)-.*/]
 
   manual-dctest:
     jobs:
@@ -285,19 +280,12 @@ workflows:
           name: bootstrap
           requires:
             - hold
-      # If branch name has specified prefix("with-neco-branch-hoge-piyo"), testing with the specified neco branch("hoge-piyo").
-      - bootstrap:
-          name: bootstrap-with-neco-branch
-          neco-release-branch: false
-          filters:
-            branches:
-              only: /^with-neco-branch-.*$/
       - upgrade-master:
           requires:
             - hold
           filters:
             branches:
-              ignore: ["master", "stage", "release"]
+              ignore: ["master", "stage", "release", /^op-(stage|release)-.*/]
       - upgrade-release:
           requires:
             - hold
@@ -313,6 +301,23 @@ workflows:
             - bootstrap
             - upgrade-stage
             - upgrade-release
+
+  # Test with the specified neco branch.
+  manual-dctest-with-neco-feature-branch:
+    jobs:
+      - hold:
+          type: approval
+          filters:
+            branches:
+              ignore: ["master", "stage", "release", /^op-(stage|release)-.*/]
+      - bootstrap:
+          name: bootstrap-with-neco-branch
+          neco-release-branch: false
+          requires:
+            - hold
+          filters:
+            branches:
+              ignore: ["master", "stage", "release", /^op-(stage|release)-.*/]
 
   daily:
     triggers:
