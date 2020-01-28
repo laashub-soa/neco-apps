@@ -200,6 +200,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# NOTE: most of the rules are downloaded from the following link:
+# https://github.com/coreos/kube-prometheus/blob/master/manifests/prometheus-rules.yaml
 groups:
   - name: kubernetes-absent
     rules:
@@ -298,25 +300,25 @@ groups:
       - alert: KubeDeploymentReplicasMismatch
         annotations:
           summary: Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not
-            matched the expected number of replicas for longer than 15 minutes.
+            matched the expected number of replicas for longer than 30 minutes.
           runbook: TBD
         expr: |
           kube_deployment_spec_replicas{job="kube-state-metrics",namespace!~"maneki|sandbox"}
             !=
           kube_deployment_status_replicas_available{job="kube-state-metrics",namespace!~"maneki|sandbox"}
-        for: 15m
+        for: 30m
         labels:
           severity: minor
       - alert: KubeStatefulSetReplicasMismatch
         annotations:
           summary: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has
-            not matched the expected number of replicas for longer than 15 minutes.
+            not matched the expected number of replicas for longer than 30 minutes.
           runbook: TBD
         expr: |
           kube_statefulset_status_replicas_ready{job="kube-state-metrics",namespace!~"maneki|sandbox"}
             !=
           kube_statefulset_status_replicas{job="kube-state-metrics",namespace!~"maneki|sandbox"}
-        for: 15m
+        for: 30m
         labels:
           severity: minor
       - alert: KubeStatefulSetGenerationMismatch
@@ -384,6 +386,16 @@ groups:
         expr: |
           kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"} > 0
         for: 10m
+        labels:
+          severity: minor
+      - alert: KubeDaemonSetReplicasMismatch
+        annotations:
+          summary: DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has not
+            matched the expected number of replicas for longer than 30 minutes.
+          runbook: TBD
+        expr: |
+          kube_daemonset_status_number_unavailable{job="kube-state-metrics",namespace!~"maneki|sandbox"} != 0
+        for: 30m
         labels:
           severity: minor
       - alert: KubeCronJobRunning
