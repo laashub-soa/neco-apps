@@ -138,6 +138,48 @@ tests:
               summary: Pod kube-system/calico-node has been in a non-ready state for longer than 15 minutes.
   - interval: 1m
     input_series:
+      - series: 'kube_pod_owner{owner_kind="DaemonSet", job="kube-state-metrics", namespace="kube-system", pod="topolvm-scheduler"}'
+        values: '1+1x40'
+      - series: 'kube_pod_owner{owner_kind="Job", job="kube-state-metrics", namespace="monitoring", pod="machines-endpoints"}'
+        values: '1+1x40'
+      - series: 'kube_pod_status_ready{job="kube-state-metrics", condition="false", namespace="kube-system", pod="topolvm-scheduler"}'
+        values: '1+1x40'
+      - series: 'kube_pod_status_ready{job="kube-state-metrics", condition="false", namespace="monitoring", pod="machines-endpoints"}'
+        values: '1+1x40'
+      - series: 'kube_pod_container_status_ready{job="kube-state-metrics", container="container-1", namespace="kube-system", pod="topolvm-scheduler"}'
+        values: '1+1x40'
+      - series: 'kube_pod_container_status_ready{job="kube-state-metrics", container="container-2", namespace="kube-system", pod="topolvm-scheduler"}'
+        values: '1+1x40'
+      - series: 'kube_pod_container_status_ready{job="kube-state-metrics", container="container-a", namespace="monitoring", pod="machines-endpoints"}'
+        values: '1+1x40'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: KubePodNotReadyWithContainersReady
+        exp_alerts:
+          - exp_labels:
+              severity: minor
+              namespace: kube-system
+              pod: topolvm-scheduler
+              owner_kind: DaemonSet
+            exp_annotations:
+              runbook: TBD
+              summary: Pod kube-system/topolvm-scheduler has been in a non-ready state though containers are in a ready state for longer than 30 minutes.
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_owner{owner_kind="DaemonSet", job="kube-state-metrics", namespace="kube-system", pod="topolvm-scheduler"}'
+        values: '1+1x40'
+      - series: 'kube_pod_status_ready{job="kube-state-metrics", condition="false", namespace="kube-system", pod="topolvm-scheduler"}'
+        values: '1+1x40'
+      - series: 'kube_pod_container_status_ready{job="kube-state-metrics", container="container-1", namespace="kube-system", pod="topolvm-scheduler"}'
+        values: '1+1x40'
+      - series: 'kube_pod_container_status_ready{job="kube-state-metrics", container="container-2", namespace="kube-system", pod="topolvm-scheduler"}'
+        values: '0+0x40'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: KubePodNotReadyWithContainersReady
+        exp_alerts: []
+  - interval: 1m
+    input_series:
       - series: 'kube_deployment_status_observed_generation{job="kube-state-metrics", namespace="kube-system", deployment="a"}'
         values: '1+0x30'
       - series: 'kube_deployment_metadata_generation{job="kube-state-metrics", namespace="kube-system", deployment="a"}'
