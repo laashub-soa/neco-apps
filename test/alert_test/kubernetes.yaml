@@ -199,11 +199,11 @@ tests:
   - interval: 1m
     input_series:
       - series: 'kube_deployment_spec_replicas{job="kube-state-metrics", namespace="monitoring", deployment="alertmanager"}'
-        values: '2+0x30'
+        values: '2+0x60'
       - series: 'kube_deployment_status_replicas_available{job="kube-state-metrics", namespace="monitoring", deployment="alertmanager"}'
-        values: '2+0x14 1+0x16'
+        values: '2+0x28 1+0x32'
     alert_rule_test:
-      - eval_time: 30m
+      - eval_time: 60m
         alertname: KubeDeploymentReplicasMismatch
         exp_alerts:
           - exp_labels:
@@ -213,15 +213,15 @@ tests:
               deployment: alertmanager
             exp_annotations:
               runbook: TBD
-              summary: Deployment monitoring/alertmanager has not matched the expected number of replicas for longer than 15 minutes.
+              summary: Deployment monitoring/alertmanager has not matched the expected number of replicas for longer than 30 minutes.
   - interval: 1m
     input_series:
       - series: 'kube_statefulset_status_replicas{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
-        values: '2+0x30'
+        values: '2+0x60'
       - series: 'kube_statefulset_status_replicas_ready{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
-        values: '2+0x14 1+0x16'
+        values: '2+0x28 1+0x32'
     alert_rule_test:
-      - eval_time: 30m
+      - eval_time: 60m
         alertname: KubeStatefulSetReplicasMismatch
         exp_alerts:
           - exp_labels:
@@ -231,7 +231,7 @@ tests:
               statefulset: prometheus
             exp_annotations:
               runbook: TBD
-              summary: StatefulSet monitoring/prometheus has not matched the expected number of replicas for longer than 15 minutes.
+              summary: StatefulSet monitoring/prometheus has not matched the expected number of replicas for longer than 30 minutes.
   - interval: 1m
     input_series:
       - series: 'kube_statefulset_status_observed_generation{job="kube-state-metrics", namespace="monitoring", statefulset="prometheus"}'
@@ -338,6 +338,24 @@ tests:
             exp_annotations:
               runbook: TBD
               summary: 2 Pods of DaemonSet default/test-ds are running where they are not supposed to run.
+  - interval: 1m
+    input_series:
+      - series: 'kube_daemonset_status_number_unavailable{job="kube-state-metrics", namespace="topolvm-system", daemonset="node"}'
+        values: '0+0x28 1+1x32'
+      - series: 'kube_daemonset_status_number_unavailable{job="kube-state-metrics", namespace="topolvm-system", daemonset="topolvm-scheduler"}'
+        values: '1+1x28 0+0x32'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: KubeDaemonSetReplicasMismatch
+        exp_alerts:
+          - exp_labels:
+              severity: minor
+              job: kube-state-metrics
+              namespace: topolvm-system
+              daemonset: node
+            exp_annotations:
+              runbook: TBD
+              summary: DaemonSet topolvm-system/node has not matched the expected number of replicas for longer than 30 minutes.
   - interval: 1m
     input_series:
       - series: 'kube_cronjob_next_schedule_time{job="kube-state-metrics",namespace="default",cronjob="test-cronjob"}'
