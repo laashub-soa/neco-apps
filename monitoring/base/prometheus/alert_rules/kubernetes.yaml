@@ -284,6 +284,7 @@ groups:
         for: 30m
         labels:
           severity: minor
+          frequency: daily
       - alert: KubeDeploymentGenerationMismatch
         annotations:
           summary: Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment
@@ -309,6 +310,7 @@ groups:
         for: 30m
         labels:
           severity: minor
+          frequency: daily
       - alert: KubeStatefulSetReplicasMismatch
         annotations:
           summary: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has
@@ -321,6 +323,7 @@ groups:
         for: 30m
         labels:
           severity: minor
+          frequency: daily
       - alert: KubeStatefulSetGenerationMismatch
         annotations:
           summary: StatefulSet generation for {{ $labels.namespace }}/{{ $labels.statefulset
@@ -398,6 +401,7 @@ groups:
         for: 30m
         labels:
           severity: minor
+          frequency: daily
       - alert: KubeCronJobRunning
         annotations:
           summary: CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is taking more
