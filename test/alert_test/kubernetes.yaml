@@ -160,6 +160,7 @@ tests:
         exp_alerts:
           - exp_labels:
               severity: minor
+              frequency: daily
               namespace: kube-system
               pod: topolvm-scheduler
               owner_kind: DaemonSet
@@ -210,6 +211,7 @@ tests:
         exp_alerts:
           - exp_labels:
               severity: minor
+              frequency: daily
               job: kube-state-metrics
               namespace: monitoring
               deployment: alertmanager
@@ -228,6 +230,7 @@ tests:
         exp_alerts:
           - exp_labels:
               severity: minor
+              frequency: daily
               job: kube-state-metrics
               namespace: monitoring
               statefulset: prometheus
@@ -352,6 +355,7 @@ tests:
         exp_alerts:
           - exp_labels:
               severity: minor
+              frequency: daily
               job: kube-state-metrics
               namespace: topolvm-system
               daemonset: node
