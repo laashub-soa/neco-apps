@@ -200,6 +200,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# NOTE: most of the rules are downloaded from the following link:
+# https://github.com/coreos/kube-prometheus/blob/master/manifests/prometheus-rules.yaml
 groups:
   - name: kubernetes-absent
     rules:
@@ -256,7 +258,7 @@ groups:
             }}) is restarting {{ printf "%.2f" $value }} times / 5 minutes.
           runbook: TBD
         expr: |
-          rate(kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace!~"maneki|sandbox"}[15m]) * 60 * 5 > 0
+          rate(kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}[15m]) * 60 * 5 > 0
         for: 15m
         labels:
           severity: minor
@@ -266,10 +268,23 @@ groups:
             state for longer than 15 minutes.
           runbook: TBD
         expr: |
-          sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown",namespace!~"maneki|sandbox"} * on(namespace, pod) group_left(owner_kind) kube_pod_owner{owner_kind!="Job"}) > 0
+          sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown",namespace!~"app-.+|maneki|sandbox"} * on(namespace, pod) group_left(owner_kind) kube_pod_owner{owner_kind!="Job"}) > 0
         for: 15m
         labels:
           severity: minor
+      - alert: KubePodNotReadyWithContainersReady
+        annotations:
+          summary: Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-ready
+            state though containers are in a ready state for longer than 30 minutes.
+          runbook: TBD
+        expr: |
+          min by(namespace, pod) (kube_pod_container_status_ready{namespace!~"app-.+|maneki|sandbox"})
+            * on(namespace, pod) kube_pod_status_ready{condition="false"}
+            * on(namespace, pod) group_left(owner_kind) kube_pod_owner{owner_kind!="Job"} > 0
+        for: 30m
+        labels:
+          severity: minor
+          frequency: daily
       - alert: KubeDeploymentGenerationMismatch
         annotations:
           summary: Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment
@@ -277,36 +292,38 @@ groups:
             not been rolled back.
           runbook: TBD
         expr: |
-          kube_deployment_status_observed_generation{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+          kube_deployment_status_observed_generation{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             !=
-          kube_deployment_metadata_generation{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+          kube_deployment_metadata_generation{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
         for: 15m
         labels:
           severity: minor
       - alert: KubeDeploymentReplicasMismatch
         annotations:
           summary: Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not
-            matched the expected number of replicas for longer than 15 minutes.
+            matched the expected number of replicas for longer than 30 minutes.
           runbook: TBD
         expr: |
-          kube_deployment_spec_replicas{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+          kube_deployment_spec_replicas{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             !=
-          kube_deployment_status_replicas_available{job="kube-state-metrics",namespace!~"maneki|sandbox"}
-        for: 15m
+          kube_deployment_status_replicas_available{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
+        for: 30m
         labels:
           severity: minor
+          frequency: daily
       - alert: KubeStatefulSetReplicasMismatch
         annotations:
           summary: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has
-            not matched the expected number of replicas for longer than 15 minutes.
+            not matched the expected number of replicas for longer than 30 minutes.
           runbook: TBD
         expr: |
-          kube_statefulset_status_replicas_ready{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+          kube_statefulset_status_replicas_ready{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             !=
-          kube_statefulset_status_replicas{job="kube-state-metrics",namespace!~"maneki|sandbox"}
-        for: 15m
+          kube_statefulset_status_replicas{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
+        for: 30m
         labels:
           severity: minor
+          frequency: daily
       - alert: KubeStatefulSetGenerationMismatch
         annotations:
           summary: StatefulSet generation for {{ $labels.namespace }}/{{ $labels.statefulset
@@ -314,9 +331,9 @@ groups:
             not been rolled back.
           runbook: TBD
         expr: |
-          kube_statefulset_status_observed_generation{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+          kube_statefulset_status_observed_generation{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             !=
-          kube_statefulset_metadata_generation{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+          kube_statefulset_metadata_generation{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
         for: 15m
         labels:
           severity: minor
@@ -327,15 +344,15 @@ groups:
           runbook: TBD
         expr: |
           max without (revision) (
-            kube_statefulset_status_current_revision{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+            kube_statefulset_status_current_revision{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
               unless
-            kube_statefulset_status_update_revision{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+            kube_statefulset_status_update_revision{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
           )
             *
           (
-            kube_statefulset_replicas{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+            kube_statefulset_replicas{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
               !=
-            kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+            kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
           )
         for: 15m
         labels:
@@ -346,9 +363,9 @@ groups:
             }}/{{ $labels.daemonset }} are scheduled and ready.
           runbook: TBD
         expr: |
-          kube_daemonset_status_number_ready{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+          kube_daemonset_status_number_ready{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             /
-          kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"} * 100 < 100
+          kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} * 100 < 100
         for: 15m
         labels:
           severity: minor
@@ -358,9 +375,9 @@ groups:
           }} are not scheduled.'
           runbook: TBD
         expr: |
-          kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"}
+          kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             -
-          kube_daemonset_status_current_number_scheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"} > 0
+          kube_daemonset_status_current_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} > 0
         for: 10m
         labels:
           severity: minor
@@ -370,17 +387,28 @@ groups:
           }} are running where they are not supposed to run.'
           runbook: TBD
         expr: |
-          kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace!~"maneki|sandbox"} > 0
+          kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} > 0
         for: 10m
         labels:
           severity: minor
+      - alert: KubeDaemonSetReplicasMismatch
+        annotations:
+          summary: DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has not
+            matched the expected number of replicas for longer than 30 minutes.
+          runbook: TBD
+        expr: |
+          kube_daemonset_status_number_unavailable{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} != 0
+        for: 30m
+        labels:
+          severity: minor
+          frequency: daily
       - alert: KubeCronJobRunning
         annotations:
           summary: CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is taking more
             than 1h to complete.
           runbook: TBD
         expr: |
-          time() - kube_cronjob_next_schedule_time{job="kube-state-metrics",namespace!~"maneki|sandbox"} > 3600
+          time() - kube_cronjob_next_schedule_time{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} > 3600
         for: 1h
         labels:
           severity: warning
@@ -390,7 +418,7 @@ groups:
             than one hour to complete.
           runbook: TBD
         expr: |
-          kube_job_spec_completions{job="kube-state-metrics",namespace!~"maneki|sandbox"} - kube_job_status_succeeded{job="kube-state-metrics",namespace!~"maneki|sandbox"}  > 0
+          kube_job_spec_completions{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} - kube_job_status_succeeded{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}  > 0
         for: 1h
         labels:
           severity: warning
@@ -399,7 +427,7 @@ groups:
           summary: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete.
           runbook: TBD
         expr: |
-          kube_job_failed{job="kube-state-metrics",namespace!~"maneki|sandbox"}  > 0
+          kube_job_failed{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}  > 0
         for: 15m
         labels:
           severity: minor
