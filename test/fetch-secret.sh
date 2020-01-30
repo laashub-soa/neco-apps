@@ -4,7 +4,7 @@ if [ -n "$SECRET_GITHUB_TOKEN" ]; then
     GIT_USER=cybozu-neco
     GIT_URL="https://${GIT_USER}:${SECRET_GITHUB_TOKEN}@github.com/cybozu-private/neco-apps-secret"
 
-    if [ "${CIRCLE_BRANCH}" != "release" -o "${CIRCLE_BRANCH}" != "stage" ]; then
+    if [ "${CIRCLE_BRANCH}" != "release" -a "${CIRCLE_BRANCH}" != "stage" ]; then
         BRANCH="master"
     else
         BRANCH=${CIRCLE_BRANCH}
