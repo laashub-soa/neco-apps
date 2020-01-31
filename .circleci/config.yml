@@ -108,6 +108,13 @@ jobs:
             ./bin/run-test.sh
           no_output_timeout: 31m
       - run:
+          name: Set the instance lifetime to 10 minutes
+          command: |
+            . ./bin/env
+            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
+              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
+          when: on_fail
+      - run:
           name: Remove instance
           command: |
             cd neco
@@ -126,6 +133,13 @@ jobs:
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade ./bin/run-test.sh
           no_output_timeout: 31m
+      - run:
+          name: Set the instance lifetime to 10 minutes
+          command: |
+            . ./bin/env
+            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
+              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
+          when: on_fail
       - run:
           name: Remove instance
           command: |
@@ -146,6 +160,13 @@ jobs:
             TARGET=dctest-upgrade BASE_BRANCH=stage ./bin/run-test.sh
           no_output_timeout: 31m
       - run:
+          name: Set the instance lifetime to 10 minutes
+          command: |
+            . ./bin/env
+            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
+              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
+          when: on_fail
+      - run:
           name: Remove instance
           command: |
             cd neco
@@ -164,6 +185,13 @@ jobs:
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=release ./bin/run-test.sh
           no_output_timeout: 31m
+      - run:
+          name: Set the instance lifetime to 10 minutes
+          command: |
+            . ./bin/env
+            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
+              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
+          when: on_fail
       - run:
           name: Remove instance
           command: |
@@ -187,6 +215,13 @@ jobs:
             curl -sSLf -o ./bin/env https://raw.githubusercontent.com/cybozu-go/neco/master/bin/env
             ./bin/run-kindtest.sh
           no_output_timeout: 31m
+      - run:
+          name: Set the instance lifetime to 10 minutes
+          command: |
+            . ./bin/env
+            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
+              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
+          when: on_fail
       - run:
           name: Remove instance
           command: |
