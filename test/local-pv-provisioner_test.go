@@ -122,10 +122,6 @@ func testLocalPVProvisioner() {
 	})
 
 	It("should be used as block device", func() {
-		if targetDeviceNum == 0 {
-			Skip("no target device")
-		}
-
 		By("deploying Pod with PVC")
 		podYAML := `apiVersion: v1
 kind: Pod
