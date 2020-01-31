@@ -81,6 +81,18 @@ $ cp manifests/*.yaml /path/to/neco-apps/metallb/base/upstream
 $ vi metallb/base/upstream/metallb.yaml
   (Remove Namespace resources)
 ```
+## metrics-server
+
+Check [releases](https://github.com/kubernetes-sigs/metrics-server/releases)
+
+Download the upstream manifest as follows:
+
+```console
+$ git clone https://github.com/kubernetes-sigs/metrics-server
+$ cd metrics-server
+$ git checkout vX.Y.Z
+$ cp deploy/1.8+/*.yaml /path/to/neco-apps/metrics-server/base/upstream
+```
 
 ## monitoring (prometheus, alertmanager, grafana)
 
