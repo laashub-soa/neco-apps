@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: metrics-server
-        image: quay.io/cybozu/metrics-server:0.3.6.1
+        image: quay.io/cybozu/metrics-server:0.3.6.2
         args:
           - --cert-dir=/tmp
           - --secure-port=4443
