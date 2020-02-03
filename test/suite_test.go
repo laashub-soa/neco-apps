@@ -43,6 +43,7 @@ var _ = Describe("Test applications", func() {
 	if doReboot {
 		Context("reboot", testRebootAllNodes)
 	}
+	Context("metrics-server", testMetricsServer)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)
 	if !withKind {
