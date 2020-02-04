@@ -43,7 +43,6 @@ var _ = Describe("Test applications", func() {
 	if doReboot {
 		Context("reboot", testRebootAllNodes)
 	}
-	Context("metrics-server", testMetricsServer)
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)
 	if !withKind {
@@ -58,7 +57,8 @@ var _ = Describe("Test applications", func() {
 	Context("prometheus", testPrometheus)
 	Context("grafana", testGrafana)
 	Context("alertmanager", testAlertmanager)
-	Context("metrics", testMetrics)
+	Context("prometheus-metrics", testPrometheusMetrics)
+	Context("metrics-server", testMetricsServer)
 	if !withKind {
 		Context("teleport", testTeleport)
 	}
