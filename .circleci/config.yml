@@ -136,6 +136,9 @@ jobs:
             ./bin/run-test.sh
           no_output_timeout: 31m
       - run:
+          name: Copy env file from neco
+          command: cp ./neco/bin/env ./bin/env
+      - run:
           name: Set the instance lifetime to 10 minutes
           command: |
             . ./bin/env
@@ -146,8 +149,7 @@ jobs:
       - run:
           name: Remove instance
           command: |
-            cd neco
-            . bin/env
+            . ./bin/env
             $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
 
   upgrade-master:
@@ -163,6 +165,9 @@ jobs:
             TARGET=dctest-upgrade ./bin/run-test.sh
           no_output_timeout: 31m
       - run:
+          name: Copy env file from neco
+          command: cp ./neco/bin/env ./bin/env
+      - run:
           name: Set the instance lifetime to 10 minutes
           command: |
             . ./bin/env
@@ -173,8 +178,7 @@ jobs:
       - run:
           name: Remove instance
           command: |
-            cd neco
-            . bin/env
+            . ./bin/env
             $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
 
   upgrade-stage:
@@ -190,6 +194,9 @@ jobs:
             TARGET=dctest-upgrade BASE_BRANCH=stage ./bin/run-test.sh
           no_output_timeout: 31m
       - run:
+          name: Copy env file from neco
+          command: cp ./neco/bin/env ./bin/env
+      - run:
           name: Set the instance lifetime to 10 minutes
           command: |
             . ./bin/env
@@ -200,8 +207,7 @@ jobs:
       - run:
           name: Remove instance
           command: |
-            cd neco
-            . bin/env
+            . ./bin/env
             $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
 
   upgrade-release:
@@ -217,6 +223,9 @@ jobs:
             TARGET=dctest-upgrade BASE_BRANCH=release ./bin/run-test.sh
           no_output_timeout: 31m
       - run:
+          name: Copy env file from neco
+          command: cp ./neco/bin/env ./bin/env
+      - run:
           name: Set the instance lifetime to 10 minutes
           command: |
             . ./bin/env
@@ -227,8 +236,7 @@ jobs:
       - run:
           name: Remove instance
           command: |
-            cd neco
-            . bin/env
+            . ./bin/env
             $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
 
   kindtest:
