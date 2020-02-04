@@ -300,7 +300,7 @@ func testGrafana() {
 	})
 }
 
-func testMetrics() {
+func testPrometheusMetrics() {
 	var podName string
 
 	It("should be up all scraping", func() {

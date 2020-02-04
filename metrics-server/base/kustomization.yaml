@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - upstream/aggregated-metrics-reader.yaml
+  - upstream/auth-delegator.yaml
+  - upstream/auth-reader.yaml
+  - upstream/metrics-apiservice.yaml
+  - upstream/metrics-server-deployment.yaml
+  - upstream/metrics-server-service.yaml
+  - upstream/resource-reader.yaml
+patchesStrategicMerge:
+  - metrics-server-deployment.yaml
+  - metrics-server-service.yaml
+patchesJSON6902:
+- target:
+    group: rbac.authorization.k8s.io
+    version: v1
+    kind: ClusterRole
+    name: system:metrics-server
+  patch: |-
+    - op: add
+      path: /rules/0/resources/-
+      value: configmaps
+- target:
+    group: rbac.authorization.k8s.io
+    version: v1beta1
+    kind: ClusterRoleBinding
+    name: metrics-server:system:auth-delegator
+  patch: |-
+    - op: replace
+      path: /apiVersion
+      value: rbac.authorization.k8s.io/v1
+- target:
+    group: rbac.authorization.k8s.io
+    version: v1beta1
+    kind: RoleBinding
+    name: metrics-server-auth-reader
+    namespace: kube-system
+  patch: |-
+    - op: replace
+      path: /apiVersion
+      value: rbac.authorization.k8s.io/v1
