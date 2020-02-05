@@ -11,6 +11,7 @@ resources:
 - local-pv-provisioner.yaml
 - maneki-apps.yaml
 - metallb.yaml
+- metrics-server.yaml
 - monitoring.yaml
 - namespaces.yaml
 - neco-admission.yaml

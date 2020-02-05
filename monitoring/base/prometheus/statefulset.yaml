@@ -44,6 +44,7 @@ spec:
               mountPath: /etc/prometheus/
             - name: prometheus-storage-volume
               mountPath: /prometheus/
+      priorityClassName: node-bound
       securityContext:
         runAsUser: 10000
         runAsGroup: 10000
