@@ -66,6 +66,7 @@ spec:
           name: tmp
         - mountPath: /var/lib/license
           name: teleport-enterprise-license
+      priorityClassName: node-bound
       securityContext:
         runAsUser: 10000
         runAsGroup: 10000

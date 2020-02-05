@@ -9,6 +9,7 @@ resources:
 - upstream/provisioner.yaml
 - upstream/psp.yaml
 - upstream/scheduler.yaml
+- priorityclass.yaml
 - pdb.yaml
 
 patchesStrategicMerge:

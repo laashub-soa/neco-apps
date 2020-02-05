@@ -57,7 +57,8 @@ var _ = Describe("Test applications", func() {
 	Context("prometheus", testPrometheus)
 	Context("grafana", testGrafana)
 	Context("alertmanager", testAlertmanager)
-	Context("metrics", testMetrics)
+	Context("prometheus-metrics", testPrometheusMetrics)
+	Context("metrics-server", testMetricsServer)
 	if !withKind {
 		Context("teleport", testTeleport)
 	}
