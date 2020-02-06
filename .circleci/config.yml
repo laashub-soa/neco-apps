@@ -138,6 +138,7 @@ jobs:
       - run:
           name: Copy env file from neco
           command: cp ./neco/bin/env ./bin/env
+          when: always
       - run:
           name: Set the instance lifetime to 10 minutes
           command: |
@@ -167,6 +168,7 @@ jobs:
       - run:
           name: Copy env file from neco
           command: cp ./neco/bin/env ./bin/env
+          when: always
       - run:
           name: Set the instance lifetime to 10 minutes
           command: |
@@ -196,6 +198,7 @@ jobs:
       - run:
           name: Copy env file from neco
           command: cp ./neco/bin/env ./bin/env
+          when: always
       - run:
           name: Set the instance lifetime to 10 minutes
           command: |
@@ -225,6 +228,7 @@ jobs:
       - run:
           name: Copy env file from neco
           command: cp ./neco/bin/env ./bin/env
+          when: always
       - run:
           name: Set the instance lifetime to 10 minutes
           command: |
