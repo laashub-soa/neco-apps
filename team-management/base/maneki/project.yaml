@@ -36,7 +36,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: maneki-apps
+  name: tenant-app-of-apps
   namespace: argocd
 spec:
   sourceRepos:
@@ -78,4 +78,4 @@ spec:
       groups:
         - cybozu-private:maneki
       policies:
-        - p, proj:maneki:admin, applications, *, maneki-apps/applications, allow
+        - p, proj:maneki:admin, applications, *, tenant-app-of-apps/applications, allow
