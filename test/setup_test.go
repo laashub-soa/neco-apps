@@ -305,6 +305,12 @@ func applyAndWaitForApplications(overlay string) {
 	fmt.Printf("application list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
+	// TODO: Remove this block after `maneki-apps` project have been pruned
+	if doUpgrade {
+		stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", "team-management")
+		Expect(err).ShouldNot(HaveOccurred(), "stdout:%s, stderr:%s", stdout, stderr)
+	}
+
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 	OUTER:
