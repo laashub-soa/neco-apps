@@ -74,6 +74,34 @@ commands:
                   ./bin/run-dctest.sh bootstrap
                 no_output_timeout: 31m
 
+  delete-instance:
+    description: remove GCP instance for this test
+    parameters:
+      need-copy-env:
+        type: boolean
+        default: true
+    steps:
+      - when:
+          condition: <<parameters.need-copy-env>>
+          steps:
+            - run:
+                name: Copy env file from neco
+                command: cp ./neco/bin/env ./bin/env
+                when: always
+      - run:
+          name: Set the instance lifetime to 10 minutes
+          command: |
+            . ./bin/env
+            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
+              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
+          when: on_fail
+      - notify-slack-to-extend
+      - run:
+          name: Remove instance
+          command: |
+            . ./bin/env
+            $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
+
   notify-slack-to-extend:
     description: "notify slack to extend the lifetime of the GCP instance"
     steps:
@@ -135,23 +163,7 @@ jobs:
             export NECO_DIR=$(pwd)/neco
             ./bin/run-test.sh
           no_output_timeout: 31m
-      - run:
-          name: Copy env file from neco
-          command: cp ./neco/bin/env ./bin/env
-          when: always
-      - run:
-          name: Set the instance lifetime to 10 minutes
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
-              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
-          when: on_fail
-      - notify-slack-to-extend
-      - run:
-          name: Remove instance
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
+      - delete-instance
 
   upgrade-master:
     docker:
@@ -165,23 +177,7 @@ jobs:
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade ./bin/run-test.sh
           no_output_timeout: 31m
-      - run:
-          name: Copy env file from neco
-          command: cp ./neco/bin/env ./bin/env
-          when: always
-      - run:
-          name: Set the instance lifetime to 10 minutes
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
-              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
-          when: on_fail
-      - notify-slack-to-extend
-      - run:
-          name: Remove instance
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
+      - delete-instance
 
   upgrade-stage:
     docker:
@@ -195,23 +191,7 @@ jobs:
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=stage ./bin/run-test.sh
           no_output_timeout: 31m
-      - run:
-          name: Copy env file from neco
-          command: cp ./neco/bin/env ./bin/env
-          when: always
-      - run:
-          name: Set the instance lifetime to 10 minutes
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
-              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
-          when: on_fail
-      - notify-slack-to-extend
-      - run:
-          name: Remove instance
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
+      - delete-instance
 
   upgrade-release:
     docker:
@@ -225,23 +205,7 @@ jobs:
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=release ./bin/run-test.sh
           no_output_timeout: 31m
-      - run:
-          name: Copy env file from neco
-          command: cp ./neco/bin/env ./bin/env
-          when: always
-      - run:
-          name: Set the instance lifetime to 10 minutes
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
-              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
-          when: on_fail
-      - notify-slack-to-extend
-      - run:
-          name: Remove instance
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
+      - delete-instance
 
   kindtest:
     docker:
@@ -259,19 +223,8 @@ jobs:
             curl -sSLf -o ./bin/env https://raw.githubusercontent.com/cybozu-go/neco/master/bin/env
             ./bin/run-kindtest.sh
           no_output_timeout: 31m
-      - run:
-          name: Set the instance lifetime to 10 minutes
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances add-metadata ${INSTANCE_NAME} --zone ${ZONE} \
-              --metadata shutdown-at=$(date -Iseconds -d+10minutes)
-          when: on_fail
-      - notify-slack-to-extend
-      - run:
-          name: Remove instance
-          command: |
-            . ./bin/env
-            $GCLOUD compute instances delete $INSTANCE_NAME --zone $ZONE
+      - delete-instance:
+          need-copy-env: false
 
   create-pull-request-stage:
     docker:
