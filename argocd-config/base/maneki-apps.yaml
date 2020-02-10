@@ -11,7 +11,7 @@ spec:
   destination:
     namespace: argocd
     server: https://kubernetes.default.svc
-  project: maneki-apps
+  project: tenant-app-of-apps
   source:
     path: argocd-config/base
     repoURL: https://github.com/cybozu-private/maneki-apps.git
@@ -19,4 +19,3 @@ spec:
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
