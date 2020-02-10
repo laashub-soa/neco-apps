@@ -3,9 +3,9 @@ ArgoCDApplicationValidator:
       - repository: https://github.com/cybozu-private/maneki-apps.git
         projects:
           - maneki
-          - maneki-apps
+          - tenant-app-of-apps
       - repository: https://github.com/cybozu-go/neco-apps.git
         projects:
           - default
           - maneki
-          - maneki-apps
+          - tenant-app-of-apps
