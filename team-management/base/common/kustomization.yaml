@@ -4,3 +4,4 @@ resources:
 - clusterrole.yaml
 - clusterrolebinding.yaml
 - elastic-rbac.yaml
+- project.yaml
