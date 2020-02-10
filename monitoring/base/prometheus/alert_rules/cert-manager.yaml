@@ -12,7 +12,7 @@ groups:
             severity: minor
         - alert: CertificateDoesNotReady
           expr: |
-            certmanager_certificate_ready_status{condition="False"} > 0
+            certmanager_certificate_ready_status{condition="False", namespace!~"app-.+|maneki|sandbox"} > 0
           for: 10m
           labels:
             severity: minor
