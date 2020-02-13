@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cybozu-go/log"
 	certmanagerv1alpha2 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -291,7 +292,7 @@ spec:
 				}
 
 				// Check the CertificateRequest status (the result of ACME challenge).
-				// If the status is failed, delete the Certificate and force retry the ACME challenge.
+				// If the status is failed, delete the Certificate and force to retry the ACME challenge.
 				// The Certificate will be recreated by contour-plus.
 				certReq, err := getCertificateRequest(cert)
 				if err != nil {
@@ -305,11 +306,18 @@ spec:
 					fmt.Printf("certificate request status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
 
 					if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
+						log.Error("CertificateRequest failed", map[string]interface{}{
+							"certificate":        cert.Name,
+							"certificaterequest": certReq.Name,
+							"status":             st.Status,
+							"reason":             st.Reason,
+							"message":            st.Message,
+						})
 						stdout, stderr, err := ExecAt(boot0, "kubectl", "delete", "-n", "test-ingress", "certificate", "tls")
 						if err != nil {
 							return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 						}
-						return errors.New("recreate Certificate")
+						return errors.New("recreate certificate")
 					}
 				}
 				return errors.New("certificate is not ready")

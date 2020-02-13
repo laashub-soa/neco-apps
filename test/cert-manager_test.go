@@ -111,21 +111,40 @@ spec:
 				if st.Type != certmanagerv1alpha2.CertificateConditionReady {
 					continue
 				}
-				if st.Status != "True" {
-					failed, err := isCertificateRequestFailed(cert)
+				// debug output
+				fmt.Printf("certificate status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
+
+				if st.Status == "True" {
+					return nil
+				}
+			}
+
+			// Check the CertificateRequest status (the result of ACME challenge).
+			// If the status is failed, recreate the Certificate and force to retry the ACME challenge.
+			certReq, err := getCertificateRequest(cert)
+			if err != nil {
+				return err
+			}
+			for _, st := range certReq.Status.Conditions {
+				if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
+					continue
+				}
+				// debug log
+				log.Info("certificate request status", map[string]interface{}{"time": st.LastTransitionTime, "status": st.Status, "reason": st.Reason, "message": st.Message})
+
+				if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
+					log.Error("CertificateRequest failed", map[string]interface{}{
+						"certificate":        cert.Name,
+						"certificaterequest": certReq.Name,
+						"status":             st.Status,
+						"reason":             st.Reason,
+						"message":            st.Message,
+					})
+					err = recreateCertificate("test-certificate", "cert-manager", certificate)
 					if err != nil {
 						return err
 					}
-					if failed {
-						err = recreateCertificate("test-certificate", "cert-manager", certificate)
-						if err != nil {
-							return err
-						}
-						return fmt.Errorf("Certificate is recreated")
-					}
-					return fmt.Errorf("Certificate is not ready")
 				}
-				return nil
 			}
 			return errors.New("certificate is not ready")
 		}).Should(Succeed())
@@ -163,27 +182,6 @@ OUTER:
 		return nil, fmt.Errorf("CertificateRequest is not found")
 	}
 	return targetCertReq, nil
-}
-
-func isCertificateRequestFailed(cert certmanagerv1alpha2.Certificate) (bool, error) {
-	certReq, err := getCertificateRequest(cert)
-	if err != nil {
-		return false, err
-	}
-
-	for _, st := range certReq.Status.Conditions {
-		if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
-			continue
-		}
-		if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
-			log.Error("CertificateRequest failed", map[string]interface{}{
-				"certificate name":         cert.Name,
-				"certificate request name": certReq.Name,
-			})
-			return true, nil
-		}
-	}
-	return false, fmt.Errorf("CertificateRequest is progressing")
 }
 
 func recreateCertificate(name, namespace, certificate string) error {
