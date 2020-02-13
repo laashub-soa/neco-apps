@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cybozu-go/log"
 	certmanagerv1alpha2 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -283,12 +282,17 @@ spec:
 					if st.Type != certmanagerv1alpha2.CertificateConditionReady {
 						continue
 					}
-					log.Info("certificate status", map[string]interface{}{"time": st.LastTransitionTime, "status": st.Status, "reason": st.Reason, "message": st.Message})
+					// debug output
+					fmt.Printf("certificate status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
+
 					if st.Status == "True" {
 						return nil
 					}
 				}
 
+				// Check the CertificateRequest status (the result of ACME challenge).
+				// If the status is failed, delete the Certificate and force retry the ACME challenge.
+				// The Certificate will be recreated by contour-plus.
 				certReq, err := getCertificateRequest(cert)
 				if err != nil {
 					return err
@@ -297,7 +301,8 @@ spec:
 					if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
 						continue
 					}
-					log.Info("certificate request status", map[string]interface{}{"time": st.LastTransitionTime, "status": st.Status, "reason": st.Reason, "message": st.Message})
+					// debug output
+					fmt.Printf("certificate request status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
 
 					if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
 						stdout, stderr, err := ExecAt(boot0, "kubectl", "delete", "-n", "test-ingress", "certificate", "tls")
