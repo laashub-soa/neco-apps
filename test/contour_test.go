@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cybozu-go/log"
 	certmanagerv1alpha2 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -282,21 +283,29 @@ spec:
 					if st.Type != certmanagerv1alpha2.CertificateConditionReady {
 						continue
 					}
-					if st.Status != "True" {
-						failed, err := isCertificateRequestFailed(cert)
-						if err != nil {
-							return err
-						}
-						if failed {
-							ExecAt(boot0, "kubectl", "delete", "-n", "test-ingress", "certificate", "tls", "-o", "json")
-							if err != nil {
-								return err
-							}
-							return fmt.Errorf("recreate Certificate")
-						}
-						return fmt.Errorf("Certificate is not ready")
+					log.Info("certificate status", map[string]interface{}{"time": st.LastTransitionTime, "status": st.Status, "reason": st.Reason, "message": st.Message})
+					if st.Status == "True" {
+						return nil
 					}
-					return nil
+				}
+
+				certReq, err := getCertificateRequest(cert)
+				if err != nil {
+					return err
+				}
+				for _, st := range certReq.Status.Conditions {
+					if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
+						continue
+					}
+					log.Info("certificate request status", map[string]interface{}{"time": st.LastTransitionTime, "status": st.Status, "reason": st.Reason, "message": st.Message})
+
+					if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
+						stdout, stderr, err := ExecAt(boot0, "kubectl", "delete", "-n", "test-ingress", "certificate", "tls")
+						if err != nil {
+							return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+						}
+						return errors.New("recreate Certificate")
+					}
 				}
 				return errors.New("certificate is not ready")
 			})

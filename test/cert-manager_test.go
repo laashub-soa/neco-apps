@@ -111,7 +111,7 @@ spec:
 				if st.Type != certmanagerv1alpha2.CertificateConditionReady {
 					continue
 				}
-				if st.Reason != "Ready" {
+				if st.Status != "True" {
 					failed, err := isCertificateRequestFailed(cert)
 					if err != nil {
 						return err
@@ -136,17 +136,17 @@ spec:
 	})
 }
 
-func isCertificateRequestFailed(cert certmanagerv1alpha2.Certificate) (bool, error) {
+func getCertificateRequest(cert certmanagerv1alpha2.Certificate) (*certmanagerv1alpha2.CertificateRequest, error) {
 	var certReqList certmanagerv1alpha2.CertificateRequestList
 	var targetCertReq *certmanagerv1alpha2.CertificateRequest
 
 	stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=cert-manager", "certificaterequest", "-o", "json")
 	if err != nil {
-		return false, fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		return nil, fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 	}
 	err = json.Unmarshal(stdout, &certReqList)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 OUTER:
@@ -160,17 +160,25 @@ OUTER:
 	}
 
 	if targetCertReq == nil {
-		return false, nil
+		return nil, fmt.Errorf("CertificateRequest is not found")
+	}
+	return targetCertReq, nil
+}
+
+func isCertificateRequestFailed(cert certmanagerv1alpha2.Certificate) (bool, error) {
+	certReq, err := getCertificateRequest(cert)
+	if err != nil {
+		return false, err
 	}
 
-	for _, st := range targetCertReq.Status.Conditions {
+	for _, st := range certReq.Status.Conditions {
 		if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
 			continue
 		}
 		if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
 			log.Error("CertificateRequest failed", map[string]interface{}{
 				"certificate name":         cert.Name,
-				"certificate request name": targetCertReq.Name,
+				"certificate request name": certReq.Name,
 			})
 			return true, nil
 		}
