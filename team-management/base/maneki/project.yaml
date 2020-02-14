@@ -9,6 +9,8 @@ spec:
   destinations:
   - namespace: app-gorush
     server: '*'
+  - namespace: app-kodama
+    server: '*'
   - namespace: app-misc
     server: '*'
   - namespace: app-monitoring
