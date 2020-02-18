@@ -111,21 +111,40 @@ spec:
 				if st.Type != certmanagerv1alpha2.CertificateConditionReady {
 					continue
 				}
-				if st.Reason != "Ready" {
-					failed, err := isCertificateRequestFailed(cert)
+				// debug output
+				fmt.Printf("certificate status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
+
+				if st.Status == "True" {
+					return nil
+				}
+			}
+
+			// Check the CertificateRequest status (the result of ACME challenge).
+			// If the status is failed, recreate the Certificate and force to retry the ACME challenge.
+			certReq, err := getCertificateRequest(cert)
+			if err != nil {
+				return err
+			}
+			for _, st := range certReq.Status.Conditions {
+				if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
+					continue
+				}
+				// debug log
+				log.Info("certificate request status", map[string]interface{}{"time": st.LastTransitionTime, "status": st.Status, "reason": st.Reason, "message": st.Message})
+
+				if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
+					log.Error("CertificateRequest failed", map[string]interface{}{
+						"certificate":        cert.Name,
+						"certificaterequest": certReq.Name,
+						"status":             st.Status,
+						"reason":             st.Reason,
+						"message":            st.Message,
+					})
+					err = recreateCertificate("test-certificate", "cert-manager", certificate)
 					if err != nil {
 						return err
 					}
-					if failed {
-						err = recreateCertificate("test-certificate", "cert-manager", certificate)
-						if err != nil {
-							return err
-						}
-						return fmt.Errorf("Certificate is recreated")
-					}
-					return fmt.Errorf("Certificate is not ready")
 				}
-				return nil
 			}
 			return errors.New("certificate is not ready")
 		}).Should(Succeed())
@@ -136,17 +155,17 @@ spec:
 	})
 }
 
-func isCertificateRequestFailed(cert certmanagerv1alpha2.Certificate) (bool, error) {
+func getCertificateRequest(cert certmanagerv1alpha2.Certificate) (*certmanagerv1alpha2.CertificateRequest, error) {
 	var certReqList certmanagerv1alpha2.CertificateRequestList
 	var targetCertReq *certmanagerv1alpha2.CertificateRequest
 
 	stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n=cert-manager", "certificaterequest", "-o", "json")
 	if err != nil {
-		return false, fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		return nil, fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 	}
 	err = json.Unmarshal(stdout, &certReqList)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 OUTER:
@@ -160,22 +179,9 @@ OUTER:
 	}
 
 	if targetCertReq == nil {
-		return false, nil
+		return nil, fmt.Errorf("CertificateRequest is not found")
 	}
-
-	for _, st := range targetCertReq.Status.Conditions {
-		if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
-			continue
-		}
-		if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
-			log.Error("CertificateRequest failed", map[string]interface{}{
-				"certificate name":         cert.Name,
-				"certificate request name": targetCertReq.Name,
-			})
-			return true, nil
-		}
-	}
-	return false, fmt.Errorf("CertificateRequest is progressing")
+	return targetCertReq, nil
 }
 
 func recreateCertificate(name, namespace, certificate string) error {
