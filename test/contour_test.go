@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cybozu-go/log"
 	certmanagerv1alpha2 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -282,21 +283,42 @@ spec:
 					if st.Type != certmanagerv1alpha2.CertificateConditionReady {
 						continue
 					}
-					if st.Reason != "Ready" {
-						failed, err := isCertificateRequestFailed(cert)
-						if err != nil {
-							return err
-						}
-						if failed {
-							ExecAt(boot0, "kubectl", "delete", "-n", "test-ingress", "certificate", "tls", "-o", "json")
-							if err != nil {
-								return err
-							}
-							return fmt.Errorf("recreate Certificate")
-						}
-						return fmt.Errorf("Certificate is not ready")
+					// debug output
+					fmt.Printf("certificate status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
+
+					if st.Status == "True" {
+						return nil
 					}
-					return nil
+				}
+
+				// Check the CertificateRequest status (the result of ACME challenge).
+				// If the status is failed, delete the Certificate and force to retry the ACME challenge.
+				// The Certificate will be recreated by contour-plus.
+				certReq, err := getCertificateRequest(cert)
+				if err != nil {
+					return err
+				}
+				for _, st := range certReq.Status.Conditions {
+					if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
+						continue
+					}
+					// debug output
+					fmt.Printf("certificate request status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
+
+					if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
+						log.Error("CertificateRequest failed", map[string]interface{}{
+							"certificate":        cert.Name,
+							"certificaterequest": certReq.Name,
+							"status":             st.Status,
+							"reason":             st.Reason,
+							"message":            st.Message,
+						})
+						stdout, stderr, err := ExecAt(boot0, "kubectl", "delete", "-n", "test-ingress", "certificate", "tls")
+						if err != nil {
+							return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+						}
+						return errors.New("recreate certificate")
+					}
 				}
 				return errors.New("certificate is not ready")
 			})
@@ -314,13 +336,16 @@ spec:
 			ExecSafeAt(boot0, "HTTPS_PROXY=http://10.0.49.3:3128",
 				"curl", "-sfL", "-o", "lets.crt", "https://letsencrypt.org/certs/fakelerootx1.pem")
 			Eventually(func() error {
-				_, _, err := ExecAt(boot0, "curl", "--resolve", fqdnHTTPS+":443:"+targetIP,
+				stdout, stderr, err := ExecAt(boot0, "curl", "-v", "--resolve", fqdnHTTPS+":443:"+targetIP,
 					"https://"+fqdnHTTPS+"/",
 					"-m", "5",
 					"--fail",
 					"--cacert", "lets.crt",
 				)
-				return err
+				if err != nil {
+					return fmt.Errorf("failed to curl; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				return nil
 			}).Should(Succeed())
 		}
 
