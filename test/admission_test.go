@@ -10,6 +10,35 @@ import (
 )
 
 func testAdmission() {
+	It("should mutate pod to append emptyDir for /tmp", func() {
+		podYAML := `apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-mutator-test
+  namespace: default
+spec:
+  containers:
+  - name: ubuntu
+    image: quay.io/cybozu/ubuntu:18.04
+    command: ["pause"]
+`
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(podYAML), "kubectl", "apply", "-f", "-")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+
+		By("waiting for test pod to start")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "pod-mutator-test", "--", "date")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+
+		By("creating a file in /tmp dir")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "pod-mutator-test", "--", "touch", "/tmp/test")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+	})
+
 	It("should validate Calico NetworkPolicy", func() {
 		networkPolicyYAML := `
 apiVersion: crd.projectcalico.org/v1
