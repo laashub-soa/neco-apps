@@ -342,10 +342,17 @@ spec:
 					"--fail",
 					"--cacert", "lets.crt",
 				)
-				if err != nil {
-					return fmt.Errorf("failed to curl; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				if err == nil {
+					return nil
 				}
-				return nil
+
+				// Check the Certificate and HTTPProxy status (for debug).
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "-n", "test-ingress", "certificate,httpproxy", "-o", "wide")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				fmt.Println(string(stdout))
+				return fmt.Errorf("failed to curl; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}).Should(Succeed())
 		}
 
