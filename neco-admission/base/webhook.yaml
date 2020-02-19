@@ -12,6 +12,12 @@ webhooks:
       namespace: kube-system
       path: /mutate-pod
   failurePolicy: Fail
+  objectSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values:
+          - neco-admission
   rules:
   - apiGroups:
     - ""
