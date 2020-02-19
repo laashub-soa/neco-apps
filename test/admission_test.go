@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -34,10 +35,15 @@ spec:
 		err = json.Unmarshal(stdout, po)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(po.Spec.Volumes).Should(HaveLen(1))
-		Expect(po.Spec.Volumes[0].VolumeSource).Should(Equal(corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}))
-		Expect(po.Spec.Containers[0].VolumeMounts).Should(HaveLen(1))
-		Expect(po.Spec.Containers[0].VolumeMounts[0].MountPath).Should(Equal("/tmp"))
+		found := false
+		for _, vol := range po.Spec.Volumes {
+			if !strings.HasPrefix(vol.Name, "tmp-") {
+				continue
+			}
+			found = true
+			Expect(vol.VolumeSource).Should(Equal(corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}))
+		}
+		Expect(found).Should(BeTrue())
 	})
 
 	It("should validate Calico NetworkPolicy", func() {
