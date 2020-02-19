@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	contourv1 "github.com/projectcontour/contour/apis/projectcontour/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func testAdmission() {
@@ -25,18 +26,18 @@ spec:
 		stdout, stderr, err := ExecAtWithInput(boot0, []byte(podYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 
-		By("waiting for test pod to start")
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "pod-mutator-test", "--", "date")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-
-		By("creating a file in /tmp dir")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "pod-mutator-test", "--", "touch", "/tmp/test")
+		By("confirming that a emptyDir is added")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pod", "pod-mutator-test", "-o", "json")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+
+		po := new(corev1.Pod)
+		err = json.Unmarshal(stdout, po)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(po.Spec.Volumes).Should(HaveLen(1))
+		Expect(po.Spec.Volumes[0].VolumeSource).Should(Equal(corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}))
+		Expect(po.Spec.Containers[0].VolumeMounts).Should(HaveLen(1))
+		Expect(po.Spec.Containers[0].VolumeMounts[0].MountPath).Should(Equal("/tmp"))
 	})
 
 	It("should validate Calico NetworkPolicy", func() {
