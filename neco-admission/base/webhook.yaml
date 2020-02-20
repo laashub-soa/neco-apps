@@ -5,6 +5,28 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: kube-system/neco-admission
 webhooks:
+- name: mpod.kb.io
+  clientConfig:
+    service:
+      name: neco-admission
+      namespace: kube-system
+      path: /mutate-pod
+  failurePolicy: Fail
+  objectSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values:
+          - neco-admission
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    resources:
+    - pods
 - name: mhttpproxy.kb.io
   namespaceSelector:
     matchExpressions:
