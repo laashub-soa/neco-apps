@@ -272,15 +272,6 @@ func applyAndWaitForApplications(overlay string) {
 		return nil
 	}).Should(Succeed())
 
-	// TODO: remove this block after merging commit where neco-developer is deleted
-	if doUpgrade {
-		_, _, err := ExecAt(boot0, "kubectl", "get", "clusterrole", "neco-developer")
-		if err == nil {
-			ExecSafeAt(boot0, "argocd", "app", "set", "team-management", "--sync-policy", "none")
-			ExecSafeAt(boot0, "kubectl", "delete", "clusterrole", "neco-developer")
-		}
-	}
-
 	ExecSafeAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/"+overlay)
 
 	By("getting application list")
@@ -314,10 +305,9 @@ func applyAndWaitForApplications(overlay string) {
 	fmt.Printf("application list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
-	// TODO: Remove this block after `maneki-apps` project have been pruned
+	// TODO: Remove this block after CSIDriver is updated on release branch.
 	if doUpgrade {
-		stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", "team-management")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout:%s, stderr:%s", stdout, stderr)
+		ExecSafeAt(boot0, "argocd", "app", "sync", "topolvm", "--force")
 	}
 
 	By("waiting initialization")
