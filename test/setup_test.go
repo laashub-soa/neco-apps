@@ -307,7 +307,13 @@ func applyAndWaitForApplications(overlay string) {
 
 	// TODO: Remove this block after CSIDriver is updated on release branch.
 	if doUpgrade {
-		ExecSafeAt(boot0, "argocd", "app", "sync", "topolvm", "--force")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "topolvm", "--force")
+			if err != nil {
+				return fmt.Errorf("unable to sync --force topolvm; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 	}
 
 	By("waiting initialization")
