@@ -3,13 +3,49 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	contourv1 "github.com/projectcontour/contour/apis/projectcontour/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func testAdmission() {
+	It("should mutate pod to append emptyDir for /tmp", func() {
+		podYAML := `apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-mutator-test
+  namespace: default
+spec:
+  containers:
+  - name: ubuntu
+    image: quay.io/cybozu/ubuntu:18.04
+    command: ["pause"]
+`
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(podYAML), "kubectl", "apply", "-f", "-")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+
+		By("confirming that a emptyDir is added")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pod", "pod-mutator-test", "-o", "json")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+
+		po := new(corev1.Pod)
+		err = json.Unmarshal(stdout, po)
+		Expect(err).NotTo(HaveOccurred())
+
+		found := false
+		for _, vol := range po.Spec.Volumes {
+			if !strings.HasPrefix(vol.Name, "tmp-") {
+				continue
+			}
+			found = true
+			Expect(vol.VolumeSource).Should(Equal(corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}))
+		}
+		Expect(found).Should(BeTrue())
+	})
+
 	It("should validate Calico NetworkPolicy", func() {
 		networkPolicyYAML := `
 apiVersion: crd.projectcalico.org/v1
