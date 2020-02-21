@@ -24,16 +24,16 @@ groups:
           sum(cke_operation_phase{phase!="completed"}) > 0
         labels:
           severity: warning
-        for: 15m
+        for: 30m
         annotations:
-          summary: CKE takes more than 15 minutes to complete operations.
+          summary: CKE takes more than 30 minutes to complete operations.
           runbook: TBD
       - alert: CKEPerformOps
         expr: |
           sum(cke_operation_phase{phase!="completed"}) > 0
         labels:
           severity: info
-        for: 1s
+        for: 1m
         annotations:
           summary: CKE performs some operations.
           runbook: TBD
@@ -60,7 +60,7 @@ groups:
           rate(cke_sabakan_integration_timestamp_seconds[1h]) == 0
         labels:
           severity: warning
-        for: 15m
+        for: 60m
         annotations:
           summary: The timestamp of CKE-sabakan integration does not change for 1 hour.
           runbook: TBD
