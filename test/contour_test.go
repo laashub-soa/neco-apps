@@ -321,7 +321,7 @@ spec:
 					}
 				}
 				return errors.New("certificate is not ready")
-			})
+			}).Should(Succeed())
 		}
 
 		By("accessing with curl: http")
