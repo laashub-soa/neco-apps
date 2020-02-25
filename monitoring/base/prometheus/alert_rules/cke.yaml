@@ -1,0 +1,66 @@
+groups:
+  - name: cke
+    rules:
+      - alert: CKEDown
+        expr: |
+          absent(up{job="cke"} == 1)
+        labels:
+          severity: minor
+        for: 15m
+        annotations:
+          summary: CKE  has disappeared from Prometheus target discovery.
+          runbook: TBD
+      - alert: CKENoLeader
+        annotations:
+          summary: CKE leader does not exist for more than 15 minutes.
+          runbook: TBD
+        expr: |
+          max(cke_leader) < 1
+        for: 15m
+        labels:
+          severity: minor
+      - alert: CKEOperationTakesLongTime
+        expr: |
+          sum(cke_operation_phase{phase!="completed"}) > 0
+        labels:
+          severity: warning
+        for: 30m
+        annotations:
+          summary: CKE takes more than 30 minutes to complete operations.
+          runbook: TBD
+      - alert: CKEPerformOps
+        expr: |
+          sum(cke_operation_phase{phase!="completed"}) > 0
+        labels:
+          severity: info
+        for: 1m
+        annotations:
+          summary: CKE performs some operations.
+          runbook: TBD
+      - alert: CKEDoesNotPerformAnyOps
+        expr: |
+          rate(cke_operation_phase_timestamp_seconds[1h]) == 0
+        labels:
+          severity: warning
+        for: 15m
+        annotations:
+          summary: CKE does not perform any operations for more than 1 hour.
+          runbook: TBD
+      - alert: CKESabakanIntegrationSeemsToBeFailed
+        expr: |
+          sum(cke_sabakan_integration_successful) == 0
+        labels:
+          severity: warning
+        for: 1h
+        annotations:
+          summary: CKE-sabakan integration does not work for 1 hour.
+          runbook: TBD
+      - alert: CKESabakanIntegrationDoesNotPerformAnyOps
+        expr: |
+          rate(cke_sabakan_integration_timestamp_seconds[1h]) == 0
+        labels:
+          severity: warning
+        for: 60m
+        annotations:
+          summary: The timestamp of CKE-sabakan integration does not change for 1 hour.
+          runbook: TBD
