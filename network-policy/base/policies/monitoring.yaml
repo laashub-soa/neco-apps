@@ -32,6 +32,7 @@ spec:
           - 9100
           - 9105
           - 10081
+          - 10180
 ---
 apiVersion: crd.projectcalico.org/v1
 kind: NetworkPolicy

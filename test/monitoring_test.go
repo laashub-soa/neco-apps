@@ -22,6 +22,7 @@ import (
 
 // dcJobs is the subset of the Prometheus jobs deployed in dctest but not deployed in kindtest
 var dcJobs = []string{
+	"cke",
 	"cke-etcd",
 	"external-dns",
 	"monitor-hw",
