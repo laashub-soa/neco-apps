@@ -179,6 +179,13 @@ spec:
         - containerPort: 8443
           name: https
           protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: 8002
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          failureThreshold: 6
         readinessProbe:
           httpGet:
             path: /ready
