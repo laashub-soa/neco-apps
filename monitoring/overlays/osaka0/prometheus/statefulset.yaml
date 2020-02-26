@@ -10,8 +10,6 @@ spec:
       containers:
         - name: prometheus
           resources:
-            limits:
-              cpu: 2
             requests:
               memory: 8Gi
               cpu: 2
