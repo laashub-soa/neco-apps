@@ -111,7 +111,7 @@ func testRebootAllNodes() {
 			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
 
-		By("wait for start of rebooting")
+		By("wait for start rebooting")
 		preReboot := make(map[string]bool)
 		for _, m := range machines {
 			if m.Spec.Role == "boot" {
@@ -135,6 +135,13 @@ func testRebootAllNodes() {
 				}
 			}
 			if len(preReboot) > 0 {
+				fmt.Println("retry to stop by IPMI", preReboot)
+				for addr := range preReboot {
+					stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "stop", addr)
+					if err != nil {
+						fmt.Println("unable to stop by IPMI", addr, "stdout:", string(stdout), "stderr:", string(stderr))
+					}
+				}
 				return fmt.Errorf("some nodes are still starting reboot: %v", preReboot)
 			}
 			return nil
