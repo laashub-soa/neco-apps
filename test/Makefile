@@ -70,7 +70,7 @@ setup:
 	chmod +x /usr/local/bin/argocd
 	$(SUDO) bash -c "argocd completion bash > /etc/bash_completion.d/argocd"
 	env GOFLAGS= GO111MODULE=off go get github.com/gostaticanalysis/nilerr/cmd/nilerr
-	env GOFLAGS= GO111MODULE=off go get github.com/cybozu/neco-containers/golang/restrictpkg/cmd/restrictpkg
+	env GOFLAGS= GO111MODULE=off go get github.com/cybozu/neco-containers/golang/analyzer/cmd/restrictpkg
 
 clean:
 	rm -f install.yaml
