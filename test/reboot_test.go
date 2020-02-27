@@ -94,12 +94,14 @@ func testRebootAllNodes() {
 	})
 
 	It("reboots all nodes", func() {
-		By("reboot all nodes")
+		By("getting machines list")
 		stdout, _, err := ExecAt(boot0, "sabactl", "machines", "get")
 		Expect(err).ShouldNot(HaveOccurred())
 		var machines []sabakan.Machine
 		err = json.Unmarshal(stdout, &machines)
 		Expect(err).ShouldNot(HaveOccurred())
+
+		By("shutdown all nodes")
 		// Skip reboot vm on rack-3 because IPMI is not initialized
 		for _, m := range machines {
 			if m.Spec.Role == "boot" || m.Spec.Rack == 3 {
@@ -108,17 +110,13 @@ func testRebootAllNodes() {
 			stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "stop", m.Spec.IPv4[0])
 			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		}
-		for _, m := range machines {
-			if m.Spec.Rack == 3 {
-				continue
-			}
-			stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "start", m.Spec.IPv4[0])
-			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		}
 
 		By("wait for start of rebooting")
 		preReboot := make(map[string]bool)
 		for _, m := range machines {
+			if m.Spec.Role == "boot" {
+				continue
+			}
 			preReboot[m.Spec.IPv4[0]] = true
 		}
 		Eventually(func() error {
@@ -141,6 +139,15 @@ func testRebootAllNodes() {
 			}
 			return nil
 		}).Should(Succeed())
+
+		By("start all nodes")
+		for _, m := range machines {
+			if m.Spec.Rack == 3 {
+				continue
+			}
+			stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "start", m.Spec.IPv4[0])
+			Expect(err).ShouldNot(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		}
 
 		By("wait for recovery of all nodes")
 		Eventually(func() error {
