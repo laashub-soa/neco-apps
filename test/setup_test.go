@@ -305,17 +305,6 @@ func applyAndWaitForApplications(overlay string) {
 	fmt.Printf("application list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
-	// TODO: Remove this block after tenants' LimitRange has been pruned on release branch.
-	if doUpgrade {
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "team-management", "--prune")
-			if err != nil {
-				return fmt.Errorf("unable to sync team-management --prune; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-	}
-
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 	OUTER:
