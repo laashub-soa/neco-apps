@@ -13,6 +13,9 @@ spec:
         securityContext:
           capabilities:
             add: []
+        resources:
+          limits:
+            cpu: null
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -30,3 +33,6 @@ spec:
       - name: controller
         image: quay.io/cybozu/metallb:0.8.3.1
         command: ["/controller"]
+        resources:
+          limits:
+            cpu: null
