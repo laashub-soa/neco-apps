@@ -102,7 +102,7 @@ func testTeleport() {
 					return fmt.Errorf("tsh ssh failed for %s: %s", n, string(output))
 				}
 				return nil
-			})
+			}).Should(Succeed())
 		}
 
 		By("clearing /etc/hosts")
