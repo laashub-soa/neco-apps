@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    v1alpha1.mysql.oracle.com/cluster: my-app-db
+    v1alpha1.mysql.oracle.com/version: ikezoe-9aebcc37-dirty
+  name: my-app-db
+  namespace: mysql
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      v1alpha1.mysql.oracle.com/cluster: my-app-db
+  serviceName: my-app-db
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        v1alpha1.mysql.oracle.com/cluster: my-app-db
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - -ecx
+        - |2-
+
+                   # Set baseServerID
+                   base=1000
+
+                   # Finds the replica index from the hostname, and uses this to define
+                   # a unique server id for this instance.
+                   index=$(cat /etc/hostname | grep -o '[^-]*$')
+                   /entrypoint.sh --server_id=$(expr $base + $index) --datadir=/var/lib/mysql --user=mysql --gtid_mode=ON --log-bin --binlog_checksum=NONE --enforce_gtid_consistency=ON --log-slave-updates=ON --binlog-format=ROW --master-info-repository=TABLE --relay-log-info-repository=TABLE --transaction-write-set-extraction=XXHASH64 --relay-log=my-app-db-${index}-relay-bin --report-host="my-app-db-${index}.my-app-db" --log-error-verbosity=3 --loose-group-replication-exit-state-action=READ_ONLY
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: my-app-db-root-password
+        - name: MYSQL_ROOT_HOST
+          value: '%'
+        - name: MYSQL_LOG_CONSOLE
+          value: "true"
+        image: mysql/mysql-server:8.0.19
+        imagePullPolicy: IfNotPresent
+        name: mysql
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysqlvolume
+          subPath: mysql
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: mysqlvolume
+      - emptyDir: {}
+        name: mysqlbackupvolume
+  updateStrategy:
+    type: RollingUpdate
