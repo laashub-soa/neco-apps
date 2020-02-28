@@ -13,6 +13,7 @@ require (
 	github.com/creack/pty v1.1.7
 	github.com/cybozu-go/log v1.5.0
 	github.com/cybozu-go/sabakan/v2 v2.4.2
+	github.com/cybozu/neco-containers/golang/analyzer v0.0.0-20200226231634-5703276e8673 // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/jetstack/cert-manager v0.11.0
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
@@ -21,7 +22,7 @@ require (
 	github.com/projectcontour/contour v1.0.1
 	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/common v0.7.0
-	golang.org/x/crypto v0.0.0-20190611184440-5c40567a22f8
+	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/appengine v1.6.0 // indirect
 	gopkg.in/src-d/go-git.v4 v4.11.0 // indirect
