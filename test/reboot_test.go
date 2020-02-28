@@ -135,11 +135,11 @@ func testRebootAllNodes() {
 				}
 			}
 			if len(preReboot) > 0 {
-				fmt.Println("retry to stop by IPMI", preReboot)
+				fmt.Println("retry to ipmipower-stop", preReboot)
 				for addr := range preReboot {
 					stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "stop", addr)
 					if err != nil {
-						fmt.Println("unable to stop by IPMI", addr, "stdout:", string(stdout), "stderr:", string(stderr))
+						fmt.Println("unable to ipmipower-stop", addr, "stdout:", string(stdout), "stderr:", string(stderr))
 					}
 				}
 				return fmt.Errorf("some nodes are still starting reboot: %v", preReboot)
@@ -176,6 +176,11 @@ func testRebootAllNodes() {
 					addr := addrs[0]
 					if addr == k {
 						if m.Status != "alive" {
+							fmt.Println("retry to ipmipower-start", addr)
+							stdout, stderr, err := ExecAt(boot0, "neco", "ipmipower", "start", addr)
+							if err != nil {
+								fmt.Println("unable to ipmipower-start", addr, "stdout:", string(stdout), "stderr:", string(stderr))
+							}
 							return fmt.Errorf("reboot failed: %s, %v", k, m)
 						}
 						continue OUTER
