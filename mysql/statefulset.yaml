@@ -45,8 +45,8 @@ spec:
           value: '%'
         - name: MYSQL_LOG_CONSOLE
           value: "true"
-        image: mysql/mysql-server:8.0.19
-        imagePullPolicy: IfNotPresent
+        image: quay.io/ikezoe/mysql:8.0.19
+        imagePullPolicy: Always
         name: mysql
         ports:
         - containerPort: 3306
@@ -58,15 +58,34 @@ spec:
         - mountPath: /var/lib/mysql
           name: mysqlvolume
           subPath: mysql
+        - name: cm-volume
+          mountPath: /etc/mysql
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /var/run/mysqld
+          name: varrun
+        - mountPath: /var/lib/mysql-files
+          name: mysqlfiles
+      securityContext:
+        runAsUser: 10000
+        runAsGroup: 10000
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
+      - emptyDir: {}
+        name: tmp
+      - emptyDir: {}
+        name: varrun
+      - emptyDir: {}
+        name: mysqlfiles
       - emptyDir: {}
         name: mysqlvolume
       - emptyDir: {}
         name: mysqlbackupvolume
+      - name: cm-volume
+        configMap:
+          name: myconf
   updateStrategy:
     type: RollingUpdate
