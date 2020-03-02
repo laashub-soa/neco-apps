@@ -67,8 +67,8 @@ spec:
         - mountPath: /var/lib/mysql-files
           name: mysqlfiles
       securityContext:
-        runAsUser: 10000
-        runAsGroup: 10000
+        runAsUser: 27
+        runAsGroup: 27
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
