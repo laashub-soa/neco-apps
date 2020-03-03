@@ -22,7 +22,7 @@ require (
 	github.com/projectcontour/contour v1.0.1
 	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/common v0.7.0
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/appengine v1.6.0 // indirect
 	gopkg.in/src-d/go-git.v4 v4.11.0 // indirect
