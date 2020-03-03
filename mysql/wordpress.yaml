@@ -10,6 +10,7 @@ metadata:
 spec:
   ports:
     - port: 80
+      targetPort: 8000
   selector:
     app: wordpress-router
   type: ClusterIP
@@ -73,16 +74,20 @@ spec:
           runAsUser: 1000
           runAsGroup: 1000
         ports:
-        - containerPort: 80
+        - containerPort: 8000
         volumeMounts:
         - mountPath: /var/www/html
           name: www
         - mountPath: /tmp
           name: tmpwp
+        - mountPath: /var/log
+          name: logwp
       volumes:
       - emptyDir: {}
         name: tmprouter
       - emptyDir: {}
         name: tmpwp
+      - emptyDir: {}
+        name: logwp
       - emptyDir: {}
         name: www
