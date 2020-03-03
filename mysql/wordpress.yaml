@@ -53,6 +53,12 @@ spec:
         - "/bin/bash"
         - "-cx"
         - "exec /run.sh mysqlrouter"
+        securityContext:
+          runAsUser: 999
+          runAsGroup: 999
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmprouter
       - name: wordpress
         image: wordpress:4.9-php7.2-apache
         env:
@@ -63,5 +69,20 @@ spec:
             secretKeyRef:
               name: my-app-db-root-password
               key: password
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
         ports:
         - containerPort: 80
+        volumeMounts:
+        - mountPath: /var/www/html
+          name: www
+        - mountPath: /tmp
+          name: tmpwp
+      volumes:
+      - emptyDir: {}
+        name: tmprouter
+      - emptyDir: {}
+        name: tmpwp
+      - emptyDir: {}
+        name: www
