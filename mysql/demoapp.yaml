@@ -10,7 +10,7 @@ metadata:
 spec:
   ports:
     - port: 80
-      targetPort: 8000
+      targetPort: 8080
   selector:
     app: wordpress-router
   type: ClusterIP
@@ -67,7 +67,7 @@ spec:
         - name: ENV_DB_HOST
           value: 127.0.0.1
         - name: ENV_DB_PORT
-          value: 6446
+          value: "6446"
         - name: ENV_DB_USER
           value: root
         - name: ENV_DB_PASSWORD
@@ -78,8 +78,13 @@ spec:
         securityContext:
           runAsUser: 1000
           runAsGroup: 1000
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
         ports:
         - containerPort: 8080
       volumes:
       - emptyDir: {}
         name: tmprouter
+      - emptyDir: {}
+        name: tmp
