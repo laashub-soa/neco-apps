@@ -111,8 +111,6 @@ spec:
 				if st.Type != certmanagerv1alpha2.CertificateConditionReady {
 					continue
 				}
-				// debug output
-				fmt.Printf("certificate status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
 
 				if st.Status == "True" {
 					return nil

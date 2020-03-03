@@ -302,8 +302,6 @@ spec:
 					if st.Type != certmanagerv1alpha2.CertificateRequestConditionReady {
 						continue
 					}
-					// debug output
-					fmt.Printf("certificate request status. time: %s, status: %s, reason: %s, message: %s\n", st.LastTransitionTime.String(), st.Status, st.Reason, st.Message)
 
 					if st.Reason == certmanagerv1alpha2.CertificateRequestReasonFailed {
 						log.Error("CertificateRequest failed", map[string]interface{}{
@@ -343,13 +341,6 @@ spec:
 					"--cacert", "lets.crt",
 				)
 				if err != nil {
-					// Check the Certificate and HTTPProxy status (for debug).
-					stdout2, stderr2, err2 := ExecAt(boot0, "kubectl", "get", "-n", "test-ingress", "certificate,httpproxy", "-o", "wide")
-					if err2 != nil {
-						fmt.Printf("failed to get Certificate and HTTPProxy; stdout: %s, stderr: %s, err: %v", stdout2, stderr2, err2)
-					} else {
-						fmt.Println(string(stdout2))
-					}
 					return fmt.Errorf("failed to curl; stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}
 				return nil
