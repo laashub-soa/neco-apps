@@ -34,7 +34,7 @@ spec:
                    # Finds the replica index from the hostname, and uses this to define
                    # a unique server id for this instance.
                    index=$(cat /etc/hostname | grep -o '[^-]*$')
-                   /entrypoint.sh --server_id=$(expr $base + $index) --datadir=/var/lib/mysql --user=mysql --gtid_mode=ON --log-bin --binlog_checksum=NONE --enforce_gtid_consistency=ON --log-slave-updates=ON --binlog-format=ROW --master-info-repository=TABLE --relay-log-info-repository=TABLE --transaction-write-set-extraction=XXHASH64 --relay-log=my-app-db-${index}-relay-bin --report-host="my-app-db-${index}.my-app-db" --log-error-verbosity=3 --loose-group-replication-exit-state-action=READ_ONLY
+                   /entrypoint.sh --server_id=$(expr $base + $index) --datadir=/var/lib/mysql --user=mysql --gtid_mode=ON --enforce_gtid_consistency=ON --log-slave-updates=ON  --master-info-repository=TABLE --relay-log-info-repository=TABLE --transaction-write-set-extraction=XXHASH64 --relay-log=my-app-db-${index}-relay-bin --report-host="my-app-db-${index}.my-app-db"  --loose-group-replication-exit-state-action=READ_ONLY
         env:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
@@ -66,6 +66,10 @@ spec:
           name: varrun
         - mountPath: /var/lib/mysql-files
           name: mysqlfiles
+        - mountPath: /var/log/mysql
+          name: mysqllogs
+        - mountPath: /var/tmp/mysql
+          name: tmpDir
       securityContext:
         runAsUser: 27
         runAsGroup: 27
@@ -82,6 +86,11 @@ spec:
         name: mysqlfiles
       - emptyDir: {}
         name: mysqlvolume
+      - emptyDir: {}
+        name: mysqllogs
+      # TODO: tmpDir volume should be replaced with ephemeral volume
+      - emptyDir: {}
+        name: tmpDir
       - emptyDir: {}
         name: mysqlbackupvolume
       - name: cm-volume
