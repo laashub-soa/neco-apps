@@ -69,7 +69,7 @@ spec:
         - mountPath: /var/log/mysql
           name: mysqllogs
         - mountPath: /var/tmp/mysql
-          name: tmpDir
+          name: tmpdir
       securityContext:
         runAsUser: 27
         runAsGroup: 27
@@ -90,7 +90,7 @@ spec:
         name: mysqllogs
       # TODO: tmpDir volume should be replaced with ephemeral volume
       - emptyDir: {}
-        name: tmpDir
+        name: tmpdir
       - emptyDir: {}
         name: mysqlbackupvolume
       - name: cm-volume
