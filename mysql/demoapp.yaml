@@ -83,6 +83,10 @@ spec:
           name: tmp
         ports:
         - containerPort: 8080
+      initContainers:
+      - name: init-database
+        image: quay.io/ysksuzuki/demo-todo-app:0.0.1
+        command: ['sh', '-c', '/app/create_table.sh']
       volumes:
       - emptyDir: {}
         name: tmprouter
