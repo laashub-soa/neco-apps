@@ -34,7 +34,7 @@ spec:
                    # Finds the replica index from the hostname, and uses this to define
                    # a unique server id for this instance.
                    index=$(cat /etc/hostname | grep -o '[^-]*$')
-                   /entrypoint.sh --server_id=$(expr $base + $index) --datadir=/var/lib/mysql --user=mysql --gtid_mode=ON --enforce_gtid_consistency=ON --log-slave-updates=ON  --master-info-repository=TABLE --relay-log-info-repository=TABLE --transaction-write-set-extraction=XXHASH64 --relay-log=my-app-db-${index}-relay-bin --report-host="my-app-db-${index}.my-app-db"  --loose-group-replication-exit-state-action=READ_ONLY
+                   /entrypoint.sh --server_id=$(expr $base + $index) --user=mysql --relay-log=my-app-db-${index}-relay-bin --report-host="my-app-db-${index}.my-app-db"
         env:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
