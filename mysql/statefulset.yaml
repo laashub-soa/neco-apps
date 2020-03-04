@@ -95,6 +95,6 @@ spec:
         name: mysqlbackupvolume
       - name: cm-volume
         configMap:
-          name: myconf
+          name: mysqlconfig
   updateStrategy:
     type: RollingUpdate
