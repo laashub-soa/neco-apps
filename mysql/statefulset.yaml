@@ -14,6 +14,15 @@ spec:
     matchLabels:
       v1alpha1.mysql.oracle.com/cluster: my-app-db
   serviceName: my-app-db
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: topolvm-provisioner
+        resources:
+          requests:
+            storage: 300Gi
   template:
     metadata:
       annotations:
@@ -88,9 +97,12 @@ spec:
         name: mysqlvolume
       - emptyDir: {}
         name: mysqllogs
-      # TODO: tmpDir volume should be replaced with ephemeral volume
-      - emptyDir: {}
-        name: tmpdir
+      - name: tmpdir
+        csi:
+          driver: topolvm.cybozu.com
+          fsType: xfs
+          volumeAttributes:
+              topolvm.cybozu.com/size: "100"
       - emptyDir: {}
         name: mysqlbackupvolume
       - name: cm-volume
