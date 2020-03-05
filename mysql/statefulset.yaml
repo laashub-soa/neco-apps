@@ -5,7 +5,7 @@ metadata:
     v1alpha1.mysql.oracle.com/cluster: my-app-db
     v1alpha1.mysql.oracle.com/version: ikezoe-9aebcc37-dirty
   name: my-app-db
-  namespace: mysql
+  namespace: app-mysql
 spec:
   podManagementPolicy: OrderedReady
   replicas: 3

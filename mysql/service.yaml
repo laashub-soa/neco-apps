@@ -4,7 +4,7 @@ metadata:
   labels:
     v1alpha1.mysql.oracle.com/cluster: my-app-db
   name: my-app-db
-  namespace: mysql
+  namespace: app-mysql
 spec:
   clusterIP: None
   publishNotReadyAddresses: true
