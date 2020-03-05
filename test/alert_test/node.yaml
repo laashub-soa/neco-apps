@@ -4,27 +4,115 @@ rule_files:
 tests:
   - interval: 1m
     input_series:
-      - series: 'up{job="node-exporter"}'
-        values: '0+0x15'
+      - series: 'up{job="node-exporter", instance="192.168.0.1"}'
+        values: '0+0x30'
+      - series: 'up{job="node-exporter", instance="192.168.0.2"}'
+        values: '0+0x30'
+      - series: 'up{job="node-exporter", instance="192.168.0.3"}'
+        values: '1+0x15'
     alert_rule_test:
-      - eval_time: 15m
+      - eval_time: 30m
         alertname: NodeExporterDown
         exp_alerts:
           - exp_labels:
+              instance: "192.168.0.1"
+              job: "node-exporter"
               severity: minor
             exp_annotations:
-              runbook: TBD
-              summary: NodeExporter has disappeared from Prometheus target discovery.
+              runbook: Please consider to find root causes, and solve the problems.
+              summary: NodeExporter has disappeared at `192.168.0.1`.
+          - exp_labels:
+              instance: "192.168.0.2"
+              job: "node-exporter"
+              severity: minor
+            exp_annotations:
+              runbook: Please consider to find root causes, and solve the problems.
+              summary: NodeExporter has disappeared at `192.168.0.2`.
   - interval: 1m
     input_series:
-      - series: 'up{job="monitor-hw"}'
-        values: '0+0x10'
+      - series: 'up{job="node-exporter", instance="192.168.0.1"}'
+        values: '1+0x30'
+      - series: 'up{job="node-exporter", instance="192.168.0.2"}'
+        values: '0+0x29 1'
     alert_rule_test:
-      - eval_time: 10m
+      - eval_time: 30m
+        alertname: NodeExporterDown
+        exp_alerts: []
+
+  - interval: 1m
+    input_series:
+      - series: 'up{job="monitor-hw", instance="192.168.0.1"}'
+        values: '0+0x30'
+      - series: 'up{job="monitor-hw", instance="192.168.0.2"}'
+        values: '0+0x30'
+      - series: 'up{job="monitor-hw", instance="192.168.0.3"}'
+        values: '1+0x30'
+    alert_rule_test:
+      - eval_time: 30m
         alertname: MonitorHWDown
         exp_alerts:
           - exp_labels:
+              instance: "192.168.0.1"
+              job: "monitor-hw"
               severity: minor
             exp_annotations:
-              runbook: Please consider to find root causes, and solve the problems
-              summary: MonitorHW has disappeared from Prometheus target discovery.
+              runbook: Please consider to find root causes, and solve the problems.
+              summary: MonitorHW has disappeared at `192.168.0.1`.
+          - exp_labels:
+              instance: "192.168.0.2"
+              job: "monitor-hw"
+              severity: minor
+            exp_annotations:
+              runbook: Please consider to find root causes, and solve the problems.
+              summary: MonitorHW has disappeared at `192.168.0.2`.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="monitor-hw" , instance="192.168.0.1"}'
+        values: '1+0x30'
+      - series: 'up{job="monitor-hw" , instance="192.168.0.2"}'
+        values: '0+0x29 1'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: MonitorHWDown
+        exp_alerts: []
+
+  - interval: 1m
+    input_series:
+      - series: 'node_nf_conntrack_entries{instance="192.168.0.1"}'
+        values: '76+0x60'
+      - series: 'node_nf_conntrack_entries_limit{instance="192.168.0.1"}'
+        values: '100+0x60'
+      - series: 'node_nf_conntrack_entries{instance="192.168.0.2"}'
+        values: '151+0x60'
+      - series: 'node_nf_conntrack_entries_limit{instance="192.168.0.2"}'
+        values: '200+0x60'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: ConntrackEntriesReachLimit
+        exp_alerts:
+          - exp_labels:
+              instance: "192.168.0.1"
+              severity: warning
+            exp_annotations:
+              runbook: Please re-configure the limit or plan some solutions.
+              summary: Conntrack entries will be reach limit at `192.168.0.1`.
+          - exp_labels:
+              instance: "192.168.0.2"
+              severity: warning
+            exp_annotations:
+              runbook: Please re-configure the limit or plan some solutions.
+              summary: Conntrack entries will be reach limit at `192.168.0.2`.
+  - interval: 1m
+    input_series:
+      - series: 'node_nf_conntrack_entries{instance="192.168.0.1"}'
+        values: '75+0x60'
+      - series: 'node_nf_conntrack_entries_limit{instance="192.168.0.1"}'
+        values: '100+0x60'
+      - series: 'node_nf_conntrack_entries{instance="192.168.0.2"}'
+        values: '200+0x59 150'
+      - series: 'node_nf_conntrack_entries_limit{instance="192.168.0.2"}'
+        values: '200+0x60'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: ConntrackEntriesReachLimit
+        exp_alerts: []

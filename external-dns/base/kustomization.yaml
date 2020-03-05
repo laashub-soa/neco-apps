@@ -4,4 +4,3 @@ resources:
 - common.yaml
 - deployment.yaml
 - rbac.yaml
-- service.yaml
