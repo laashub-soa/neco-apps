@@ -39,7 +39,7 @@ $ vi elastic/base/upstream/all-in-one.yaml
 
 Read the following document and fix manifests as necessary.
 
-https://github.com/kubernetes-incubator/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md
+https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md
 
 ## ingress (Contour & Envoy)
 
@@ -81,6 +81,7 @@ $ cp manifests/*.yaml /path/to/neco-apps/metallb/base/upstream
 $ vi metallb/base/upstream/metallb.yaml
   (Remove Namespace resources)
 ```
+
 ## metrics-server
 
 Check [releases](https://github.com/kubernetes-sigs/metrics-server/releases)
@@ -94,10 +95,16 @@ $ git checkout vX.Y.Z
 $ cp deploy/1.8+/*.yaml /path/to/neco-apps/metrics-server/base/upstream
 ```
 
-## monitoring (prometheus, alertmanager, grafana)
+## monitoring
+
+### prometheus, alertmanager, grafana
 
 There is no official kubernetes manifests for prometheus.
 So, check changes in release notes on github for both prometheus and alertmanager and make necessary actions.
+
+### kube-state-metrics
+
+Check [examples/standard](https://github.com/kubernetes/kube-state-metrics/tree/master/examples/standard)
 
 ## network-policy (Calico)
 
