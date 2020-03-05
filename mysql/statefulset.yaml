@@ -16,13 +16,21 @@ spec:
   serviceName: my-app-db
   volumeClaimTemplates:
     - metadata:
-        name: storage
+        name: mysqlvolume
       spec:
         accessModes: [ "ReadWriteOnce" ]
         storageClassName: topolvm-provisioner
         resources:
           requests:
             storage: 300Gi
+    - metadata:
+        name: tmpdir
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: topolvm-provisioner
+        resources:
+          requests:
+            storage: 100Gi
   template:
     metadata:
       annotations:
@@ -94,15 +102,7 @@ spec:
       - emptyDir: {}
         name: mysqlfiles
       - emptyDir: {}
-        name: mysqlvolume
-      - emptyDir: {}
         name: mysqllogs
-      - name: tmpdir
-        csi:
-          driver: topolvm.cybozu.com
-          fsType: xfs
-          volumeAttributes:
-              topolvm.cybozu.com/size: "100"
       - emptyDir: {}
         name: mysqlbackupvolume
       - name: cm-volume
