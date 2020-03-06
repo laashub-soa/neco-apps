@@ -87,6 +87,11 @@ scrape_configs:
     - source_labels: [__name__]
       action: drop
       regex: apiserver_request_latencies.*
+    - source_labels: [__address__]
+      action: replace
+      regex: ([^:]+)(?::\d+)?
+      replacement: ${1}
+      target_label: instance
   - job_name: 'kube-controller-manager'
     kubernetes_sd_configs:
     - role: endpoints
@@ -178,6 +183,11 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_service_port_name]
         action: keep
         regex: (http-metrics|telemetry)
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
   - job_name: 'node-exporter'
     kubernetes_sd_configs:
       - role: endpoints
@@ -196,6 +206,11 @@ scrape_configs:
       - source_labels: [__name__]
         action: drop
         regex: node_cpu_seconds_total
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
   - job_name: 'bootserver-etcd'
     kubernetes_sd_configs:
       - role: endpoints
@@ -211,6 +226,11 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_service_name]
         action: replace
         target_label: kubernetes_name
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
   - job_name: "metallb"
     kubernetes_sd_configs:
       - role: pod
@@ -236,6 +256,11 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_service_name]
         action: keep
         regex: argocd-metrics
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
   - job_name: "cke-etcd"
     kubernetes_sd_configs:
       - role: endpoints
@@ -407,7 +432,9 @@ scrape_configs:
         replacement: ${1}:${2}
         target_label: __address__
       - source_labels: [__address__]
-        action: keep
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
         target_label: instance
       - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
         target_label: __metrics_path__
@@ -415,13 +442,18 @@ scrape_configs:
         target_label: __param_format
   - job_name: "external-dns"
     kubernetes_sd_configs:
-      - role: service
+      - role: pod
         namespaces:
           names: ["external-dns"]
     relabel_configs:
-      - source_labels: [__meta_kubernetes_service_name]
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
         action: keep
-        regex: external-dns-metrics
+        regex: external-dns
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
   - job_name: "neco-admission"
     kubernetes_sd_configs:
       - role: pod
