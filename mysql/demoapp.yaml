@@ -3,35 +3,35 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: wordpress-router
+  name: demo-todo-app
   namespace: app-mysql
   labels:
-    app: wordpress-router
+    app: demo-todo-app
 spec:
   ports:
     - port: 80
       targetPort: 8080
   selector:
-    app: wordpress-router
+    app: demo-todo-app
   type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wordpress-router
+  name: demo-todo-app
   namespace: app-mysql
   labels:
-    app: wordpress-router
+    app: demo-todo-app
 spec:
   selector:
     matchLabels:
-      app: wordpress-router
+      app: demo-todo-app
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: wordpress-router
+        app: demo-todo-app
     spec:
       containers:
       - name: mysqlrouter
