@@ -6,13 +6,15 @@ groups:
           summary: NodeExporter has disappeared at `{{ $labels.instance }}`.
           runbook: Please consider to find root causes, and solve the problems.
         expr: |
-          up{job="node-exporter"} == 0
+          (up{job="node-exporter"} == 0) * on (instance)
+          label_replace(sum(sabakan_machine_status{status!="retired"} == 1) by (address), "instance", "$1", "address" , "(.+)")
         for: 30m
         labels:
           severity: minor
       - alert: MonitorHWDown
         expr: |
-          up{job="monitor-hw"} == 0
+          (up{job="monitor-hw"} == 0) * on (instance)
+          label_replace(sum(sabakan_machine_status{status!="retired"} == 1) by (address), "instance", "$1", "address" , "(.+)")
         labels:
           severity: minor
         for: 30m
