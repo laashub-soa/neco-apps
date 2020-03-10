@@ -9,31 +9,50 @@ tests:
       - series: 'up{job="node-exporter", instance="192.168.0.2"}'
         values: '0+0x30'
       - series: 'up{job="node-exporter", instance="192.168.0.3"}'
-        values: '1+0x15'
+        values: '1+0x30'
+      - series: 'up{job="node-exporter", instance="192.168.0.4"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.1"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.1"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.2"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.2"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.3"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.3"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.4"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.4"}'
+        values: '1+0x30'
     alert_rule_test:
       - eval_time: 30m
         alertname: NodeExporterDown
         exp_alerts:
           - exp_labels:
               instance: "192.168.0.1"
-              job: "node-exporter"
               severity: minor
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems.
               summary: NodeExporter has disappeared at `192.168.0.1`.
-          - exp_labels:
-              instance: "192.168.0.2"
-              job: "node-exporter"
-              severity: minor
-            exp_annotations:
-              runbook: Please consider to find root causes, and solve the problems.
-              summary: NodeExporter has disappeared at `192.168.0.2`.
+
   - interval: 1m
     input_series:
       - series: 'up{job="node-exporter", instance="192.168.0.1"}'
         values: '1+0x30'
       - series: 'up{job="node-exporter", instance="192.168.0.2"}'
         values: '0+0x29 1'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.1"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.1"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.2"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.2"}'
+        values: '0+0x30'
     alert_rule_test:
       - eval_time: 30m
         alertname: NodeExporterDown
@@ -47,30 +66,49 @@ tests:
         values: '0+0x30'
       - series: 'up{job="monitor-hw", instance="192.168.0.3"}'
         values: '1+0x30'
+      - series: 'up{job="monitor-hw", instance="192.168.0.4"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.1"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.1"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.2"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.2"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.3"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.3"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.4"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.4"}'
+        values: '1+0x30'
     alert_rule_test:
       - eval_time: 30m
         alertname: MonitorHWDown
         exp_alerts:
           - exp_labels:
               instance: "192.168.0.1"
-              job: "monitor-hw"
               severity: minor
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems.
               summary: MonitorHW has disappeared at `192.168.0.1`.
-          - exp_labels:
-              instance: "192.168.0.2"
-              job: "monitor-hw"
-              severity: minor
-            exp_annotations:
-              runbook: Please consider to find root causes, and solve the problems.
-              summary: MonitorHW has disappeared at `192.168.0.2`.
+
   - interval: 1m
     input_series:
       - series: 'up{job="monitor-hw" , instance="192.168.0.1"}'
         values: '1+0x30'
       - series: 'up{job="monitor-hw" , instance="192.168.0.2"}'
         values: '0+0x29 1'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.1"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.1"}'
+        values: '0+0x30'
+      - series: 'sabakan_machine_status{status="healthy", address="192.168.0.2"}'
+        values: '1+0x30'
+      - series: 'sabakan_machine_status{status="retired", address="192.168.0.2"}'
+        values: '0+0x30'
     alert_rule_test:
       - eval_time: 30m
         alertname: MonitorHWDown
@@ -102,6 +140,7 @@ tests:
             exp_annotations:
               runbook: Please re-configure the limit or plan some solutions.
               summary: Conntrack entries will be reach limit at `192.168.0.2`.
+
   - interval: 1m
     input_series:
       - series: 'node_nf_conntrack_entries{instance="192.168.0.1"}'
