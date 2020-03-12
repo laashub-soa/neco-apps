@@ -64,13 +64,15 @@ spec:
         image: quay.io/ysksuzuki/demo-todo-app:0.0.1
         imagePullPolicy: Always
         env:
-        - name: ENV_DB_HOST
+        - name: MYSQL_HOST
           value: 127.0.0.1
-        - name: ENV_DB_PORT
+        - name: MYSQL_PORT
           value: "6446"
-        - name: ENV_DB_USER
+        - name: MYSQL_USER
           value: root
-        - name: ENV_DB_PASSWORD
+        - name: MYSQL_DB_NAME
+          value: todo
+        - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: my-app-db-root-password
@@ -90,13 +92,15 @@ spec:
           runAsGroup: 1000
           runAsUser: 1000
         env:
-        - name: ENV_DB_HOST
+        - name: MYSQL_HOST
           value: 127.0.0.1
-        - name: ENV_DB_PORT
+        - name: MYSQL_PORT
           value: "6446"
-        - name: ENV_DB_USER
+        - name: MYSQL_DB_NAME
+          value: todo
+        - name: MYSQL_USER
           value: root
-        - name: ENV_DB_PASSWORD
+        - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: my-app-db-root-password
