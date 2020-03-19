@@ -45,6 +45,7 @@ spec:
             - --proxy=squid.internet-egress.svc:3128
             - --proxy-enable
             - --power=full
+            - --cpus=24
           env:
             - name: http_proxy
               value: http://squid.internet-egress.svc:3128
