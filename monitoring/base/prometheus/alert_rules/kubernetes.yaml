@@ -381,16 +381,6 @@ groups:
         for: 10m
         labels:
           severity: minor
-      - alert: KubeDaemonSetMisScheduled
-        annotations:
-          summary: '{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
-          }} are running where they are not supposed to run.'
-          runbook: TBD
-        expr: |
-          kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} > 0
-        for: 10m
-        labels:
-          severity: minor
       - alert: KubeDaemonSetReplicasMismatch
         annotations:
           summary: DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has not
@@ -590,4 +580,3 @@ groups:
         annotations:
           summary: Disk usage of `{{ $labels.persistentvolumeclaim }}, {{ $labels.namespace }}` increases rapidly over 10GiB in 10 minutes.
           runbook: TBD
-
