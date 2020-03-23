@@ -29,7 +29,7 @@ func existTargetLocalPV(localPVs []corev1.PersistentVolume, nodename, path strin
 }
 
 func testLocalPVProvisioner() {
-	const cryptPartDir = "/dev/crypt-part/by-path/"
+	const cryptPartDir = "/dev/crypt-disk/by-path/"
 
 	var ssNodes corev1.NodeList
 	var ssNumber int
