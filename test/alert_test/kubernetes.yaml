@@ -329,22 +329,6 @@ tests:
               summary: 1 Pods of DaemonSet kube-system/calico-node are not scheduled.
   - interval: 1m
     input_series:
-      - series: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace="default",daemonset="test-ds"}'
-        values: 0+0x14 2+0x16
-    alert_rule_test:
-      - eval_time: 30m
-        alertname: KubeDaemonSetMisScheduled
-        exp_alerts:
-          - exp_labels:
-              severity: minor
-              namespace: default
-              job: kube-state-metrics
-              daemonset: test-ds
-            exp_annotations:
-              runbook: TBD
-              summary: 2 Pods of DaemonSet default/test-ds are running where they are not supposed to run.
-  - interval: 1m
-    input_series:
       - series: 'kube_daemonset_status_number_unavailable{job="kube-state-metrics", namespace="topolvm-system", daemonset="node"}'
         values: '0+0x28 1+1x32'
       - series: 'kube_daemonset_status_number_unavailable{job="kube-state-metrics", namespace="topolvm-system", daemonset="topolvm-scheduler"}'
