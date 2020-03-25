@@ -23,8 +23,7 @@ spec:
         app.kubernetes.io/name: folding-at-home-1
     spec:
       securityContext:
-        runAsUser: 105 # fahclient(=105)
-        runAsGroup: 105
+        runAsUser: 101 # fahclient(=101)
       initContainers:
         - name: copy-config
           image: richstokes20/fah-covid:latest
@@ -98,8 +97,7 @@ spec:
         app.kubernetes.io/name: folding-at-home-2
     spec:
       securityContext:
-        runAsUser: 105 # fahclient(=105)
-        runAsGroup: 105
+        runAsUser: 101 # fahclient(=101)
       initContainers:
         - name: copy-config
           image: richstokes20/fah-covid:latest
@@ -173,8 +171,7 @@ spec:
         app.kubernetes.io/name: folding-at-home-3
     spec:
       securityContext:
-        runAsUser: 105 # fahclient(=105)
-        runAsGroup: 105
+        runAsUser: 101 # fahclient(=101)
       initContainers:
         - name: copy-config
           image: richstokes20/fah-covid:latest
@@ -248,8 +245,7 @@ spec:
         app.kubernetes.io/name: folding-at-home-4
     spec:
       securityContext:
-        runAsUser: 105 # fahclient(=105)
-        runAsGroup: 105
+        runAsUser: 101 # fahclient(=101)
       initContainers:
         - name: copy-config
           image: richstokes20/fah-covid:latest
@@ -323,8 +319,7 @@ spec:
         app.kubernetes.io/name: folding-at-home-5
     spec:
       securityContext:
-        runAsUser: 105 # fahclient(=105)
-        runAsGroup: 105
+        runAsUser: 101 # fahclient(=101)
       initContainers:
         - name: copy-config
           image: richstokes20/fah-covid:latest
@@ -398,8 +393,7 @@ spec:
         app.kubernetes.io/name: folding-at-home-6
     spec:
       securityContext:
-        runAsUser: 105 # fahclient(=105)
-        runAsGroup: 105
+        runAsUser: 101 # fahclient(=101)
       initContainers:
         - name: copy-config
           image: richstokes20/fah-covid:latest
