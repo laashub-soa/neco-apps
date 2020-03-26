@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mysql-operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mysql-operator
+    spec:
+      containers:
+      - name: mysql-operator
+        image: quay.io/ikezoe/mysql:8.0.19
+        command:
+        - sleep
+        args:
+        - infinity
+        securityContext:
+          runAsUser: 10000
+          runAsGroup: 10000
+        volumeMounts:
+        - mountPath: /etc/mysql/setup/sql
+          name: setup-sql-vol
+        - mountPath: /etc/mysql/setup
+          name: setup-script-vol
+        env:
+        - name: MYSQLSH_USER_CONFIG_HOME
+          value: /tmp
+      volumes:
+      - name: setup-sql-vol
+        configMap:
+          name: setup-sql
+      - name: setup-script-vol
+        configMap:
+          name: setup-script
+          defaultMode: 0755

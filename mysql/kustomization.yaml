@@ -6,8 +6,16 @@ resources:
   - secret.yaml
   - service.yaml
   - statefulset.yaml
-  - demoapp.yaml
+# - demoapp.yaml
+  - operator.yaml
 configMapGenerator:
   - name: mysqlconfig
     files:
       - my.cnf
+  - name: setup-sql
+    files:
+      - setup_master.sql
+      - setup_slave.sql
+  - name: setup-script
+    files:
+      - setup_cluster.sh
