@@ -8,6 +8,8 @@ spec:
   volumes:
     - 'secret'
     - 'hostPath'
+    # emptyDir is not used in DaemonSet manifest, but added by neco-admission webhook
+    - 'emptyDir'
   allowedHostPaths:
   - pathPrefix: "/dev"
     readOnly: true
