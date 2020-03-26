@@ -11,3 +11,7 @@ configMapGenerator:
   - name: mysqlconfig
     files:
       - my.cnf
+
+# To change the destination namespace, uncomment the following statement.
+# And also change `namespace.yaml`.
+# namespace: app-mysql-hoge
