@@ -272,7 +272,7 @@ func applyAndWaitForApplications(overlay string) {
 		return nil
 	}).Should(Succeed())
 
-	ExecSafeAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/"+overlay)
+	ExecSafeAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/"+overlay, "--async")
 
 	By("getting application list")
 	stdout, _, err := kustomizeBuild("../argocd-config/overlays/" + overlay)

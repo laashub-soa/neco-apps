@@ -313,6 +313,25 @@ scrape_configs:
         regex: ([^:]+)(?::\d+)?
         replacement: ${1}:9091
         target_label: __address__
+  - job_name: "calico-typha"
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ["kube-system"]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_k8s_app]
+        action: keep
+        regex: calico-typha
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}:9093
+        target_label: __address__
   - job_name: "monitor-hw"
     kubernetes_sd_configs:
       - role: endpoints
