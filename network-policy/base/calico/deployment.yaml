@@ -19,5 +19,3 @@ spec:
             value: "veth"
           - name: TYPHA_PROMETHEUSMETRICSENABLED
             value: "true"
-          - name: TYPHA_PROMETHEUSMETRICSPORT
-            value: "9093"
