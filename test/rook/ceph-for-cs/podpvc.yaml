@@ -1,0 +1,32 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pod-rbd
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-rbd
+  namespace: default
+  labels:
+    app.kubernetes.io/name: pod-rbd
+spec:
+  containers:
+  - name: ubuntu
+    image: quay.io/cybozu/ubuntu:18.04
+    command: ["/usr/local/bin/pause"]
+    volumeMounts:
+    - mountPath: /test1
+      name: rbd-volume
+  volumes:
+    - name: rbd-volume
+      persistentVolumeClaim:
+        claimName: pod-rbd
