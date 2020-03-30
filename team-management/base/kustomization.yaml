@@ -4,4 +4,5 @@ bases:
   - ./common
   - ./maneki
   - ./neco
+  - ./neco-readonly
   - ./sandbox
