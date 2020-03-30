@@ -1,4 +1,3 @@
-# As rolebinding resource does not allow for manipulating cluster-wide resources, create clusterrole to manipulate cluster-wide resources to use with clusterrolebinding
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
