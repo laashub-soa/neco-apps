@@ -60,7 +60,7 @@ spec:
           value: '%'
         - name: MYSQL_LOG_CONSOLE
           value: "true"
-        image: quay.io/ikezoe/mysql:8.0.19
+        image: quay.io/ysksuzuki/mysql:8.0.19
         imagePullPolicy: Always
         name: mysql
         ports:
