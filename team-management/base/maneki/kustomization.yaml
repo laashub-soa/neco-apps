@@ -5,6 +5,7 @@ resources:
   - app-kodama.yaml
   - app-misc.yaml
   - app-monitoring.yaml
+  - app-oauth-redirector.yaml
   - elastic-serviceaccount.yaml
   - maneki.yaml
   - project.yaml
