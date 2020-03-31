@@ -56,6 +56,15 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: argocd-rbac-cm
+data:
+  policy.csv: |
+    p, cybozu-private:Neco, repositories, *, *, allow
+    p, cybozu-private:neco-readonly, projects, get, *, allow
+    p, cybozu-private:neco-readonly, applications, get, *, allow
+    p, cybozu-private:maneki, repositories, *, https://github.com/cybozu-private/maneki-apps.git, allow
+    p, cybozu-private:maneki, clusters, get, *, allow
+  # unauthenticated users cannot see the app, projects, etc...
+  policy.default: ""
 ---
 apiVersion: v1
 kind: ConfigMap
