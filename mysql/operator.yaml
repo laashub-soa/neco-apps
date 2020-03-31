@@ -30,6 +30,11 @@ spec:
         env:
         - name: MYSQLSH_USER_CONFIG_HOME
           value: /tmp
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: my-app-db-root-password
       volumes:
       - name: setup-sql-vol
         configMap:
