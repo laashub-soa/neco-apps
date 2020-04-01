@@ -14,8 +14,7 @@ configMapGenerator:
       - my.cnf
   - name: setup-sql
     files:
-      - setup_master.sql
-      - setup_slave.sql
+      - scripts/setup_node.sql
   - name: setup-script
     files:
-      - setup_cluster.sh
+      - scripts/setup_cluster.sh

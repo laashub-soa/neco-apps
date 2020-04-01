@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mysql-operator
-        image: quay.io/ikezoe/mysql:8.0.19
+        image: quay.io/kfyharukz/mysql:poc-01
         command:
         - sleep
         args:
