@@ -4,8 +4,8 @@ ACTION=$1
 TARGET=$2
 
 function create_table() {
-    node=$1
-    mysqlsh --no-wizard --sql --uri root:${MYSQL_ROOT_PASSWORD}@${node}.my-app-db:3306 << EOS
+    TARGET_POD=$1
+    mysqlsh --no-wizard --sql --uri root:${MYSQL_ROOT_PASSWORD}@${TARGET_POD}.my-app-db:3306 << EOS
 CREATE DATABASE IF NOT EXISTS test;
 CREATE TABLE IF NOT EXISTS test.t1 (
   num  bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -20,8 +20,8 @@ EOS
 }
 
 function insert() {
-    node=$1
-    mysqlsh --no-wizard --sql --uri root:${MYSQL_ROOT_PASSWORD}@${node}.my-app-db:3306 << EOS
+    TARGET_POD=$1
+    mysqlsh --no-wizard --sql --uri root:${MYSQL_ROOT_PASSWORD}@${TARGET_POD}.my-app-db:3306 << EOS
 SET autocommit=0;
 START TRANSACTION;
 INSERT INTO test.t1 (val0, val1, val2, val3, val4) values
@@ -35,8 +35,8 @@ EOS
 }
 
 function count() {
-    node=$1
-    mysqlsh --no-wizard --sql --uri root:${MYSQL_ROOT_PASSWORD}@${node}.my-app-db:3306 << EOS
+    TARGET_POD=$1
+    mysqlsh --no-wizard --sql --uri root:${MYSQL_ROOT_PASSWORD}@${TARGET_POD}.my-app-db:3306 << EOS
 SELECT count(*) FROM test.t1;
 EOS
 }
@@ -49,5 +49,5 @@ case "${ACTION}" in
     "count")
         count ${TARGET} ;;
     *)
-        echo "invalid action: $0 <create|insert|count> <mysql host>";;
+        echo "invalid action: $0 <create|insert|count> <mysql pod>";;
 esac

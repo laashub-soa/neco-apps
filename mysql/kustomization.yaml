@@ -12,10 +12,11 @@ configMapGenerator:
   - name: mysqlconfig
     files:
       - my.cnf
-  - name: setup-sql
+  - name: operator-script
     files:
-      - scripts/setup_node.sql
-  - name: setup-script
+      - script/setup.sh
+      - script/do.sh
+      - script/status.sh
+  - name: operator-sql
     files:
-      - scripts/setup_cluster.sh
-      - scripts/do.sh
+      - sql/status.sql
