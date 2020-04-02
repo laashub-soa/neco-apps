@@ -38,7 +38,10 @@ spec:
         v1alpha1.mysql.oracle.com/cluster: my-app-db
     spec:
       containers:
-      - command:
+      - name: mysql
+        image: quay.io/kfyharukz/mysql:poc-01
+        imagePullPolicy: Always
+        command:
         - /bin/bash
         - -ecx
         - |2-
@@ -60,12 +63,14 @@ spec:
           value: '%'
         - name: MYSQL_LOG_CONSOLE
           value: "true"
-        image: quay.io/kfyharukz/mysql:poc-01
-        imagePullPolicy: Always
-        name: mysql
         ports:
         - containerPort: 3306
           protocol: TCP
+        livenessProbe:
+          exec:
+            command: ["bash", "-c", "mysqladmin -h localhost -u root -p${MYSQL_ROOT_PASSWORD} ping"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
