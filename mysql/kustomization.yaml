@@ -18,3 +18,4 @@ configMapGenerator:
   - name: setup-script
     files:
       - scripts/setup_cluster.sh
+      - scripts/do.sh
