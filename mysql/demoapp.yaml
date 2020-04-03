@@ -1,0 +1,110 @@
+# original is https://github.com/oracle/mysql-operator/blob/9aebcc37a080283bdc199d7150d91f2e9bfa4e2c/examples/demo/wordpress-router/wordpress-deployment.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-todo-app
+  labels:
+    app: demo-todo-app
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: demo-todo-app
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-todo-app
+  labels:
+    app: demo-todo-app
+spec:
+  selector:
+    matchLabels:
+      app: demo-todo-app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: demo-todo-app
+    spec:
+      containers:
+      - name: mysqlrouter
+        image: mysql/mysql-router:8.0.19
+        env:
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-root-password
+              key: password
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_HOST
+          value: my-app-db-0.my-app-db
+        - name: MYSQL_INNODB_NUM_MEMBERS
+          value: "3"
+        command:
+        - "/bin/bash"
+        - "-cx"
+        - "exec /run.sh mysqlrouter"
+        securityContext:
+          runAsUser: 999
+          runAsGroup: 999
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmprouter
+      - name: demoapp
+        image: quay.io/ysksuzuki/demo-todo-app:0.0.1
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_HOST
+          value: 127.0.0.1
+        - name: MYSQL_PORT
+          value: "6446"
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_DB_NAME
+          value: todo
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-root-password
+              key: password
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        ports:
+        - containerPort: 8080
+      - name: init-database
+        image: quay.io/ysksuzuki/demo-todo-app:0.0.1
+        command: ['sh', '-c', '/app/create_table.sh']
+        securityContext:
+          runAsGroup: 1000
+          runAsUser: 1000
+        env:
+        - name: MYSQL_HOST
+          value: 127.0.0.1
+        - name: MYSQL_PORT
+          value: "6446"
+        - name: MYSQL_DB_NAME
+          value: todo
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-root-password
+              key: password
+      volumes:
+      - emptyDir: {}
+        name: tmprouter
+      - emptyDir: {}
+        name: tmp

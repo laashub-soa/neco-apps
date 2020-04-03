@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: operator
+spec:
+  containers:
+  - name: operator
+    image: quay.io/kfyharukz/mysql:poc-01
+    command:
+    - sleep
+    args:
+    - infinity
+    securityContext:
+      runAsUser: 10000
+      runAsGroup: 10000
+    volumeMounts:
+    - mountPath: /etc/mysql/setup/sql
+      name: sql-vol
+    - mountPath: /etc/mysql/setup
+      name: script-vol
+    env:
+    - name: MYSQLSH_USER_CONFIG_HOME
+      value: /tmp
+    - name: MYSQL_ROOT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: password
+          name: my-app-db-root-password
+  volumes:
+  - name: script-vol
+    configMap:
+      name: operator-script
+      defaultMode: 0755
+  - name: sql-vol
+    configMap:
+      name: operator-sql
