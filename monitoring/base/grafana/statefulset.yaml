@@ -10,7 +10,8 @@ data:
     # because ${DS_PROMETHEUS} is not available in provisioning
     curl -sSLf https://grafana.com/api/dashboards/1860/revisions/14/download | \
     jq '(.rows[].panels[] | select(.datasource == "${DS_PROMETHEUS}") | .datasource) |= "prometheus"' | \
-    jq '(.templating.list[] | select(.datasource == "${DS_PROMETHEUS}") | .datasource) |= "prometheus"' \
+    jq '(.templating.list[] | select(.datasource == "${DS_PROMETHEUS}") | .datasource) |= "prometheus"' | \
+    sed -e "s/:\$port//g" \
     > /config/node-exporter.json
 ---
 apiVersion: apps/v1
