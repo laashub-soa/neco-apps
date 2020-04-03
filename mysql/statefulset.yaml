@@ -68,9 +68,14 @@ spec:
           protocol: TCP
         livenessProbe:
           exec:
-            command: ["bash", "-c", "mysqladmin -h localhost -u root -p${MYSQL_ROOT_PASSWORD} ping"]
+            command: ["/healthcheck.sh"]
           initialDelaySeconds: 5
           periodSeconds: 5
+        startupProbe:
+          exec:
+            command: ["/healthcheck.sh"]
+          failureThreshold: 30
+          periodSeconds: 10
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
