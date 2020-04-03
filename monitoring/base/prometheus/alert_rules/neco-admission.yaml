@@ -6,7 +6,7 @@ groups:
           summary: "The rest client of neco-admission has a 99th percentile latency of {{ $value }} for {{ $labels.verb }}."
           runbook: TBD
         expr: |
-          histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{job="neco-admission"}[1m])) by (le, verb)) > 1
+          histogram_quantile(0.99, sum(rate(rest_client_request_duration_seconds_bucket{job="neco-admission"}[1m])) by (le, verb)) > 1
         for: 10m
         labels:
           severity: warning
