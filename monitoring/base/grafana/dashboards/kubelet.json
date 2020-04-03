@@ -1644,7 +1644,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.99,sum(rate(rest_client_request_latency_seconds_bucket{job=\"kubernetes-nodes\",instance=~\"$instance\"}[5m])) by (verb,url,le))",
+          "expr": "histogram_quantile(0.99,sum(rate(rest_client_request_duration_seconds_bucket{job=\"kubernetes-nodes\",instance=~\"$instance\"}[5m])) by (verb,url,le))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{verb}} {{url}}",
