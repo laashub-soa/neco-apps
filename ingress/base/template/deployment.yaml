@@ -87,7 +87,7 @@ spec:
       - env:
         - name: CP_DEFAULT_ISSUER_NAME
           value: clouddns
-        image: quay.io/cybozu/contour-plus:0.4.0
+        image: quay.io/cybozu/contour-plus:0.4.1
         name: contour-plus
       dnsPolicy: ClusterFirst
       serviceAccountName: contour
