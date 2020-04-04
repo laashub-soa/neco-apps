@@ -6,3 +6,10 @@ resources:
   - service.yaml
   - serviceaccount.yaml
   - statefulset.yaml
+configMapGenerator:
+  - name: teleport-role
+    namespace: teleport
+    files:
+      - conf/admin-role.yaml
+      - conf/neco-readonly-role.yaml
+      - conf/maneki-role.yaml

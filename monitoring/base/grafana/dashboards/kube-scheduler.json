@@ -146,21 +146,21 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "histogram_quantile(0.99, sum(rate(scheduler_e2e_scheduling_latency_microseconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\"}[10h])) by (le))",
+            "expr": "histogram_quantile(0.99, sum(rate(scheduler_e2e_scheduling_latency_seconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\"}[10h])) by (le))",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "e2e",
             "refId": "A"
           },
           {
-            "expr": "histogram_quantile(0.99, sum(rate(scheduler_binding_latency_microseconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\"}[10h])) by (le))",
+            "expr": "histogram_quantile(0.99, sum(rate(scheduler_binding_latency_seconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\"}[10h])) by (le))",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "binding",
             "refId": "B"
           },
           {
-            "expr": "histogram_quantile(0.99, sum(rate(scheduler_scheduling_algorithm_latency_microseconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\"}[10h])) by (le))",
+            "expr": "histogram_quantile(0.99, sum(rate(scheduler_scheduling_algorithm_latency_seconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\"}[10h])) by (le))",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "scheduling algorithm",
@@ -367,7 +367,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "histogram_quantile(0.99,sum(rate(rest_client_request_latency_seconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\",verb=\"POST\"}[5m])) by (verb,url,le))",
+            "expr": "histogram_quantile(0.99,sum(rate(rest_client_request_duration_seconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\",verb=\"POST\"}[5m])) by (verb,url,le))",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "{{verb}} {{url}}",
@@ -460,7 +460,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "histogram_quantile(0.99,sum(rate(rest_client_request_latency_seconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\",verb=\"GET\"}[5m])) by (verb,url,le))",
+            "expr": "histogram_quantile(0.99,sum(rate(rest_client_request_duration_seconds_bucket{job=\"kube-scheduler\",instance=~\"$instance\",verb=\"GET\"}[5m])) by (verb,url,le))",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "{{verb}} {{url}}",
