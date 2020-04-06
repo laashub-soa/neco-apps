@@ -57,6 +57,9 @@ spec:
         - mountPath: /etc/teleport
           name: teleport-auth-secret
           readOnly: true
+        - mountPath: /etc/teleport/role
+          name: teleport-role-volume
+          readOnly: true
         - mountPath: /var/lib/etcd-certs
           name: teleport-etcd-certs
           readOnly: true
@@ -83,6 +86,9 @@ spec:
       - name: teleport-enterprise-license
         secret:
           secretName: teleport-enterprise-license-m5bffgtbh6
+      - name: teleport-role-volume
+        configMap:
+          name: teleport-role
       serviceAccountName: teleport
   volumeClaimTemplates:
   - metadata:

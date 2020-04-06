@@ -86,7 +86,7 @@ scrape_configs:
       regex: apiserver_request_duration_seconds.*
     - source_labels: [__name__]
       action: drop
-      regex: apiserver_request_latencies.*
+      regex: apiserver_request_latency_seconds.*
     - source_labels: [__address__]
       action: replace
       regex: ([^:]+)(?::\d+)?

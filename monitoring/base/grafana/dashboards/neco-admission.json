@@ -259,7 +259,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "histogram_quantile($quantile, sum(rate(rest_client_request_latency_seconds_bucket{job=\"neco-admission\"}[1m])) by (le))",
+                    "expr": "histogram_quantile($quantile, sum(rate(rest_client_request_duration_seconds_bucket{job=\"neco-admission\"}[1m])) by (le))",
                     "intervalFactor": 2,
                     "refId": "A"
                 }
