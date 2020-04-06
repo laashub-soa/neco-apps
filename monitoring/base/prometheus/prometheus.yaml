@@ -206,11 +206,9 @@ scrape_configs:
       - source_labels: [__name__]
         action: drop
         regex: node_cpu_seconds_total
-      - source_labels: [__address__]
-        action: replace
-        regex: ([^:]+)(?::\d+)?
-        replacement: ${1}
-        target_label: instance
+      # CAUTION:
+      # Do not remove the port number from instance label
+      # because node-exporter-full dashboard expects to be in the form of `ip:port`.
   - job_name: 'bootserver-etcd'
     kubernetes_sd_configs:
       - role: endpoints
