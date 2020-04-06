@@ -69,15 +69,28 @@ spec:
               key: password
         - name: MYSQL_ROOT_HOST
           value: '%'
-        - name: MYSQL_REPLICATION_DOMAIN
+        - name: MYSQL_CLUSTER_DOMAIN
           value: my-app-db
+        - name: MYSQL_OPERATOR_USER
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-secret
+              key: operator-user
+        - name: MYSQL_OPERATOR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-secret
+              key: operator-password
         - name: MYSQL_REPLICATION_USER
-          value: rpluser
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-secret
+              key: replication-user
         - name: MYSQL_REPLICATION_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: my-app-db-replication-password
-              key: password
+              name: my-app-db-secret
+              key: replication-password
         - name: MYSQL_LOG_CONSOLE
           value: "true"
         ports:
