@@ -93,13 +93,13 @@ spec:
             command: ["/healthcheck.sh"]
           failureThreshold: 30
           periodSeconds: 10
-        resources:
-          limits:
-            cpu: 24 # How much CPU you wish to donate per node
-            memory: 4Gi
-          requests:
-            cpu: 24
-            memory: 4Gi
+        # resources:
+        #   limits:
+        #     cpu: 24 # How much CPU you wish to donate per node
+        #     memory: 4Gi
+        #   requests:
+        #     cpu: 24
+        #     memory: 4Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
@@ -125,7 +125,7 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
-      priorityClassName: mysql
+      # priorityClassName: mysql
       volumes:
       - emptyDir: {}
         name: tmp
