@@ -23,6 +23,11 @@ spec:
       value: /tmp
     - name: MYSQL_CLUSTER_DOMAIN
       value: my-app-db
+    - name: MYSQL_ROOT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: my-app-db-root-password
+          key: password
     - name: MYSQL_OPERATOR_USER
       valueFrom:
         secretKeyRef:
