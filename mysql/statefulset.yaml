@@ -47,7 +47,7 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: quay.io/kfyharukz/mysql:poc-01
+        image: quay.io/cybozu/mysql:latest
         imagePullPolicy: Always
         command:
         - /bin/bash
@@ -65,10 +65,19 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: password
               name: my-app-db-root-password
+              key: password
         - name: MYSQL_ROOT_HOST
           value: '%'
+        - name: MYSQL_REPLICATION_DOMAIN
+          value: my-app-db
+        - name: MYSQL_REPLICATION_USER
+          value: rpluser
+        - name: MYSQL_REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-replication-password
+              key: password
         - name: MYSQL_LOG_CONSOLE
           value: "true"
         ports:

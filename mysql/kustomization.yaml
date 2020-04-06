@@ -8,6 +8,10 @@ resources:
   - statefulset.yaml
 # - demoapp.yaml
   - operator.yaml
+images:
+- name: quay.io/cybozu/mysql
+  newName: quay.io/ishii_masayuki/mysql
+  newTag: poc-01
 configMapGenerator:
   - name: mysqlconfig
     files:

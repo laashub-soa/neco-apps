@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: operator
-    image: quay.io/kfyharukz/mysql:poc-01
+    image: quay.io/cybozu/mysql:latest
     command:
     - sleep
     args:
@@ -26,6 +26,13 @@ spec:
         secretKeyRef:
           key: password
           name: my-app-db-root-password
+    - name: MYSQL_REPLICATION_USER
+      value: rpluser
+    - name: MYSQL_REPLICATION_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: my-app-db-replication-password
+          key: password
   volumes:
   - name: script-vol
     configMap:
