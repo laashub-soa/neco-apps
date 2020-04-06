@@ -303,10 +303,11 @@ spec:
       serviceAccountName: controller
       containers:
         - name: topolvm-controller
-          image: quay.io/cybozu/topolvm:0.4.0
+          image: quay.io/cybozu/topolvm:0.4.1
           command:
             - /topolvm-controller
             - --cert-dir=/certs
+            - --leader-election-id=topolvm
           ports:
             - containerPort: 9808
               name: healthz
@@ -331,7 +332,7 @@ spec:
               mountPath: /certs
 
         - name: csi-provisioner
-          image: quay.io/cybozu/topolvm:0.4.0
+          image: quay.io/cybozu/topolvm:0.4.1
           command:
             - /csi-provisioner
             - "--csi-address=/run/topolvm/csi-topolvm.sock"
@@ -344,19 +345,18 @@ spec:
               mountPath: /run/topolvm
 
         - name: csi-attacher
-          image: quay.io/cybozu/topolvm:0.4.0
+          image: quay.io/cybozu/topolvm:0.4.1
           command:
             - /csi-attacher
             - "--csi-address=/run/topolvm/csi-topolvm.sock"
             - --leader-election
             - --leader-election-namespace=topolvm-system
-            - --leader-election-type=leases
           volumeMounts:
             - name: socket-dir
               mountPath: /run/topolvm
 
         - name: csi-resizer
-          image: quay.io/cybozu/topolvm:0.4.0
+          image: quay.io/cybozu/topolvm:0.4.1
           command:
             - /csi-resizer
             - "--csi-address=/run/topolvm/csi-topolvm.sock"
@@ -367,7 +367,7 @@ spec:
               mountPath: /run/topolvm
 
         - name: liveness-probe
-          image: quay.io/cybozu/topolvm:0.4.0
+          image: quay.io/cybozu/topolvm:0.4.1
           command:
             - /livenessprobe
             - "--csi-address=/run/topolvm/csi-topolvm.sock"
