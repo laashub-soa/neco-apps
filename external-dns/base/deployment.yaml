@@ -4,7 +4,6 @@ metadata:
   name: external-dns
   namespace: kube-system
   labels:
-    $patch: replace
     app.kubernetes.io/name: external-dns
 spec:
   selector:
