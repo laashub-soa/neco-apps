@@ -1,6 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: external-dns
 resources:
+- upstream/manifest.yaml
 - common.yaml
-- deployment.yaml
 - rbac.yaml
+patches:
+- deployment.yaml

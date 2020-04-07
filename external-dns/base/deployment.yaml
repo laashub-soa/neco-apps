@@ -2,11 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
+  namespace: kube-system
   labels:
+    $patch: replace
     app.kubernetes.io/name: external-dns
 spec:
   selector:
     matchLabels:
+      $patch: replace
       app.kubernetes.io/name: external-dns
   strategy:
     type: Recreate
@@ -15,17 +18,19 @@ spec:
       annotations:
         prometheus.io/port: "7979"
       labels:
+        $patch: replace
         app.kubernetes.io/name: external-dns
     spec:
       serviceAccountName: external-dns
       containers:
       - name: external-dns
-        image: quay.io/cybozu/external-dns:0.5.17.1
+        image: quay.io/cybozu/external-dns:0.7.1.1
         ports:
         - containerPort: 7979
         args:
         - --help
         env:
+        - $patch: replace
         - name: NO_PROXY
           value: 10.0.0.0/8
         - name: HTTP_PROXY
