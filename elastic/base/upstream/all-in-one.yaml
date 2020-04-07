@@ -1691,7 +1691,7 @@ spec:
     spec:
       serviceAccountName: elastic-operator
       containers:
-      - image: docker.elastic.co/eck/eck-operator:1.0.0
+      - image: docker.elastic.co/eck/eck-operator:1.0.1
         name: manager
         args: ["manager", "--operator-roles", "all", "--log-verbosity=0"]
         env:
@@ -1704,7 +1704,7 @@ spec:
           - name: WEBHOOK_PODS_LABEL
             value: elastic-operator
           - name: OPERATOR_IMAGE
-            value: docker.elastic.co/eck/eck-operator:1.0.0
+            value: docker.elastic.co/eck/eck-operator:1.0.1
         resources:
           limits:
             cpu: 1
