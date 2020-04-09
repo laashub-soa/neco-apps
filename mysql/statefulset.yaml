@@ -47,7 +47,7 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: quay.io/cybozu/mysql:latest
+        image: quay.io/kfyharukz/mysql:poc-02
         imagePullPolicy: Always
         command:
         - /bin/bash
