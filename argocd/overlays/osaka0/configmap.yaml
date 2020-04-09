@@ -4,3 +4,4 @@ metadata:
   name: argocd-cm
 data:
   url: https://argocd.osaka0.cybozu-ne.co
+  admin.enabled: "false"
