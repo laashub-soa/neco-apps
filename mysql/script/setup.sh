@@ -48,10 +48,3 @@ setup_slave my-app-db-2
 change_master_to my-app-db-1 my-app-db-0
 change_master_to my-app-db-2 my-app-db-0
 disable_read_only my-app-db-0
-
-setup_master my-app-db-copy-0
-setup_slave my-app-db-copy-1
-setup_slave my-app-db-copy-2
-change_master_to my-app-db-copy-1 my-app-db-copy-0
-change_master_to my-app-db-copy-2 my-app-db-copy-0
-disable_read_only my-app-db-copy-0

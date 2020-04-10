@@ -171,7 +171,7 @@ spec:
     matchLabels:
       v1alpha1.mysql.oracle.com/cluster: my-app-db
       is-copy: "true"
-  serviceName: my-app-db
+  serviceName: my-app-db-copy
   volumeClaimTemplates:
     - metadata:
         name: mysqlvolume
