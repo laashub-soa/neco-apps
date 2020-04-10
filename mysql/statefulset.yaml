@@ -47,7 +47,157 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: quay.io/kfyharukz/mysql:poc-02
+        image: quay.io/cybozu/mysql:latest
+        imagePullPolicy: Always
+        command:
+        - /bin/bash
+        - -ecx
+        - |2-
+
+                   # Set baseServerID
+                   base=1000
+
+                   # Finds the replica index from the hostname, and uses this to define
+                   # a unique server id for this instance.
+                   index=$(cat /etc/hostname | grep -o '[^-]*$')
+                   /entrypoint.sh --server_id=$(expr $base + $index) --user=mysql --relay-log=my-app-db-${index}-relay-bin --report-host="my-app-db-${index}.my-app-db"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-root-password
+              key: password
+        - name: MYSQL_ROOT_HOST
+          value: '%'
+        - name: MYSQL_CLUSTER_DOMAIN
+          value: my-app-db
+        - name: MYSQL_OPERATOR_USER
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-secret
+              key: operator-user
+        - name: MYSQL_OPERATOR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-secret
+              key: operator-password
+        - name: MYSQL_REPLICATION_USER
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-secret
+              key: replication-user
+        - name: MYSQL_REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-app-db-secret
+              key: replication-password
+        - name: MYSQL_LOG_CONSOLE
+          value: "true"
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        livenessProbe:
+          exec:
+            command: ["/healthcheck.sh"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        startupProbe:
+          exec:
+            command: ["/healthcheck.sh"]
+          failureThreshold: 30
+          periodSeconds: 10
+        # resources:
+        #   limits:
+        #     cpu: 24 # How much CPU you wish to donate per node
+        #     memory: 4Gi
+        #   requests:
+        #     cpu: 24
+        #     memory: 4Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysqlvolume
+          subPath: mysql
+        - name: cm-volume
+          mountPath: /etc/mysql
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /var/run/mysqld
+          name: varrun
+        - mountPath: /var/lib/mysql-files
+          name: mysqlfiles
+        - mountPath: /var/log
+          name: mysqllogs
+        - mountPath: /var/tmp/mysql
+          name: tmpdir
+      securityContext:
+        runAsUser: 27
+        runAsGroup: 27
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      # priorityClassName: mysql
+      volumes:
+      - emptyDir: {}
+        name: tmp
+      - emptyDir: {}
+        name: varrun
+      - emptyDir: {}
+        name: mysqlfiles
+      - emptyDir: {}
+        name: mysqllogs
+      - emptyDir: {}
+        name: mysqlbackupvolume
+      - name: cm-volume
+        configMap:
+          name: mysqlconfig
+  updateStrategy:
+    type: RollingUpdate
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    v1alpha1.mysql.oracle.com/cluster: my-app-db
+  name: my-app-db-copy
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      v1alpha1.mysql.oracle.com/cluster: my-app-db
+  serviceName: my-app-db
+  volumeClaimTemplates:
+    - metadata:
+        name: mysqlvolume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: topolvm-provisioner
+        resources:
+          requests:
+            storage: 300Gi
+    - metadata:
+        name: tmpdir
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: topolvm-provisioner
+        resources:
+          requests:
+            storage: 100Gi
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        v1alpha1.mysql.oracle.com/cluster: my-app-db
+    spec:
+      containers:
+      - name: mysql
+        image: quay.io/cybozu/mysql:latest
         imagePullPolicy: Always
         command:
         - /bin/bash

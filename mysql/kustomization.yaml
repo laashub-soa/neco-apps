@@ -8,10 +8,13 @@ resources:
   - statefulset.yaml
 # - demoapp.yaml
   - operator.yaml
+  - minio/minio-standalone-deployment.yaml
+  - minio/minio-standalone-pvc.yaml
+  - minio/minio-standalone-service.yaml
 images:
 - name: quay.io/cybozu/mysql
-  newName: quay.io/ishii_masayuki/mysql
-  newTag: poc-01
+  newName: quay.io/tsuruda/mysql
+  newTag: 55e1b
 configMapGenerator:
   - name: mysqlconfig
     files:
