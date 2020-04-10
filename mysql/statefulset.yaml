@@ -127,7 +127,7 @@ spec:
           name: varrun
         - mountPath: /var/lib/mysql-files
           name: mysqlfiles
-        - mountPath: /var/log/mysql
+        - mountPath: /var/log
           name: mysqllogs
         - mountPath: /var/tmp/mysql
           name: tmpdir
