@@ -30,6 +30,6 @@ spec:
     protocol: TCP
     targetPort: 3306
   selector:
-    v1alpha1.mysql.oracle.com/cluster: my-app-db
+    is-copy: "true"
   sessionAffinity: None
   type: ClusterIP

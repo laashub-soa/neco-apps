@@ -161,6 +161,7 @@ kind: StatefulSet
 metadata:
   labels:
     v1alpha1.mysql.oracle.com/cluster: my-app-db
+    is-copy: "true"
   name: my-app-db-copy
 spec:
   podManagementPolicy: OrderedReady
@@ -169,6 +170,7 @@ spec:
   selector:
     matchLabels:
       v1alpha1.mysql.oracle.com/cluster: my-app-db
+      is-copy: "true"
   serviceName: my-app-db
   volumeClaimTemplates:
     - metadata:
@@ -194,6 +196,7 @@ spec:
         prometheus.io/scrape: "true"
       labels:
         v1alpha1.mysql.oracle.com/cluster: my-app-db
+        is-copy: "true"
     spec:
       containers:
       - name: mysql
