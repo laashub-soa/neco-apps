@@ -17,7 +17,7 @@ spec:
   template:
     spec:
       containers:
-        - image: quay.io/cybozu/redis:5.0.8.1
+        - image: quay.io/cybozu/redis:5.0.7.1
           name: redis
 ---
 apiVersion: apps/v1
@@ -91,7 +91,7 @@ spec:
           name: static-files
       containers:
       - name: dex
-        image: quay.io/cybozu/dex:2.23.0.1
+        image: quay.io/cybozu/dex:2.21.0.1
         command: [/shared/argocd-util, rundex]
         env:
         - name: NO_PROXY
