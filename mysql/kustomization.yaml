@@ -13,8 +13,8 @@ resources:
   - minio/minio-standalone-service.yaml
 images:
 - name: quay.io/cybozu/mysql
-  newName: quay.io/tsuruda/mysql
-  newTag: 55e1b
+  newName: quay.io/yokaze/mysql
+  newTag: 5b5b84
 configMapGenerator:
   - name: mysqlconfig
     files:
