@@ -22,6 +22,7 @@ configMapGenerator:
   - name: operator-script
     files:
       - script/setup.sh
+      - script/setup-copy.sh
       - script/do.sh
       - script/status.sh
   - name: operator-sql
