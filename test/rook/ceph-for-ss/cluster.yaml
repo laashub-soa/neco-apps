@@ -5,8 +5,6 @@ metadata:
   namespace: ceph-for-ss
 spec:
   dataDirHostPath: /var/lib/rook
-  cleanupPolicy:
-    deleteDataDirOnHosts: yes-really-destroy-data
   mon:
     count: 1
     allowMultiplePerNode: false
