@@ -43,6 +43,11 @@ var _ = Describe("Test applications", func() {
 	if doReboot {
 		Context("reboot", testRebootAllNodes)
 	}
+	if doStorageTest {
+		Context("rookRGW", testRGW)
+		Context("rookRBD", testRookRBD)
+		return
+	}
 	Context("network-policy", testNetworkPolicy)
 	Context("metallb", testMetalLB)
 	if !withKind {
