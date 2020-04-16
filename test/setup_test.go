@@ -305,6 +305,20 @@ func applyAndWaitForApplications(overlay string) {
 	fmt.Printf("application list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
+	// TODO: remove this Eventually() after updating bmc-reverse-proxy to use mounted volume
+	Eventually(func() error {
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "-n", "bmc-reverse-proxy", "configmap", "bmc-reverse-proxy")
+		if err == nil {
+			return nil
+		}
+		fmt.Printf("stdout: %s, stderr: %s, err: %v\n", stdout, stderr, err)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "create", "-n", "bmc-reverse-proxy", "configmap", "bmc-reverse-proxy", "--from-literal=")
+		if err != nil {
+			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+		return nil
+	}).Should(Succeed())
+
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 	OUTER:
