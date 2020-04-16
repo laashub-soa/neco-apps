@@ -32,6 +32,13 @@ data:
   providers.yaml: |
     apiVersion: 1
     providers:
+    - name: 'argocd'
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: false
+      options:
+        path: /var/lib/grafana/dashboards/argocd
     - name: 'calico'
       folder: ''
       type: file
