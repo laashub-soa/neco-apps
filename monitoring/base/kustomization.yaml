@@ -47,6 +47,9 @@ configMapGenerator:
   - name: alertmanager
     files:
       - alertmanager/neco.template
+  - name: dashboard-argocd
+    files:
+      - grafana/dashboards/argocd.json
   - name: dashboard-calico
     files:
       - grafana/dashboards/calico.json

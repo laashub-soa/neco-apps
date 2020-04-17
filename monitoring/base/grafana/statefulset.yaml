@@ -95,6 +95,8 @@ spec:
               subPath: ldap.toml
             - mountPath: /var/lib/grafana
               name: storage
+            - name: dashboard-argocd-volume
+              mountPath: /var/lib/grafana/dashboards/argocd
             - name: dashboard-calico-volume
               mountPath: /var/lib/grafana/dashboards/calico
             - name: dashboard-cert-manager-volume
@@ -155,6 +157,9 @@ spec:
               - key: ldap-toml
                 path: ldap.toml
             secretName: grafana
+        - name: dashboard-argocd-volume
+          configMap:
+            name: dashboard-argocd
         - name: dashboard-calico-volume
           configMap:
             name: dashboard-calico
