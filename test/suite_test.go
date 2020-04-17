@@ -44,7 +44,8 @@ var _ = Describe("Test applications", func() {
 		Context("reboot", testRebootAllNodes)
 	}
 	if doStorageTest {
-		Context("rookRGW", testRGW)
+		Context("rookOperator", testRookOperator)
+		Context("rookRGW", testRookRGW)
 		Context("rookRBD", testRookRBD)
 		return
 	}
