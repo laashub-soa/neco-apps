@@ -37,9 +37,21 @@ $ vi elastic/base/upstream/all-in-one.yaml
 
 ## external-dns
 
-Read the following document and fix manifests as necessary.
+Check [releases](https://github.com/kubernetes-sigs/external-dns/releases) for changes.
 
-https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md
+Copy manifest from the link below and save as `external-dns/base/upstream/manifest.yaml`.
+
+https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md#manifest-for-clusters-with-rbac-enabled
+
+Copy RBAC configuration from the link below and edit `external-dns/base/upstream/manifest.yaml` according to comments.
+
+https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/contributing/crd-source.md#rbac-configuration
+
+Download manifests as follows:
+
+```console
+$ curl -sLf -o  external-dns/base/upstream/crd-manifest.yaml https://raw.githubusercontent.com/kubernetes-sigs/external-dns/vX.Y.Z/docs/contributing/crd-source/crd-manifest.yaml
+```
 
 ## ingress (Contour & Envoy)
 
