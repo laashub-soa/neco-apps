@@ -12,3 +12,4 @@ patchesStrategicMerge:
 - metallb.yaml
 - monitoring.yaml
 - teleport.yaml
+- rook.yaml
