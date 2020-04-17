@@ -222,7 +222,7 @@ jobs:
           name: Test neco-apps
           command: |
             export NECO_DIR=$(pwd)/neco
-            ./bin/run-storage-test.sh
+            ./bin/run-test.sh STORAGE_TEST=1
           no_output_timeout: 31m
       - delete-instance
 

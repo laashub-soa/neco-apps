@@ -23,7 +23,7 @@ git checkout -qf ${CIRCLE_SHA1}
 cd test
 cp /home/cybozu/account.json ./
 make setup
-make -f Makefile.dctest $TARGET COMMIT_ID=${CIRCLE_SHA1} BASE_BRANCH=${BASE_BRANCH}
+make -f Makefile.dctest $TARGET COMMIT_ID=${CIRCLE_SHA1} BASE_BRANCH=${BASE_BRANCH} STORAGE_TEST=${STORAGE_TEST}
 EOF
 chmod +x run.sh
 
